@@ -14,7 +14,7 @@
   "license": "MIT",
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "bin": {
-    "builder": "bin/inspectpack.js"
+    "inspectpack": "bin/inspectpack.js"
   },
   "scripts": {
     "lint-server": "eslint --color -c .eslintrc-server lib bin",
@@ -22,7 +22,8 @@
     "check": "npm run lint"
   },
   "dependencies": {
-    "async": "^1.5.2",
+    "lodash": "^4.6.1",
+    "uglify-js": "^2.6.2",
     "yargs": "^4.3.1"
   },
   "devDependencies": {
