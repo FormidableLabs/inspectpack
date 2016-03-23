@@ -2,18 +2,25 @@
 "use strict";
 
 var args = require("../lib").args;
-
-var EXIT_ERROR = 1;
+var actions = require("../lib").actions;
 
 // The main event.
 var main = function () {
+  // Parse arguments.
   var parser = args.parse();
   var argv = args.validate(parser);
-  if (!argv) {
-    process.exit(EXIT_ERROR); // eslint-disable-line no-process-exit
-  }
 
-  console.log("TODO: IMPLEMENT CLI!"); // eslint-disable-line no-console
+  // Invoke action.
+  actions(argv.action)(argv, function (err, data) {
+    if (err) {
+      // Try to get full stack, then full string if not.
+      console.error(err.stack || err.toString()); // eslint-disable-line no-console
+    }
+
+    if (data) {
+      console.log(data); // eslint-disable-line no-console,no-magic-numbers
+    }
+  });
 };
 
 if (require.main === module) {
