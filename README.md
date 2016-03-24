@@ -29,7 +29,9 @@ Options:
   --bundle, -b    Path to webpack-created JS bundle                                         [string]
   --format, -f    Display output format         [string] [choices: "json", "text"] [default: "text"]
   --verbose       Verbose output                                          [boolean] [default: false]
-  --minified, -m  Calculate / display minified byte sizes                 [boolean] [default: false]
+  --minified, -m  Calculate / display minified byte sizes                  [boolean] [default: true]
+  --gzip, -g      Calculate / display minified + gzipped byte size (implies `--minified`)
+                                                                           [boolean] [default: true]
   --help, -h      Show help                                                                [boolean]
   --version, -v   Show version number                                                      [boolean]
 
@@ -103,10 +105,9 @@ Example:
 
 **Notes**:
 
-* The vast majority of the analysis time is spent minifying duplicate code
-  snippets and the entire bundle. For just a list of missed duplicates, add
-  the `--minified=false` flag.
-
+* The vast majority of the analysis time is spent minifying and gzipping
+  duplicate code snippets and the entire bundle. For just a list of missed
+  duplicates, add the `--minified=false --gzip=false` flags.
 
 ## Other Useful Tools
 
