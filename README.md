@@ -52,13 +52,9 @@ The are three potential sources of input for bundle analysis:
 Additionally, specific analysis steps also may require designated Webpack
 configurations to produce a proper input.
 
+### Bundle
 
-## Actions
-
-### `duplicates`
-
-Detect if there are libraries that _should_ be de-duplicated with the
-`webpack.optimize.DedupePlugin` but are not because of version mismatches.
+If an `inspectpack` action requires a `--bundle`, create one as follows:
 
 **Webpack configuration**:
 
@@ -72,15 +68,25 @@ Detect if there are libraries that _should_ be de-duplicated with the
 $ webpack
 ```
 
-**Analyze**:
+The created JS bundle path is ready to use. (Note that code split chunks should
+work same as a single root bundle, but we haven't tested this yet.)
+
+
+## Actions
+
+### `duplicates`
+
+Detect if there are libraries that _should_ be de-duplicated with the
+`webpack.optimize.DedupePlugin` but are not because of version mismatches.
+
+First create a [bundle](#bundle). Then run:
+
 
 ```sh
 $ inspectpack --action=duplicates --bundle=bundle.js
 ```
 
-**Outputs**: A JSON or text report.
-
-Example:
+**Outputs**: A JSON or text report. For example:
 
 ```
 ## Summary
@@ -108,6 +114,119 @@ Example:
 * The vast majority of the analysis time is spent minifying and gzipping
   duplicate code snippets and the entire bundle. For just a list of missed
   duplicates, add the `--minified=false --gzip=false` flags.
+
+### `pattern`
+
+Detect the occurrence of 1+ patterns in code sections of the bundle. This is
+useful for detecting anti-patterns, some of which we aggregate in a useful
+option `--suspect-patterns`.
+
+First create a [bundle](#bundle). Then run:
+
+
+```sh
+# A single pattern
+$ inspectpack \
+  --action=pattern --bundle=bundle.js \
+  --pattern="201[56]"
+
+# Multiple patterns
+$ inspectpack \
+  --action=pattern --bundle=bundle.js \
+  --pattern "2016" "unicorn"
+
+# Suspect patterns
+$ inspectpack \
+  --action=pattern --bundle=bundle.js \
+  --suspect-patterns
+```
+
+**Notes**:
+
+* It is best to use quotes around patterns so that you don't have to escape
+  shell processing.
+* Some regular expressions can be very expensive time-wise, so be sure to try
+  things out a bit and refactor your patterns if the inspection is taking too
+  long.
+
+**Suspect Patterns**: The `--suspect-patterns` flag looks for known "suspect"
+patterns that potentially contain inefficient code. See
+[the source code](lib/actions/pattern.js) for the full breakdown of
+`SUSPECT_PATTERNS`.
+
+* `MULTIPLE_EXPORTS_SINGLE`: Multiple exports via one export object.
+
+    ```js
+    module.exports = {
+      foo: __webpack_require__(1),
+      bar: __webpack_require__(2)
+    }
+    ```
+
+* `MULTIPLE_EXPORTS_MUTIPLE`: Multiple exports via 2+ export statements.
+
+    ```js
+    module.exports.foo = __webpack_require__(1);
+    module.exports.bar = __webpack_require__(2);
+    ```
+
+**Outputs**: A JSON or text report. For example:
+
+```
+$ inspectpack \
+  --action=pattern \
+  --bundle="/PATH/TO/bundle.js" \
+  --format=text \
+  --suspect-patterns
+
+## Summary
+
+* Bundle:
+    * Path:                /PATH/TO/bundle.js
+    * Num Matches:         17
+    * Num Unique Files:    14
+    * Num All Files:       17
+    * Custom Patterns:
+    * Suspect Patterns:
+        * MULTIPLE_EXPORTS_SINGLE: [^\n]*(module\.|)exports\s*=\s*{(\s*.*__webpack_require__\(.*){2}
+        * MULTIPLE_EXPORTS_MUTIPLE: [^\n]*((module\.|)exports\..*\s*=\s*.*__webpack_require__\(.*\s*){2}
+
+## Matches
+
+* custom-lib/lib/index.js
+    * Num Matches:         1
+    * Num Files Matched:   1
+
+    * 1103: ../~/custom-lib/lib/index.js
+        * Matches: 1
+            * MULTIPLE_EXPORTS_SINGLE - /[^\n]*(module\.|)exports\s*=\s*{(\s*.*__webpack_require__\(.*){2}/:
+                module.exports = {
+                  Foo: __webpack_require__(/*! ./components/foo */ 1104),
+                  Bar: __webpack_require__(/*! ./components/bar */ 1135),
+
+* lodash/string.js
+    * Num Matches:         1
+    * Num Files Matched:   1
+
+    * 1581: ../~/lodash/string.js
+        * Matches: 1
+            * MULTIPLE_EXPORTS_SINGLE - /[^\n]*(module\.|)exports\s*=\s*{(\s*.*__webpack_require__\(.*){2}/:
+                module.exports = {
+                  'camelCase': __webpack_require__(/*! ./string/camelCase */ 1582),
+                  'capitalize': __webpack_require__(/*! ./string/capitalize */ 1587),
+
+
+* lodash/lang.js
+    * Num Matches:         1
+    * Num Files Matched:   1
+
+    * 1862: ../~/lodash/lang.js
+        * Matches: 1
+            * MULTIPLE_EXPORTS_SINGLE - /[^\n]*(module\.|)exports\s*=\s*{(\s*.*__webpack_require__\(.*){2}/:
+                module.exports = {
+                  'clone': __webpack_require__(/*! ./lang/clone */ 1863),
+                  'cloneDeep': __webpack_require__(/*! ./lang/cloneDeep */ 1869),
+```
 
 ## Other Useful Tools
 
