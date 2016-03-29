@@ -25,19 +25,25 @@ An inspection tool for Webpack frontend JavaScript bundles.
 Usage: inspectpack --action=<string> [options]
 
 Options:
-  --action, -a    Actions to take                        [string] [required] [choices: "duplicates"]
-  --bundle, -b    Path to webpack-created JS bundle                                         [string]
-  --format, -f    Display output format         [string] [choices: "json", "text"] [default: "text"]
-  --verbose       Verbose output                                          [boolean] [default: false]
-  --minified, -m  Calculate / display minified byte sizes                  [boolean] [default: true]
-  --gzip, -g      Calculate / display minified + gzipped byte size (implies `--minified`)
+  --action, -a        Actions to take[string] [required] [choices: "duplicates", "pattern", "files"]
+  --bundle, -b        Path to webpack-created JS bundle                                     [string]
+  --format, -f        Display output format     [string] [choices: "json", "text"] [default: "text"]
+  --verbose           Verbose output                                      [boolean] [default: false]
+  --minified, -m      Calculate / display minified byte sizes              [boolean] [default: true]
+  --gzip, -g          Calculate / display minified + gzipped byte size (implies `--minified`)
                                                                            [boolean] [default: true]
-  --help, -h      Show help                                                                [boolean]
-  --version, -v   Show version number                                                      [boolean]
+  --pattern, -p       Regular expression strings to match on                   [array] [default: []]
+  --suspect-patterns  Known 'suspicious' patterns for `--pattern`                          [boolean]
+  --suspect-files     Known 'suspicious' file names for `--files`                          [boolean]
+  --help, -h          Show help                                                            [boolean]
+  --version, -v       Show version number                                                  [boolean]
 
 Examples:
-  inspectpack --action=duplicates                     Report duplicates that cannot be deduped
-  --bundle=bundle.js
+  inspectpack --action=duplicates --bundle=bundle.js  Report duplicates that cannot be deduped
+  inspectpack --action=pattern --bundle=bundle.js     Show files with pattern matches in code
+  --suspect-patterns
+  inspectpack --action=files --bundle=bundle.js       Show files with pattern matches in file names
+  --suspect-files
 ```
 
 
@@ -227,6 +233,96 @@ $ inspectpack \
                   'clone': __webpack_require__(/*! ./lang/clone */ 1863),
                   'cloneDeep': __webpack_require__(/*! ./lang/cloneDeep */ 1869),
 ```
+
+### `files`
+
+Detect the occurrence of 1+ files by the base name (resolved from
+`node_modules`). This is useful for detecting anti-patterns based on files that
+should _never_ be part of a webpack bundle. We aggregate useful file patterns
+in the option `--suspect-files`.
+
+First create a [bundle](#bundle). Then run:
+
+
+```sh
+# A single file pattern
+$ inspectpack \
+  --action=files --bundle=bundle.js \
+  --pattern="underscore"
+
+# Multiple file patterns
+$ inspectpack \
+  --action=files --bundle=bundle.js \
+  --pattern "underscore" "jquery"
+
+# Suspect files
+$ inspectpack \
+  --action=files --bundle=bundle.js \
+  --suspect-files
+```
+
+**Suspect Files**: The `--suspect-files` flag looks for known "suspect"
+file patterns that potentially contain inefficient code. See
+[the source code](lib/actions/files.js) for the full breakdown of
+`SUSPECT_FILES`.
+
+* `LODASH`: Known lodash files that have multiple exports. You should instead
+  import "one-off" files.
+* `MOMENT_LOCALE_ROOT`: A webpack pattern that signals _every_ possible locale
+  is bundled in your application. You should instead hone down and include
+  only the locales that you specifically need for your application.
+
+**Outputs**: A JSON or text report. For example:
+
+```
+inspectpack --action=files
+==========================
+
+## Summary
+
+* Bundle:
+    * Path:                /PATH/TO/bundle.js
+    * Num Matches:         4
+    * Num Files:           4
+    * Custom Patterns:
+        * underscore\/
+    * Suspect Patterns:
+        * LODASH: lodash/(index|lodash|lodash\.min|array|collection|date|function|lang|math|number|object|seq|string|util)\.js
+        * MOMENT_LOCALE_ROOT: moment\/locale \^\\\.\\\/\.\*\$
+
+## Files
+    * lodash/index.js
+    * underscore/underscore.js
+    * lodash/lang.js
+    * moment/locale ^\.\/.*$
+
+## Matches
+
+* lodash/index.js
+    * Matches:            1
+        * LODASH - /lodash\/(index|lodash|lodash\.min|array|collection|date|function|lang|math|number|object|seq|string|util)\.js/: lodash/index.js
+    * Refs:
+        * 1400: ../~/foo/~/lodash/index.js
+
+* underscore/underscore.js
+    * Matches:            1
+        * CUSTOM - /underscore\//: underscore/
+    * Refs:
+        * 2650: ../~/bar/~/underscore/underscore.js
+
+* lodash/lang.js
+    * Matches:            1
+        * LODASH - /lodash\/(index|lodash|lodash\.min|array|collection|date|function|lang|math|number|object|seq|string|util)\.js/: lodash/lang.js
+    * Refs:
+        * 2820: ../~/baz/~/lodash/lang.js
+
+* moment/locale ^\.\/.*$
+    * Matches:            1
+        * MOMENT_LOCALE_ROOT - /moment\/locale \^\\\.\\\/\.\*\$/: moment/locale ^\.\/.*$
+    * Refs:
+        * 2855: ../~/moment/locale ^\.\/.*$
+```
+
 
 ## Other Useful Tools
 
