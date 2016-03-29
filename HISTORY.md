@@ -1,7 +1,7 @@
 History
 =======
 
-## Current
+## 0.2.0
 
 * Add `--action=pattern` report.
   [#4](https://github.com/FormidableLabs/inspectpack/issues/4)
