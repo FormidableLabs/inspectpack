@@ -1,7 +1,7 @@
 History
 =======
 
-## Current
+## 0.3.0
 
 * Add `--action=files` report.
   [#4](https://github.com/FormidableLabs/inspectpack/issues/4)
