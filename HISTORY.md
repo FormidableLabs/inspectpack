@@ -1,6 +1,11 @@
 History
 =======
 
+## Current
+
+* Add `--action=pattern` report.
+  [#4](https://github.com/FormidableLabs/inspectpack/issues/4)
+
 ## 0.1.1
 
 * Add `--gzip` flag and output to `--action=duplicates` report.
