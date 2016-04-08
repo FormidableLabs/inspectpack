@@ -25,16 +25,19 @@ An inspection tool for Webpack frontend JavaScript bundles.
 Usage: inspectpack --action=<string> [options]
 
 Options:
-  --action, -a        Actions to take[string] [required] [choices: "duplicates", "pattern", "files"]
+  --action, -a        Actions to take
+                            [string] [required] [choices: "duplicates", "files", "parse", "pattern"]
   --bundle, -b        Path to webpack-created JS bundle                                     [string]
   --format, -f        Display output format     [string] [choices: "json", "text"] [default: "text"]
   --verbose           Verbose output                                      [boolean] [default: false]
   --minified, -m      Calculate / display minified byte sizes              [boolean] [default: true]
   --gzip, -g          Calculate / display minified + gzipped byte size (implies `--minified`)
                                                                            [boolean] [default: true]
-  --pattern, -p       Regular expression strings to match on                   [array] [default: []]
-  --suspect-patterns  Known 'suspicious' patterns for `--pattern`                          [boolean]
-  --suspect-files     Known 'suspicious' file names for `--files`                          [boolean]
+  --pattern, -p       Regular expression string(s) to match on                 [array] [default: []]
+  --path              Path to input file(s)                                    [array] [default: []]
+  --suspect-patterns  Known 'suspicious' patterns for `--action=pattern`                   [boolean]
+  --suspect-parses    Known 'suspicious' code parses for `--action=parse`                  [boolean]
+  --suspect-files     Known 'suspicious' file names for `--action=files`                   [boolean]
   --help, -h          Show help                                                            [boolean]
   --version, -v       Show version number                                                  [boolean]
 
@@ -42,6 +45,8 @@ Examples:
   inspectpack --action=duplicates --bundle=bundle.js  Report duplicates that cannot be deduped
   inspectpack --action=pattern --bundle=bundle.js     Show files with pattern matches in code
   --suspect-patterns
+  inspectpack --action=parse --bundle=bundle.js       Show files with parse function matches in code
+  --suspect-parses
   inspectpack --action=files --bundle=bundle.js       Show files with pattern matches in file names
   --suspect-files
 ```
@@ -243,7 +248,6 @@ in the option `--suspect-files`.
 
 First create a [bundle](#bundle). Then run:
 
-
 ```sh
 # A single file pattern
 $ inspectpack \
@@ -322,6 +326,18 @@ inspectpack --action=files
     * Refs:
         * 2855: ../~/moment/locale ^\.\/.*$
 ```
+
+### `parse`
+
+Detect the occurrence of 1+ code transform matches in code sections of the
+bundle. This is another means of detecting anti-patterns, some of which we
+aggregate in `--suspect-parses`.
+
+First create a [bundle](#bundle). Then run:
+
+**TODO: WRITE_REST_OF_PARSE_SECTION**
+
+**TODO: DOCUMENT_AND_TEST_PATH_OPTION**
 
 
 ## Other Useful Tools
