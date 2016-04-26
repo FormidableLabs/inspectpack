@@ -22,6 +22,8 @@
     "check": "npm run lint"
   },
   "dependencies": {
+    "babel-traverse": "^6.7.6",
+    "babel-types": "^6.7.2",
     "babylon": "^6.7.0",
     "lodash": "^4.6.1",
     "uglify-js": "^2.6.2",
