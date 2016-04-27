@@ -126,11 +126,135 @@ $ inspectpack --action=duplicates --bundle=bundle.js
   duplicate code snippets and the entire bundle. For just a list of missed
   duplicates, add the `--minified=false --gzip=false` flags.
 
+### `parse`
+
+Detect the occurrence of 1+ code parse function matches in code sections of the
+bundle. This is another means of detecting anti-patterns, some of which we
+aggregate in `--suspect-parses`.
+
+_Note_: This is simply a more abstract version of `pattern` where you could have
+a parse function that uses the same regex to match a code snippet manually. What
+this feature really opens up is full Babel traversals / introspection, which are
+more correct and flexible than anything regular expressions can do. In our
+`--suspect-parses` collection, we use babel introspection to very tightly
+determine if there are multiple exports in any source code file in a bundle.
+
+First create a [bundle](#bundle).
+
+Next, decide if using provided `--suspect-parses` or your own custom parse
+functions with one or more file paths to `--path`. A parse function should
+follow these guidelines:
+
+```js
+/**
+ * Check if source matches selection criteria.
+ *
+ * @param   {String}      src Source code snippet
+ * @returns {String|null}     String snippet match or falsy if no match
+ */
+module.exports = function (src) {
+  // Find a occurrences of token "first" and return containing line.
+  return (src.match(/^.*first.*$/m) || [])[0];
+};
+```
+
+In this simple example, we're just using regular expresssions, but for complex
+projects / investigations you'll likely want to step up to some Babel magic.
+
+Then run:
+
+```sh
+# A custom parse file
+$ inspectpack \
+  --action=parse --bundle=bundle.js \
+  --path=/PATH/TO/parse.js
+
+# Suspect parses
+$ inspectpack \
+  --action=parse --bundle=bundle.js \
+  --suspect-parses
+```
+
+**Suspect Parses**: The `--suspect-parses` flag looks for known "suspect"
+code snippets that potentially contain inefficient code. See
+[the source code](lib/actions/parse.js) for the full breakdown of
+`SUSPECT_PARSES`.
+
+* `MULTIPLE_EXPORTS`: Multiple exports via any number export objects /
+  statements.
+
+    ```js
+    // Single object.
+    module.exports = {
+      foo: __webpack_require__(1),
+      bar: __webpack_require__(2)
+    }
+
+    // Multiple statements.
+    module.exports.foo = __webpack_require__(1);
+    module.exports.bar = __webpack_require__(2);
+    ```
+
+**Outputs**: A JSON or text report. For example:
+
+```
+$ inspectpack \
+  --action=parse \
+  --bundle="/PATH/TO/bundle.js" \
+  --format=text \
+  --suspect-parses
+inspectpack --action=parse
+============================
+
+## Summary
+
+* Bundle:
+    * Path:                /Users/rye/scm/fmd/simple-proj/dist/bundle.js
+    * Num Matches:         3
+    * Num Unique Files:    3
+    * Num All Files:       3
+    * Custom Parses:
+    * Suspect Parses:
+        * MULTIPLE_EXPORTS
+
+## Matches
+
+* ./lib/mod-a.js
+    * Num Matches:         1
+    * Num Files Matched:   1
+
+    * 1: ./lib/mod-a.js
+        * Matches: 1
+            * MULTIPLE_EXPORTS:
+                module.exports = {
+                  first: __webpack_require__(/*! ./first */ 2),
+                  second: __webpack_require__(/*! ./second */ 3)
+                };
+
+
+* ./lib/mod-b.js
+    * Num Matches:         1
+    * Num Files Matched:   1
+
+    * 4: ./lib/mod-b.js
+        * Matches: 1
+            * MULTIPLE_EXPORTS:
+                module.exports.first = __webpack_require__(/*! ./first */ 2);
+              // ...
+                module.exports.second = __webpack_require__(/*! ./second */ 3);
+```
+
 ### `pattern`
 
 Detect the occurrence of 1+ patterns in code sections of the bundle. This is
 useful for detecting anti-patterns, some of which we aggregate in a useful
 option `--suspect-patterns`.
+
+_Note_: There is a good deal of overlap with `parse` in suspect patterns, were
+we're doing the same thing with different approaches (code parsing vs regex
+grepping). In general, parsing is far more powerful and correct. But, there's
+always a use for quick and dirty regular expressions which we discuss further
+in this section.
 
 First create a [bundle](#bundle). Then run:
 
@@ -326,18 +450,6 @@ inspectpack --action=files
     * Refs:
         * 2855: ../~/moment/locale ^\.\/.*$
 ```
-
-### `parse`
-
-Detect the occurrence of 1+ code transform matches in code sections of the
-bundle. This is another means of detecting anti-patterns, some of which we
-aggregate in `--suspect-parses`.
-
-First create a [bundle](#bundle). Then run:
-
-**TODO: WRITE_REST_OF_PARSE_SECTION**
-
-**TODO: DOCUMENT_AND_TEST_PATH_OPTION**
 
 
 ## Other Useful Tools
