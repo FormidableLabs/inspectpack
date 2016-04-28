@@ -1,7 +1,7 @@
 History
 =======
 
-## Current
+## 0.4.0
 
 * Add `--action=parse` report.
   [#7](https://github.com/FormidableLabs/inspectpack/issues/7)
