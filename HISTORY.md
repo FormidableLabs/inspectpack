@@ -1,6 +1,11 @@
 History
 =======
 
+## Current
+
+* Add `--action=parse` report.
+  [#7](https://github.com/FormidableLabs/inspectpack/issues/7)
+
 ## 0.3.0
 
 * Add `--action=files` report.
