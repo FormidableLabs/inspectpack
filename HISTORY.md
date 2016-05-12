@@ -1,6 +1,11 @@
 History
 =======
 
+## 0.4.1
+
+* Add ES6 reexport detection to `--action=parse` report. (*[@divmain][]*)
+  [#14](https://github.com/FormidableLabs/inspectpack/issues/14)
+
 ## 0.4.0
 
 * Add `--action=parse` report. (*[@divmain][]*)
