@@ -26,7 +26,7 @@ Usage: inspectpack --action=<string> [options]
 
 Options:
   --action, -a        Actions to take
-                            [string] [required] [choices: "duplicates", "files", "parse", "pattern"]
+                   [string] [required] [choices: "duplicates", "files", "parse", "pattern", "sizes"]
   --bundle, -b        Path to webpack-created JS bundle                                     [string]
   --format, -f        Display output format
                                          [string] [choices: "json", "text", "tsv"] [default: "text"]
