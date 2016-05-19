@@ -127,6 +127,48 @@ $ inspectpack --action=duplicates --bundle=bundle.js
   duplicate code snippets and the entire bundle. For just a list of missed
   duplicates, add the `--minified=false --gzip=false` flags.
 
+### `sizes`
+
+Get a simple report of each file chunk in a bundle with the type of chunk and
+relevant sizes (full, min, min+gz).
+
+First create a [bundle](#bundle). Then run:
+
+
+```sh
+$ inspectpack --action=sizes --bundle=bundle.js
+```
+
+**Outputs**: A JSON, text, or tab-separate-value report. For example:
+
+```
+## Summary
+
+* Bundle:
+    * Path:                    /PATH/TO/bundle.js
+    * Bytes (min):             1584818
+    * Bytes (min+gz):          367026
+
+## Files
+0. ./app.jsx
+  * Type:          code
+  * Size:          5439
+  * Size (min):    2314
+  * Size (min+gz): 1002
+
+1. ../~/babel-polyfill/lib/index.js
+  * Type:          code
+  * Size:          1423
+  * Size (min):    658
+  * Size (min+gz): 422
+```
+
+**Notes**:
+
+* The vast majority of the analysis time is spent minifying and gzipping code
+  snippets and the entire bundle. To skip these sizes for a faster report, add
+  the `--minified=false --gzip=false` flags.
+
 ### `parse`
 
 Detect the occurrence of 1+ code parse function matches in code sections of the
