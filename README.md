@@ -28,7 +28,8 @@ Options:
   --action, -a        Actions to take
                             [string] [required] [choices: "duplicates", "files", "parse", "pattern"]
   --bundle, -b        Path to webpack-created JS bundle                                     [string]
-  --format, -f        Display output format     [string] [choices: "json", "text"] [default: "text"]
+  --format, -f        Display output format
+                                         [string] [choices: "json", "text", "tsv"] [default: "text"]
   --verbose           Verbose output                                      [boolean] [default: false]
   --minified, -m      Calculate / display minified byte sizes              [boolean] [default: true]
   --gzip, -g          Calculate / display minified + gzipped byte size (implies `--minified`)
@@ -97,7 +98,7 @@ First create a [bundle](#bundle). Then run:
 $ inspectpack --action=duplicates --bundle=bundle.js
 ```
 
-**Outputs**: A JSON or text report. For example:
+**Outputs**: A JSON, text, or tab-separate-value report. For example:
 
 ```
 ## Summary
@@ -195,7 +196,7 @@ code snippets that potentially contain inefficient code. See
     module.exports.bar = __webpack_require__(2);
     ```
 
-**Outputs**: A JSON or text report. For example:
+**Outputs**: A JSON, text, or tab-separate-value report. For example:
 
 ```
 $ inspectpack \
@@ -305,7 +306,7 @@ patterns that potentially contain inefficient code. See
     module.exports.bar = __webpack_require__(2);
     ```
 
-**Outputs**: A JSON or text report. For example:
+**Outputs**: A JSON, text, or tab-separate-value report. For example:
 
 ```
 $ inspectpack \
@@ -400,7 +401,7 @@ file patterns that potentially contain inefficient code. See
   is bundled in your application. You should instead hone down and include
   only the locales that you specifically need for your application.
 
-**Outputs**: A JSON or text report. For example:
+**Outputs**: A JSON, text, or tab-separate-value report. For example:
 
 ```
 inspectpack --action=files
