@@ -1,6 +1,11 @@
 History
 =======
 
+## 0.5.0
+
+* Add `--action=sizes` report.
+* Add `--format=tsv` output for all reports.
+
 ## 0.4.1
 
 * Add ES6 reexport detection to `--action=parse` report. (*[@divmain][]*)

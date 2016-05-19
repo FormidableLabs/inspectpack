@@ -1,6 +1,6 @@
 {
   "name": "inspectpack",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "An inspection tool for Webpack frontend JavaScript bundles.",
   "main": "lib/index.js",
   "repository": {
