@@ -1,6 +1,21 @@
 History
 =======
 
+## 0.5.0
+
+* Add `--action=sizes` report.
+* Add `--format=tsv` output for all reports.
+
+## 0.4.1
+
+* Add ES6 reexport detection to `--action=parse` report. (*[@divmain][]*)
+  [#14](https://github.com/FormidableLabs/inspectpack/issues/14)
+
+## 0.4.0
+
+* Add `--action=parse` report. (*[@divmain][]*)
+  [#7](https://github.com/FormidableLabs/inspectpack/issues/7)
+
 ## 0.3.0
 
 * Add `--action=files` report.
@@ -19,3 +34,6 @@ History
 ## 0.1.0
 
 * Add `--action=duplicates` report.
+
+[@divmain]: https://github.com/divmain
+[@ryan-roemer]: https://github.com/ryan-roemer
