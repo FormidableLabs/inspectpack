@@ -26,8 +26,9 @@ Usage: inspectpack --action=<string> [options]
 
 Options:
   --action, -a        Actions to take
-                   [string] [required] [choices: "duplicates", "files", "parse", "pattern", "sizes"]
+                [string] [required] [choices: "duplicates", "files", "versions", "pattern", "sizes"]
   --bundle, -b        Path to webpack-created JS bundle                                     [string]
+  --root, -r          Project root (for `node_modules` introspection, default cwd)          [string]
   --format, -f        Display output format
                                          [string] [choices: "json", "text", "tsv"] [default: "text"]
   --verbose           Verbose output                                      [boolean] [default: false]
@@ -39,6 +40,7 @@ Options:
   --suspect-patterns  Known 'suspicious' patterns for `--action=pattern`                   [boolean]
   --suspect-parses    Known 'suspicious' code parses for `--action=parse`                  [boolean]
   --suspect-files     Known 'suspicious' file names for `--action=files`                   [boolean]
+  --duplicates        Filter `--action=versions` to libraries that cannot be deduped       [boolean]
   --help, -h          Show help                                                            [boolean]
   --version, -v       Show version number                                                  [boolean]
 
@@ -46,6 +48,8 @@ Examples:
   inspectpack --action=duplicates --bundle=bundle.js  Report duplicates that cannot be deduped
   inspectpack --action=pattern --bundle=bundle.js     Show files with pattern matches in code
   --suspect-patterns
+  inspectpack --action=versions --bundle=bundle.js    Show version skews in a project
+  --root=/PATH/TO/project
   inspectpack --action=parse --bundle=bundle.js       Show files with parse function matches in code
   --suspect-parses
   inspectpack --action=files --bundle=bundle.js       Show files with pattern matches in file names

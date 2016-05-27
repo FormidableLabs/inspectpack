@@ -1,6 +1,10 @@
 History
 =======
 
+## Current
+
+* Add `--action=versions` report.
+
 ## 0.5.0
 
 * Add `--action=sizes` report.
