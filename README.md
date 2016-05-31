@@ -20,8 +20,6 @@ $ npm install inspectpack
 ## Usage
 
 ```
-An inspection tool for Webpack frontend JavaScript bundles.
-
 Usage: inspectpack --action=<string> [options]
 
 Options:
@@ -130,6 +128,102 @@ $ inspectpack --action=duplicates --bundle=bundle.js
 * The vast majority of the analysis time is spent minifying and gzipping
   duplicate code snippets and the entire bundle. For just a list of missed
   duplicates, add the `--minified=false --gzip=false` flags.
+
+### `versions`
+
+Examine all of the modules in `node_modules` that are used in 1+ files in the
+bundle and detect version skews. Many downstream modules require the same
+upstream modules at _different versions_ and this can create inefficiencies if
+those common dependencies cannot be deduplicated (detected by
+`--action=duplicates`). This feature figures out:
+
+* Any skewed version dependencies for a given library. This is important because
+  we want to ideally make sure that only one version of a library is used.
+* If that library has _upstream_ dependencies that are themselves skewed. This
+  is important additional data because it tells us if this module depends on
+  other modules that have skews that you should resolve _first_.
+
+With these two pieces of data, we can then look at our dependency graph for a
+given application and manually harmonize module versions. The key here is to
+start with modules that have _no upstream skews_, and accordingly the `versions`
+action produces reports that are sorted by lowest number of upstream skews.
+
+Let's see this in action...
+
+First create a [bundle](#bundle). Then run:
+
+
+```sh
+$ inspectpack --action=versions --bundle=bundle.js --root=/PATH/TO/project
+```
+
+**Outputs**: A JSON, text, or tab-separate-value report. For example:
+
+```
+inspectpack --action=versions
+=============================
+
+## Summary
+
+* Bundle:
+    * Path:                /PATH/TO/bundle.js
+    * Num Libs:            17
+
+## Libraries
+...
+
+* lodash
+  * Skewed Deps: 0
+
+  * Versions: 2
+    * 4.12.0:
+      * root -> cabal-event-pattern@3.1.0
+      * root -> foo-add-to-cart-analytics-util@1.2.0
+      * root -> foo-footer@5.5.6 -> foo-forms@4.0.1 -> foo-validation@2.1.1
+      ...
+    * 3.10.1:
+      * root
+      * root -> my-ui-config@1.3.1
+      * root -> foo-containers@8.1.2 -> foo-interactive@6.0.3
+      * root -> a11y@1.0.3 -> foo-carousel@2.0.0 -> foo-interactive@5.2.0
+      * root -> a11y@1.0.3 -> babar-card@6.7.3
+      * root -> a11y@1.0.3 -> babar-card@6.7.3 -> babar-buttons@5.7.1 -> foo-forms@2.0.1 -> foo-base@2.1.1 -> foo-layout@2.0.2 -> foo-validation@0.2.5
+      * root -> a11y@1.0.3 -> babar-card@6.7.3 -> babar-descriptors@2.0.0
+      ...
+
+...
+
+* cabal-event
+  * Skewed Deps: 1
+    * lodash
+
+  * Versions: 2
+    * 3.1.0:
+      * root
+      * root -> foo-footer@5.5.6
+      * root -> foo-footer@5.5.6 -> foo-tutils@3.0.1
+      * root -> foo-header@6.11.1
+    * 2.1.0:
+      * root -> a11y@1.0.3
+
+...
+```
+
+The above truncated report tells us that we have 17 module dependencies that
+have at least 2+ version skews in our project. The `lodash` module has `0`
+"Skewed Deps" upstream dependencies and there are two versions of the library
+ending up in the bundle: `4.12.0` and `3.10.1`. Having no upstream skews means
+we should fix these skews _first_ in our project before moving to modules that
+have 1+ upstream skews. By contrast, the `cabal-event` module has `1` skewed
+upstream dependency on `lodash`, which illustrates that we should wait until
+`lodash` is resolved before moving on to harmonize versions in that module.
+
+The `versions` action provides a `--duplicates` flag to only list version skews
+for code chunks that are missed deduplication opportunities. This is a good
+prioritization step to take since different module versions may still have the
+exact same code files in the resulting bundle, which can be deduplicated and
+thus aren't a real concern for code size / execution speed in optimizing your
+bundle.
 
 ### `sizes`
 
