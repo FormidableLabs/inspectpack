@@ -1,6 +1,10 @@
 History
 =======
 
+## Current
+
+* Add `--action=versions` report. (*[@rgerstenberger][]*)
+
 ## 0.5.0
 
 * Add `--action=sizes` report.
@@ -36,4 +40,5 @@ History
 * Add `--action=duplicates` report.
 
 [@divmain]: https://github.com/divmain
+[@rgerstenberger]: https://github.com/rgerstenberger
 [@ryan-roemer]: https://github.com/ryan-roemer
