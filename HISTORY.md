@@ -1,7 +1,7 @@
 History
 =======
 
-## Current
+## 0.6.0
 
 * Add `--action=versions` report. (*[@rgerstenberger][]*)
 
