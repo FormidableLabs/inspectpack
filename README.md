@@ -177,7 +177,7 @@ inspectpack --action=versions
 
   * Versions: 2
     * 4.12.0:
-      * root -> cabal-event-pattern@3.1.0
+      * root -> cabal-event@3.1.0
       * root -> foo-add-to-cart-analytics-util@1.2.0
       * root -> foo-footer@5.5.6 -> foo-forms@4.0.1 -> foo-validation@2.1.1
       ...
@@ -218,12 +218,17 @@ have 1+ upstream skews. By contrast, the `cabal-event` module has `1` skewed
 upstream dependency on `lodash`, which illustrates that we should wait until
 `lodash` is resolved before moving on to harmonize versions in that module.
 
-The `versions` action provides a `--duplicates` flag to only list version skews
-for code chunks that are missed deduplication opportunities. This is a good
-prioritization step to take since different module versions may still have the
-exact same code files in the resulting bundle, which can be deduplicated and
-thus aren't a real concern for code size / execution speed in optimizing your
-bundle.
+**Notes**:
+
+* The `versions` action provides a `--duplicates` flag to only list version
+  skews for code chunks that are missed deduplication opportunities. This is a
+  good prioritization step to take since different module versions may still
+  have the exact same code files in the resulting bundle, which can be
+  deduplicated and thus aren't a real concern for code size / execution speed in
+  optimizing your bundle.
+* The `--root` flag needs to point to the webpack configuration
+  [`context`](http://webpack.github.io/docs/configuration.html#context) value,
+  which defaults to `process.cwd()` for both webpack and `inspectpack`.
 
 ### `sizes`
 
