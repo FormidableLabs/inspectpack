@@ -12,7 +12,7 @@ you can cut down on size, duplicates, etc.
 
 ## Install
 
-```sh
+```shad
 $ npm install inspectpack
 ```
 
@@ -178,7 +178,7 @@ inspectpack --action=versions
   * Versions: 2
     * 4.12.0:
       * root -> cabal-event@3.1.0
-      * root -> foo-add-to-cart-analytics-util@1.2.0
+      * root -> foo-buzz-util@1.2.0
       * root -> foo-footer@5.5.6 -> foo-forms@4.0.1 -> foo-validation@2.1.1
       ...
     * 3.10.1:
