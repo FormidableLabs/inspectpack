@@ -1,3 +1,10 @@
 ---
 extends:
+  - "plugin:lodash-fp/recommended"
   - "defaults/configurations/walmart/es5-node"
+
+plugins:
+  - lodash-fp
+
+rules:
+  strict: 0
