@@ -20,11 +20,13 @@ $ npm install inspectpack
 ## Usage
 
 ```
+An inspection tool for Webpack frontend JavaScript bundles.
+
 Usage: inspectpack --action=<string> [options]
 
 Options:
   --action, -a        Actions to take
-                [string] [required] [choices: "duplicates", "files", "versions", "pattern", "sizes"]
+       [string] [required] [choices: "duplicates", "pattern", "parse", "files", "versions", "sizes"]
   --bundle, -b        Path to webpack-created JS bundle                                     [string]
   --root, -r          Project root (for `node_modules` introspection, default cwd)          [string]
   --format, -f        Display output format
