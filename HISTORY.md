@@ -1,6 +1,10 @@
 History
 =======
 
+## 0.6.1
+
+* Fix usage of `lodash/fp`.
+
 ## 0.6.0
 
 * Add `--action=versions` report. (*[@rgerstenberger][]*)
