@@ -8,3 +8,4 @@ plugins:
 
 rules:
   strict: 0
+  no-magic-numbers: ["error", { "ignore": [-1, 0, 1] }]
