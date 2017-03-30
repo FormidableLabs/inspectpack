@@ -34,7 +34,7 @@ describe("Smoke tests", function () {
 
     duplicates({
       code: basicFixture,
-      format: "json",
+      format: "object",
       minified: true,
       gzip: true
     }, done);
@@ -46,14 +46,13 @@ describe("Smoke tests", function () {
     pattern({
       code: badBundleFixture,
       suspectPatterns: true,
-      format: "json",
+      format: "object",
       minified: true,
       gzip: true
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
-        expect(result).to.be.truthy;
-        expect(JSON.parse(result).meta.numMatches).to.equal(1);
+        expect(result.meta.numMatches).to.equal(1);
       });
     });
   });
@@ -63,7 +62,7 @@ describe("Smoke tests", function () {
 
     parse({
       code: basicFixture,
-      format: "json",
+      format: "object",
       minified: true,
       gzip: true
     }, done);
@@ -75,14 +74,13 @@ describe("Smoke tests", function () {
     files({
       code: badBundleFixture,
       suspectFiles: true,
-      format: "json",
+      format: "object",
       minified: true,
       gzip: true
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
-        expect(result).to.be.truthy;
-        expect(JSON.parse(result).meta.numMatches).to.equal(3);
+        expect(result.meta.numMatches).to.equal(3);
       });
     });
   });
@@ -93,7 +91,7 @@ describe("Smoke tests", function () {
     versions({
       code: badBundleFixture,
       root: process.cwd(),
-      format: "json",
+      format: "object",
       minified: true,
       gzip: true
     }, done);
@@ -104,14 +102,12 @@ describe("Smoke tests", function () {
 
     sizes({
       code: basicFixture,
-      format: "json",
+      format: "object",
       minified: true,
       gzip: true
-    }, function (err, json) {
+    }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
-        expect(json).to.be.truthy;
-        var result = JSON.parse(json);
         expect(result.sizes).to.have.lengthOf(4);
       });
     });
