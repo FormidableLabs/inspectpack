@@ -8,8 +8,9 @@
   	"build": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "lodash": "^4.17.4",
+    "new-lodash": "file:./new-lodash",
     "old-lodash": "file:./old-lodash",
+    "lodash": "4.17.4",
     "moment": "^2.18.1",
     "webpack": "^1.14.0"
   }

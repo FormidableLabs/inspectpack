@@ -16,7 +16,8 @@ var EXTENDED_TIMEOUT = 12000;
 var basicFixturePath = path.resolve(__dirname, "fixtures/basic-lodash-object-expression.js");
 var basicFixture = fs.readFileSync(basicFixturePath, "utf8");
 
-var badBundleFixturePath = path.resolve(__dirname, "fixtures/bad-bundle/app.js");
+var badBundleFixtureRoot = path.resolve(__dirname, "fixtures/bad-bundle");
+var badBundleFixturePath = path.resolve(badBundleFixtureRoot, "app.js");
 var badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
 
 var checkForErrors = function (done, assertion) {
@@ -33,7 +34,7 @@ describe("Smoke tests", function () {
     this.timeout(EXTENDED_TIMEOUT);
 
     duplicates({
-      code: basicFixture,
+      code: badBundleFixture,
       format: "object",
       minified: true,
       gzip: true
@@ -52,20 +53,31 @@ describe("Smoke tests", function () {
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
-        expect(result.meta.numMatches).to.equal(1);
+        expect(result.meta.numMatches).to.equal(2);
       });
     });
   });
 
-  it.skip("analyzes suspicious parses", function (done) {
+  it("analyzes suspicious parses", function (done) {
     this.timeout(EXTENDED_TIMEOUT);
 
     parse({
       code: basicFixture,
+      parseFns: {
+        TEST_PARSE: function (src) {
+          return src.indexOf("oh hai mark") !== -1;
+        }
+      },
+      suspectParses: true,
       format: "object",
       minified: true,
       gzip: true
-    }, done);
+    }, function (err, result) {
+      if (err) { done(err); }
+      checkForErrors(done, function () {
+        expect(result.meta.numMatches).to.equal(1);
+      });
+    });
   });
 
   it("analyzes suspicious files", function (done) {
@@ -80,7 +92,7 @@ describe("Smoke tests", function () {
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
-        expect(result.meta.numMatches).to.equal(3);
+        expect(result.meta.numMatches).to.equal(5);
       });
     });
   });
@@ -90,7 +102,7 @@ describe("Smoke tests", function () {
 
     versions({
       code: badBundleFixture,
-      root: process.cwd(),
+      root: badBundleFixtureRoot,
       format: "object",
       minified: true,
       gzip: true
