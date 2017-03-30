@@ -1,0 +1,16 @@
+{
+  "name": "bad-bundle",
+  "version": "1.0.0",
+  "description": "A project that generates a \"bad\" bundle that triggers inspectpack detection of missed dupes, version skews, and suspect patterns/parses/files",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+  	"build": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "old-lodash": "file:./old-lodash",
+    "moment": "^2.18.1",
+    "webpack": "^1.14.0"
+  }
+}
