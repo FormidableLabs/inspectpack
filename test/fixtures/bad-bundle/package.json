@@ -5,13 +5,16 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-  	"build": "webpack --config webpack.config.js"
+    "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
+    "lodash": "4.15.0",
+    "moment": "^2.18.1",
     "new-lodash": "file:./new-lodash",
     "old-lodash": "file:./old-lodash",
-    "lodash": "4.17.4",
-    "moment": "^2.18.1",
     "webpack": "^1.14.0"
+  },
+  "devDependencies": {
+    "duplicate-package-checker-webpack-plugin": "^1.2.4"
   }
 }

@@ -11,7 +11,7 @@ var files = require("../lib/actions/files");
 var versions = require("../lib/actions/versions");
 var sizes = require("../lib/actions/sizes");
 
-var EXTENDED_TIMEOUT = 12000;
+var EXTENDED_TIMEOUT = 15000;
 
 var basicFixturePath = path.resolve(__dirname, "fixtures/basic-lodash-object-expression.js");
 var basicFixture = fs.readFileSync(basicFixturePath, "utf8");
@@ -30,7 +30,7 @@ var checkForErrors = function (done, assertion) {
 };
 
 describe("Smoke tests", function () {
-  it.skip("analyzes duplicates", function (done) {
+  it("analyzes duplicates", function (done) {
     this.timeout(EXTENDED_TIMEOUT);
 
     duplicates({
@@ -38,7 +38,12 @@ describe("Smoke tests", function () {
       format: "object",
       minified: true,
       gzip: true
-    }, done);
+    }, function (err, result) {
+      if (err) { return done(err); }
+      return checkForErrors(done, function () {
+        expect(result.meta.numFilesWithDuplicates).to.equal(1);
+      });
+    });
   });
 
   it("analyzes suspicious patterns", function (done) {
