@@ -102,7 +102,7 @@ describe("Smoke tests", function () {
     });
   });
 
-  it.skip("analyzes version skews", function (done) {
+  it("analyzes version skews", function (done) {
     this.timeout(EXTENDED_TIMEOUT);
 
     versions({
@@ -111,7 +111,18 @@ describe("Smoke tests", function () {
       format: "object",
       minified: true,
       gzip: true
-    }, done);
+    }, function (err, result) {
+      if (err) { done(err); }
+      checkForErrors(done, function () {
+        expect(result).to.have.deep.property(
+          "versions[0].name",
+          "lodash"
+        );
+        ["4.15.0", "4.17.4", "3.10.0"].forEach(function (version) {
+          expect(Object.keys(result.versions[0].versions)).to.include(version);
+        });
+      });
+    });
   });
 
   it("analyzes bundle sizes", function (done) {
