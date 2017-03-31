@@ -17,9 +17,10 @@
     "inspectpack": "bin/inspectpack.js"
   },
   "scripts": {
-    "lint-server": "eslint --color -c .eslintrc lib bin",
-    "lint": "npm run lint-server",
-    "check": "npm run lint",
+    "lint-server": "eslint --color lib bin",
+    "lint-test": "eslint --color 'test/**/*.spec.js'",
+    "lint": "npm run lint-server && npm run lint-test",
+    "check": "npm run lint && npm run test",
     "test": "mocha 'test/**/*.spec.js'"
   },
   "dependencies": {
