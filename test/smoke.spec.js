@@ -36,8 +36,8 @@ describe("Smoke tests", function () {
     duplicates({
       code: badBundleFixture,
       format: "object",
-      minified: true,
-      gzip: true
+      minified: false,
+      gzip: false
     }, function (err, result) {
       if (err) { return done(err); }
       return checkForErrors(done, function () {
@@ -53,8 +53,8 @@ describe("Smoke tests", function () {
       code: badBundleFixture,
       suspectPatterns: true,
       format: "object",
-      minified: true,
-      gzip: true
+      minified: false,
+      gzip: false
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
@@ -75,8 +75,8 @@ describe("Smoke tests", function () {
       },
       suspectParses: true,
       format: "object",
-      minified: true,
-      gzip: true
+      minified: false,
+      gzip: false
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
@@ -92,8 +92,8 @@ describe("Smoke tests", function () {
       code: badBundleFixture,
       suspectFiles: true,
       format: "object",
-      minified: true,
-      gzip: true
+      minified: false,
+      gzip: false
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
@@ -109,8 +109,8 @@ describe("Smoke tests", function () {
       code: badBundleFixture,
       root: badBundleFixtureRoot,
       format: "object",
-      minified: true,
-      gzip: true
+      minified: false,
+      gzip: false
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
@@ -131,8 +131,8 @@ describe("Smoke tests", function () {
     sizes({
       code: basicFixture,
       format: "object",
-      minified: true,
-      gzip: true
+      minified: false,
+      gzip: false
     }, function (err, result) {
       if (err) { done(err); }
       checkForErrors(done, function () {
