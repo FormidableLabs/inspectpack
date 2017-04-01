@@ -1,33 +1,33 @@
 "use strict";
 
-var expect = require("chai").expect;
-var fs = require("fs");
+const expect = require("chai").expect;
+const fs = require("fs");
 
-var duplicates = require("../lib/actions/duplicates");
-var pattern = require("../lib/actions/pattern");
-var parse = require("../lib/actions/parse");
-var files = require("../lib/actions/files");
-var versions = require("../lib/actions/versions");
-var sizes = require("../lib/actions/sizes");
+const duplicates = require("../lib/actions/duplicates");
+const pattern = require("../lib/actions/pattern");
+const parse = require("../lib/actions/parse");
+const files = require("../lib/actions/files");
+const versions = require("../lib/actions/versions");
+const sizes = require("../lib/actions/sizes");
 
-var EXTENDED_TIMEOUT = 15000;
+const EXTENDED_TIMEOUT = 15000;
 
-var basicFixturePath = require.resolve(
+const basicFixturePath = require.resolve(
   "inspectpack-test-fixtures/basic-lodash-object-expression"
 );
-var basicFixture = fs.readFileSync(basicFixturePath, "utf8");
+const basicFixture = fs.readFileSync(basicFixturePath, "utf8");
 
-var badBundleFixtureRoot = require
+const badBundleFixtureRoot = require
   .resolve("inspectpack-test-fixtures")
   .replace("/index.js", "");
 
-var badBundleFixturePath = require.resolve(
+const badBundleFixturePath = require.resolve(
   "inspectpack-test-fixtures/badBundle.js"
 );
 
-var badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
+const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
 
-var checkForErrors = function (done, assertion) {
+const checkForErrors = function (done, assertion) {
   try {
     assertion();
     done();
@@ -36,7 +36,7 @@ var checkForErrors = function (done, assertion) {
   }
 };
 
-describe("Smoke tests", function () {
+describe("Smoke tests", () => {
   it("analyzes duplicates", function (done) {
     this.timeout(EXTENDED_TIMEOUT);
 
@@ -45,9 +45,9 @@ describe("Smoke tests", function () {
       format: "object",
       minified: false,
       gzip: false
-    }, function (err, result) {
+    }, (err, result) => {
       if (err) { done(err); return; }
-      checkForErrors(done, function () {
+      checkForErrors(done, () => {
         expect(result.meta.numFilesWithDuplicates).to.equal(1);
       });
     });
@@ -62,9 +62,9 @@ describe("Smoke tests", function () {
       format: "object",
       minified: false,
       gzip: false
-    }, function (err, result) {
+    }, (err, result) => {
       if (err) { done(err); return; }
-      checkForErrors(done, function () {
+      checkForErrors(done, () => {
         expect(result.meta.numMatches).to.equal(2);
       });
     });
@@ -76,7 +76,7 @@ describe("Smoke tests", function () {
     parse({
       code: basicFixture,
       parseFns: {
-        TEST_PARSE: function (src) {
+        TEST_PARSE(src) {
           return src.indexOf("oh hai mark") !== -1;
         }
       },
@@ -84,9 +84,9 @@ describe("Smoke tests", function () {
       format: "object",
       minified: false,
       gzip: false
-    }, function (err, result) {
+    }, (err, result) => {
       if (err) { done(err); return; }
-      checkForErrors(done, function () {
+      checkForErrors(done, () => {
         expect(result.meta.numMatches).to.equal(1);
       });
     });
@@ -101,9 +101,10 @@ describe("Smoke tests", function () {
       format: "object",
       minified: false,
       gzip: false
-    }, function (err, result) {
+
+    }, (err, result) => {
       if (err) { done(err); return; }
-      checkForErrors(done, function () {
+      checkForErrors(done, () => {
         expect(result.meta.numMatches).to.equal(5);
       });
     });
@@ -118,9 +119,9 @@ describe("Smoke tests", function () {
       format: "object",
       minified: false,
       gzip: false
-    }, function (err, result) {
+    }, (err, result) => {
       if (err) { done(err); return; }
-      checkForErrors(done, function () {
+      checkForErrors(done, () => {
         expect(result).to.have.property("versions");
       });
     });
@@ -134,9 +135,9 @@ describe("Smoke tests", function () {
       format: "object",
       minified: false,
       gzip: false
-    }, function (err, result) {
+    }, (err, result) => {
       if (err) { done(err); return; }
-      checkForErrors(done, function () {
+      checkForErrors(done, () => {
         expect(result.sizes).to.have.lengthOf(4);
       });
     });
