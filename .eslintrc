@@ -1,11 +1,11 @@
 ---
 extends:
   - "plugin:lodash-fp/recommended"
-  - "defaults/configurations/walmart/es5-node"
+  - formidable/configurations/es6-node
 
 plugins:
   - lodash-fp
 
 rules:
-  strict: 0
-  no-magic-numbers: ["error", { "ignore": [-1, 0, 1] }]
+  func-style: off
+  arrow-parens: off

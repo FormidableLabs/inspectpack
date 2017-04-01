@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 "use strict";
 
-var args = require("../lib").args;
-var actions = require("../lib").actions;
+const args = require("../lib").args;
+const actions = require("../lib").actions;
 
 // The main event.
-var main = function () {
+const main = function () {
   // Parse arguments.
-  var parser = args.parse();
-  var argv = args.validate(parser);
+  const parser = args.parse();
+  const argv = args.validate(parser);
 
   // Invoke action.
-  actions(argv.action)(argv, function (err, data) {
+  actions(argv.action)(argv, (err, data) => {
     if (err) {
       // Try to get full stack, then full string if not.
       console.error(err.stack || err.toString()); // eslint-disable-line no-console
