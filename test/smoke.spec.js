@@ -1,7 +1,6 @@
 "use strict";
 
 var expect = require("chai").expect;
-var path = require("path");
 var fs = require("fs");
 
 var duplicates = require("../lib/actions/duplicates");
@@ -13,11 +12,19 @@ var sizes = require("../lib/actions/sizes");
 
 var EXTENDED_TIMEOUT = 15000;
 
-var basicFixturePath = path.resolve(__dirname, "fixtures/basic-lodash-object-expression.js");
+var basicFixturePath = require.resolve(
+  "inspectpack-test-fixtures/basic-lodash-object-expression"
+);
 var basicFixture = fs.readFileSync(basicFixturePath, "utf8");
 
-var badBundleFixtureRoot = path.resolve(__dirname, "fixtures/bad-bundle");
-var badBundleFixturePath = path.resolve(badBundleFixtureRoot, "app.js");
+var badBundleFixtureRoot = require
+  .resolve("inspectpack-test-fixtures")
+  .replace("/index.js", "");
+
+var badBundleFixturePath = require.resolve(
+  "inspectpack-test-fixtures/badBundle.js"
+);
+
 var badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
 
 var checkForErrors = function (done, assertion) {
@@ -39,8 +46,8 @@ describe("Smoke tests", function () {
       minified: false,
       gzip: false
     }, function (err, result) {
-      if (err) { return done(err); }
-      return checkForErrors(done, function () {
+      if (err) { done(err); return; }
+      checkForErrors(done, function () {
         expect(result.meta.numFilesWithDuplicates).to.equal(1);
       });
     });
@@ -56,7 +63,7 @@ describe("Smoke tests", function () {
       minified: false,
       gzip: false
     }, function (err, result) {
-      if (err) { done(err); }
+      if (err) { done(err); return; }
       checkForErrors(done, function () {
         expect(result.meta.numMatches).to.equal(2);
       });
@@ -78,7 +85,7 @@ describe("Smoke tests", function () {
       minified: false,
       gzip: false
     }, function (err, result) {
-      if (err) { done(err); }
+      if (err) { done(err); return; }
       checkForErrors(done, function () {
         expect(result.meta.numMatches).to.equal(1);
       });
@@ -95,7 +102,7 @@ describe("Smoke tests", function () {
       minified: false,
       gzip: false
     }, function (err, result) {
-      if (err) { done(err); }
+      if (err) { done(err); return; }
       checkForErrors(done, function () {
         expect(result.meta.numMatches).to.equal(5);
       });
@@ -112,7 +119,7 @@ describe("Smoke tests", function () {
       minified: false,
       gzip: false
     }, function (err, result) {
-      if (err) { done(err); }
+      if (err) { done(err); return; }
       checkForErrors(done, function () {
         expect(result).to.have.property("versions");
       });
@@ -128,7 +135,7 @@ describe("Smoke tests", function () {
       minified: false,
       gzip: false
     }, function (err, result) {
-      if (err) { done(err); }
+      if (err) { done(err); return; }
       checkForErrors(done, function () {
         expect(result.sizes).to.have.lengthOf(4);
       });
