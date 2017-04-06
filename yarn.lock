@@ -1702,7 +1702,7 @@ oauth-sign@~0.8.1:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
 
-object-assign@^4.0.1, object-assign@^4.1.0:
+object-assign@^4.0.1, object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
@@ -2475,9 +2475,11 @@ wordwrap@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
 
-workerpool@^2.2.0:
+"workerpool@https://github.com/FormidableLabs/workerpool#71d4e17":
   version "2.2.0"
-  resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-2.2.0.tgz#67e45736f6c19cd41fd15f810c545770cf456f98"
+  resolved "https://github.com/FormidableLabs/workerpool#71d4e17"
+  dependencies:
+    object-assign "^4.1.1"
 
 wrap-ansi@^2.0.0:
   version "2.1.0"
