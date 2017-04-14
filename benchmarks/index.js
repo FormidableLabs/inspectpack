@@ -1,7 +1,6 @@
 "use strict";
 
 const fs = require("fs");
-const Promise = require("bluebird");
 const Benchmark = require("benchmark");
 const benchmarks = require("beautify-benchmark");
 const suite = new Benchmark.Suite();
