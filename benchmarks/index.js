@@ -1,15 +1,17 @@
 "use strict";
 
 const fs = require("fs");
+const path = require("path");
+const pify = require("pify");
 const Benchmark = require("benchmark");
 const benchmarks = require("beautify-benchmark");
 const suite = new Benchmark.Suite();
 
 const actions = require("../lib/actions");
 
-const badBundleFixtureRoot = require
-  .resolve("inspectpack-test-fixtures")
-  .replace("/index.js", "");
+const badBundleFixtureRoot = path.dirname(
+  require.resolve("inspectpack-test-fixtures/package.json")
+);
 
 const badBundleFixturePath = require.resolve(
   "inspectpack-test-fixtures/badBundle.js"
@@ -37,7 +39,6 @@ Object.keys(actions.ACTIONS).forEach(action => {
 
   suite.add(action, {
     defer: true,
-    minSamples: 20,
     fn: deferred => {
       actionFn(opts, err => {
         if (err) { throw err; }
@@ -49,10 +50,9 @@ Object.keys(actions.ACTIONS).forEach(action => {
 
 suite.add("all actions", {
   defer: true,
-  minSamples: 20,
   fn: deferred => Promise.all(
     Object.keys(actions.ACTIONS).map(action => {
-      return Promise.promisify(actions.ACTIONS[action])(opts);
+      return pify(actions.ACTIONS[action])(opts);
     })
   )
     .then(() => deferred.resolve())

@@ -17,12 +17,12 @@
     "inspectpack": "bin/inspectpack.js"
   },
   "scripts": {
+    "benchmark": "node benchmarks/index.js",
     "lint-server": "eslint --color lib bin",
     "lint-test": "eslint --color 'test/**/*.spec.js'",
     "lint": "npm run lint-server && npm run lint-test",
-    "check": "npm run lint && npm run test",
-    "test": "mocha 'test/**/*.spec.js'",
-    "benchmark": "node benchmarks/index.js"
+    "check": "npm run lint && npm run test && npm run benchmark",
+    "test": "mocha 'test/**/*.spec.js'"
   },
   "dependencies": {
     "babel-traverse": "^6.7.6",
