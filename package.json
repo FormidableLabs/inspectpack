@@ -17,19 +17,20 @@
     "inspectpack": "bin/inspectpack.js"
   },
   "scripts": {
+    "benchmark": "node benchmarks/index.js",
     "lint-server": "eslint --color lib bin",
     "lint-test": "eslint --color 'test/**/*.spec.js'",
     "lint": "npm run lint-server && npm run lint-test",
-    "check": "npm run lint && npm run test",
+    "check": "npm run lint && npm run test && npm run benchmark",
     "test": "mocha 'test/**/*.spec.js'"
   },
   "dependencies": {
     "babel-traverse": "^6.7.6",
     "babel-types": "^6.7.2",
     "babylon": "^6.7.0",
-    "bluebird": "^3.5.0",
     "lodash": "^4.6.1",
     "mkdirp": "^0.5.1",
+    "pify": "^2.3.0",
     "uglify-js": "^2.6.2",
     "workerpool": "https://github.com/FormidableLabs/workerpool#71d4e17",
     "yargs": "^4.3.1"
@@ -39,6 +40,8 @@
   },
   "devDependencies": {
     "babel-eslint": "^7.2.1",
+    "beautify-benchmark": "^0.2.4",
+    "benchmark": "^2.1.4",
     "chai": "^3.5.0",
     "eslint": "^3.18.0",
     "eslint-config-formidable": "^2.0.1",
