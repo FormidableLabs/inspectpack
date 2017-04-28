@@ -306,7 +306,7 @@ module.exports = function (src) {
 };
 ```
 
-In this simple example, we're just using regular expresssions, but for complex
+In this simple example, we're just using regular expressions, but for complex
 projects / investigations you'll likely want to step up to some Babel magic.
 
 Then run:
