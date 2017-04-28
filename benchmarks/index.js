@@ -8,6 +8,7 @@ const benchmarks = require("beautify-benchmark");
 const suite = new Benchmark.Suite();
 
 const actions = require("../lib/actions");
+const Compressor = require("../lib/utils/compressor");
 
 const badBundleFixtureRoot = path.dirname(
   require.resolve("inspectpack-test-fixtures/package.json")
@@ -19,7 +20,7 @@ const badBundleFixturePath = require.resolve(
 
 const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
 
-const opts = {
+const opts = compressor => ({
   code: badBundleFixture,
   format: "object",
   minified: true,
@@ -31,34 +32,45 @@ const opts = {
     TEST_PARSE(src) {
       return src.indexOf("oh hai mark") !== -1;
     }
-  }
-};
+  },
+  compressor
+});
 
 Object.keys(actions.ACTIONS).forEach(action => {
   const actionFn = actions.ACTIONS[action];
 
-  suite.add(action, {
-    defer: true,
-    fn: deferred => {
-      actionFn(opts, err => {
-        if (err) { throw err; }
-        deferred.resolve();
-      });
-    }
-  });
+  [true, false].forEach(usePuglify =>
+    suite.add(`${action} (using puglify: ${usePuglify})`, {
+      defer: true,
+      fn: deferred => {
+        const compressor = new Compressor({ usePuglify });
+        actionFn(opts(compressor, usePuglify), err => {
+          if (err) { throw err; }
+          compressor.destroy();
+          deferred.resolve();
+        });
+      }
+    })
+  );
 }, {});
 
-suite.add("all actions", {
-  defer: true,
-  fn: deferred => Promise.all(
-    Object.keys(actions.ACTIONS).map(action => {
-      return pify(actions.ACTIONS[action])(opts);
-    })
-  )
-    .then(() => deferred.resolve())
-    // eslint-disable-next-line no-console
-    .catch(err => console.log(err))
-});
+[true, false].forEach(usePuglify =>
+  suite.add("all actions", {
+    defer: true,
+    fn: deferred => {
+      const compressor = new Compressor({ usePuglify });
+      return Promise.all(
+        Object.keys(actions.ACTIONS).map(action => {
+          return pify(actions.ACTIONS[action])(opts(compressor));
+        })
+      )
+        .then(() => deferred.resolve())
+        // eslint-disable-next-line no-console
+        .catch(err => console.log(err))
+        .then(() => compressor.destroy());
+    }
+  })
+);
 
 suite
   .on("cycle", event => {
