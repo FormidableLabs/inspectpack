@@ -2647,9 +2647,9 @@ wordwrap@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-1.0.0.tgz#27584810891456a4171c8d0226441ade90cbcaeb"
 
-"workerpool@https://github.com/FormidableLabs/workerpool#71d4e17":
-  version "2.2.0"
-  resolved "https://github.com/FormidableLabs/workerpool#71d4e17"
+workerpool@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-2.2.1.tgz#41ebff11d5859da948fdb2c850b57da69240988a"
   dependencies:
     object-assign "^4.1.1"
 
