@@ -32,7 +32,7 @@
     "mkdirp": "^0.5.1",
     "pify": "^2.3.0",
     "uglify-js": "^2.6.2",
-    "workerpool": "https://github.com/FormidableLabs/workerpool#71d4e17",
+    "workerpool": "^2.2.1",
     "yargs": "^4.3.1"
   },
   "optionalDependencies": {
