@@ -16,13 +16,10 @@ const EXTENDED_TIMEOUT = 15000;
 const fixtureRoot = path.dirname(require.resolve(
   "inspectpack-test-fixtures/package.json"
 ));
+const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
 
-const basicFixturePath = path.join(fixtureRoot, "basic-lodash-object-expression.js");
-const basicFixture = fs.readFileSync(basicFixturePath, "utf8");
-
-const badBundleFixtureRoot = fixtureRoot;
-const badBundleFixturePath = path.join(fixtureRoot, "dist/bad-bundle.js");
-const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
+const basicFixture = readFile("built/basic-lodash-object-expression.js");
+const badBundleFixture = readFile("dist/bad-bundle.js");
 
 const checkForErrors = function (done, err, assertion) {
   if (err) { return void done(err); }
@@ -104,7 +101,7 @@ describe("Smoke tests", () => {
   it("analyzes version skews", (done) => {
     versions({
       code: badBundleFixture,
-      root: badBundleFixtureRoot,
+      root: fixtureRoot,
       format: "object",
       minified: false,
       gzip: false
