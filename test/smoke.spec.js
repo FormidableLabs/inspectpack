@@ -2,6 +2,7 @@
 
 const expect = require("chai").expect;
 const fs = require("fs");
+const path = require("path");
 
 const duplicates = require("../lib/actions/duplicates");
 const pattern = require("../lib/actions/pattern");
@@ -12,19 +13,15 @@ const sizes = require("../lib/actions/sizes");
 
 const EXTENDED_TIMEOUT = 15000;
 
-const basicFixturePath = require.resolve(
-  "inspectpack-test-fixtures/basic-lodash-object-expression"
-);
+const fixtureRoot = path.dirname(require.resolve(
+  "inspectpack-test-fixtures/package.json"
+));
+
+const basicFixturePath = path.join(fixtureRoot, "basic-lodash-object-expression.js");
 const basicFixture = fs.readFileSync(basicFixturePath, "utf8");
 
-const badBundleFixtureRoot = require
-  .resolve("inspectpack-test-fixtures")
-  .replace("/index.js", "");
-
-const badBundleFixturePath = require.resolve(
-  "inspectpack-test-fixtures/badBundle.js"
-);
-
+const badBundleFixtureRoot = fixtureRoot;
+const badBundleFixturePath = path.join(fixtureRoot, "dist/bad-bundle.js");
 const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
 
 const checkForErrors = function (done, err, assertion) {
