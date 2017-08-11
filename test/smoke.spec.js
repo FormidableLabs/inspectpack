@@ -28,7 +28,7 @@ const badBundleFixturePath = require.resolve(
 const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
 
 const checkForErrors = function (done, err, assertion) {
-  if (err) { return done(err); }
+  if (err) { return void done(err); }
 
   try {
     assertion();
