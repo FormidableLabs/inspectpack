@@ -27,7 +27,9 @@ const badBundleFixturePath = require.resolve(
 
 const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
 
-const checkForErrors = function (done, assertion) {
+const checkForErrors = function (done, err, assertion) {
+  if (err) { return done(err); }
+
   try {
     assertion();
     done();
@@ -37,25 +39,24 @@ const checkForErrors = function (done, assertion) {
 };
 
 describe("Smoke tests", () => {
-  it("analyzes duplicates", function (done) {
+  before(function () {
     this.timeout(EXTENDED_TIMEOUT);
+  });
 
+  it("analyzes duplicates", (done) => {
     duplicates({
       code: badBundleFixture,
       format: "object",
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numFilesWithDuplicates).to.equal(1);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numFilesWithDuplicates", 1);
       });
     });
   });
 
-  it("analyzes suspicious patterns", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes suspicious patterns", (done) => {
     pattern({
       code: badBundleFixture,
       suspectPatterns: true,
@@ -63,16 +64,13 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numMatches).to.equal(2);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numMatches", 2);
       });
     });
   });
 
-  it("analyzes suspicious parses", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes suspicious parses", (done) => {
     parse({
       code: basicFixture,
       parseFns: {
@@ -85,16 +83,13 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numMatches).to.equal(1);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numMatches", 1);
       });
     });
   });
 
-  it("analyzes suspicious files", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes suspicious files", (done) => {
     files({
       code: badBundleFixture,
       suspectFiles: true,
@@ -103,16 +98,13 @@ describe("Smoke tests", () => {
       gzip: false
 
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numMatches).to.equal(5);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numMatches", 5);
       });
     });
   });
 
-  it("analyzes version skews", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes version skews", (done) => {
     versions({
       code: badBundleFixture,
       root: badBundleFixtureRoot,
@@ -120,25 +112,21 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
+      checkForErrors(done, err, () => {
         expect(result).to.have.property("versions");
       });
     });
   });
 
-  it("analyzes bundle sizes", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes bundle sizes", (done) => {
     sizes({
       code: basicFixture,
       format: "object",
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.sizes).to.have.lengthOf(4);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.property("sizes").with.lengthOf(4);
       });
     });
   });

@@ -3,7 +3,7 @@ language: node_js
 node_js:
   - "4"
   - "6"
-  - "7"
+  - "8"
 
 sudo: false
 
@@ -12,5 +12,5 @@ branches:
     - master
 
 script:
-  - npm --version
-  - npm run check
+  - yarn --version
+  - yarn run check
