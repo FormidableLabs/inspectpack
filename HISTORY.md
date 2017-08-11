@@ -1,6 +1,10 @@
 History
 =======
 
+## 1.2.1
+
+* Fix size inspection of bundles created with `devtool: eval`. (*[@kkerr1][]*)
+
 ## 0.6.1
 
 * Fix usage of `lodash/fp`.
@@ -44,5 +48,6 @@ History
 * Add `--action=duplicates` report.
 
 [@divmain]: https://github.com/divmain
+[@kkerr1]: https://github.com/kkerr1
 [@rgerstenberger]: https://github.com/rgerstenberger
 [@ryan-roemer]: https://github.com/ryan-roemer
