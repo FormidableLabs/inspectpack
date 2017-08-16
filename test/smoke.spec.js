@@ -2,6 +2,7 @@
 
 const expect = require("chai").expect;
 const fs = require("fs");
+const path = require("path");
 
 const duplicates = require("../lib/actions/duplicates");
 const pattern = require("../lib/actions/pattern");
@@ -12,22 +13,15 @@ const sizes = require("../lib/actions/sizes");
 
 const EXTENDED_TIMEOUT = 15000;
 
-const basicFixturePath = require.resolve(
-  "inspectpack-test-fixtures/basic-lodash-object-expression"
-);
-const basicFixture = fs.readFileSync(basicFixturePath, "utf8");
+const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
+const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
 
-const badBundleFixtureRoot = require
-  .resolve("inspectpack-test-fixtures")
-  .replace("/index.js", "");
+const basicFixture = readFile("built/basic-lodash-object-expression.js");
+const badBundleFixture = readFile("dist/bad-bundle.js");
 
-const badBundleFixturePath = require.resolve(
-  "inspectpack-test-fixtures/badBundle.js"
-);
+const checkForErrors = function (done, err, assertion) {
+  if (err) { return void done(err); }
 
-const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
-
-const checkForErrors = function (done, assertion) {
   try {
     assertion();
     done();
@@ -37,25 +31,24 @@ const checkForErrors = function (done, assertion) {
 };
 
 describe("Smoke tests", () => {
-  it("analyzes duplicates", function (done) {
+  before(function () {
     this.timeout(EXTENDED_TIMEOUT);
+  });
 
+  it("analyzes duplicates", (done) => {
     duplicates({
       code: badBundleFixture,
       format: "object",
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numFilesWithDuplicates).to.equal(1);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numFilesWithDuplicates", 1);
       });
     });
   });
 
-  it("analyzes suspicious patterns", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes suspicious patterns", (done) => {
     pattern({
       code: badBundleFixture,
       suspectPatterns: true,
@@ -63,16 +56,13 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numMatches).to.equal(2);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numMatches", 2);
       });
     });
   });
 
-  it("analyzes suspicious parses", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes suspicious parses", (done) => {
     parse({
       code: basicFixture,
       parseFns: {
@@ -85,16 +75,13 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numMatches).to.equal(1);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numMatches", 1);
       });
     });
   });
 
-  it("analyzes suspicious files", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes suspicious files", (done) => {
     files({
       code: badBundleFixture,
       suspectFiles: true,
@@ -103,42 +90,35 @@ describe("Smoke tests", () => {
       gzip: false
 
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.meta.numMatches).to.equal(5);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.deep.property("meta.numMatches", 5);
       });
     });
   });
 
-  it("analyzes version skews", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes version skews", (done) => {
     versions({
       code: badBundleFixture,
-      root: badBundleFixtureRoot,
+      root: fixtureRoot,
       format: "object",
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
+      checkForErrors(done, err, () => {
         expect(result).to.have.property("versions");
       });
     });
   });
 
-  it("analyzes bundle sizes", function (done) {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  it("analyzes bundle sizes", (done) => {
     sizes({
       code: basicFixture,
       format: "object",
       minified: false,
       gzip: false
     }, (err, result) => {
-      if (err) { done(err); return; }
-      checkForErrors(done, () => {
-        expect(result.sizes).to.have.lengthOf(4);
+      checkForErrors(done, err, () => {
+        expect(result).to.have.property("sizes").with.lengthOf(4);
       });
     });
   });

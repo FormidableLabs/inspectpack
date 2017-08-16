@@ -1,6 +1,6 @@
 ---
 extends:
-  - "plugin:lodash-fp/recommended"
+  - plugin:lodash-fp/recommended
   - formidable/configurations/es6-node
 
 plugins:
@@ -9,3 +9,4 @@ plugins:
 rules:
   func-style: off
   arrow-parens: off
+  consistent-return: [error, { treatUndefinedAsUnspecified: true }]
