@@ -9,22 +9,15 @@ const suite = new Benchmark.Suite();
 
 const actions = require("../lib/actions");
 
-const badBundleFixtureRoot = path.dirname(
-  require.resolve("inspectpack-test-fixtures/package.json")
-);
-
-const badBundleFixturePath = require.resolve(
-  "inspectpack-test-fixtures/badBundle.js"
-);
-
-const badBundleFixture = fs.readFileSync(badBundleFixturePath, "utf8");
+const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
+const badBundleFixture = fs.readFileSync(path.join(fixtureRoot, "dist/bad-bundle.js"), "utf8");
 
 const opts = {
   code: badBundleFixture,
   format: "object",
   minified: true,
   gzip: true,
-  root: badBundleFixtureRoot,
+  root: fixtureRoot,
   suspectFiles: true,
   suspectPatterns: true,
   parseFns: {

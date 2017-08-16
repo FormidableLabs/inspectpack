@@ -13,9 +13,7 @@ const sizes = require("../lib/actions/sizes");
 
 const EXTENDED_TIMEOUT = 15000;
 
-const fixtureRoot = path.dirname(require.resolve(
-  "inspectpack-test-fixtures/package.json"
-));
+const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
 
 const basicFixture = readFile("built/basic-lodash-object-expression.js");
