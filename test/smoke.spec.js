@@ -101,7 +101,37 @@ describe("Smoke tests", () => {
     });
   });
 
-  it("analyzes bundle sizes", (done) => {
+  it("analyzes bundle sizes in bad fixture", (done) => {
+    sizes({
+      code: badBundleFixture,
+      format: "object",
+      minified: false,
+      gzip: false
+    }, (err, result) => {
+      finishAsserts(done, err, () => {
+        expect(result).to.have.property("sizes").with.lengthOf(125);
+
+        const codes = result.sizes;
+        expect(codes[0]).to.have.property("id", "0");
+        expect(codes[0]).to.have.property("baseName", "moment/moment.js");
+        expect(codes[0]).to.have.property("type", "code");
+
+        expect(codes[1]).to.have.property("id", "1");
+        expect(codes[1]).to.have.property("fileName", "(webpack)/buildin/module.js");
+        expect(codes[1]).to.have.property("type", "code");
+
+        expect(codes[2]).to.have.property("id", "2");
+        expect(codes[2]).to.have.property("baseName", "(webpack)/buildin/global.js");
+        expect(codes[2]).to.have.property("type", "code");
+
+        expect(codes[124]).to.have.property("id", "124");
+        expect(codes[124]).to.have.property("baseName", "./src/bad-bundle.js");
+        expect(codes[124]).to.have.property("type", "code");
+      });
+    });
+  });
+
+  it("analyzes bundle sizes in basic fixture", (done) => {
     sizes({
       code: basicFixture,
       format: "object",
