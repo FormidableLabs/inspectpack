@@ -1,7 +1,7 @@
 History
 =======
 
-## Unreleased
+## 1.2.2
 
 * Improve module ID comment inference logic.
 * Add `--allow-empty` command flag and internal option for malformed bundles.
