@@ -1,6 +1,13 @@
 History
 =======
 
+## Unreleased
+
+* Improve module ID comment inference logic.
+* Add `--allow-empty` command flag and internal option for malformed bundles.
+* Capture bundle validation errors in callback rather than throwing
+  synchronously.
+
 ## 1.2.1
 
 * Fix size inspection of bundles created with `devtool: eval`. (*[@kkerr1][]*)
