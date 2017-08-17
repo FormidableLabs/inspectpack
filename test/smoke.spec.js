@@ -1,8 +1,8 @@
 "use strict";
 
-const expect = require("chai").expect;
 const fs = require("fs");
 const path = require("path");
+const expect = require("chai").expect;
 
 const duplicates = require("../lib/actions/duplicates");
 const pattern = require("../lib/actions/pattern");
@@ -19,16 +19,7 @@ const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "
 const basicFixture = readFile("built/basic-lodash-object-expression.js");
 const badBundleFixture = readFile("dist/bad-bundle.js");
 
-const checkForErrors = function (done, err, assertion) {
-  if (err) { return void done(err); }
-
-  try {
-    assertion();
-    done();
-  } catch (e) {
-    done(e);
-  }
-};
+const finishAsserts = require("./util").finishAsserts;
 
 describe("Smoke tests", () => {
   before(function () {
@@ -42,7 +33,7 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      checkForErrors(done, err, () => {
+      finishAsserts(done, err, () => {
         expect(result).to.have.deep.property("meta.numFilesWithDuplicates", 1);
       });
     });
@@ -56,7 +47,7 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      checkForErrors(done, err, () => {
+      finishAsserts(done, err, () => {
         expect(result).to.have.deep.property("meta.numMatches", 2);
       });
     });
@@ -75,7 +66,7 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      checkForErrors(done, err, () => {
+      finishAsserts(done, err, () => {
         expect(result).to.have.deep.property("meta.numMatches", 1);
       });
     });
@@ -90,7 +81,7 @@ describe("Smoke tests", () => {
       gzip: false
 
     }, (err, result) => {
-      checkForErrors(done, err, () => {
+      finishAsserts(done, err, () => {
         expect(result).to.have.deep.property("meta.numMatches", 5);
       });
     });
@@ -104,7 +95,7 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      checkForErrors(done, err, () => {
+      finishAsserts(done, err, () => {
         expect(result).to.have.property("versions");
       });
     });
@@ -117,7 +108,7 @@ describe("Smoke tests", () => {
       minified: false,
       gzip: false
     }, (err, result) => {
-      checkForErrors(done, err, () => {
+      finishAsserts(done, err, () => {
         expect(result).to.have.property("sizes").with.lengthOf(4);
       });
     });

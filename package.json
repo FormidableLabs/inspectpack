@@ -28,6 +28,7 @@
     "babel-traverse": "^6.7.6",
     "babel-types": "^6.7.2",
     "babylon": "^6.7.0",
+    "formidable-playbook": "^0.1.0",
     "lodash": "^4.6.1",
     "mkdirp": "^0.5.1",
     "pify": "^2.3.0",
