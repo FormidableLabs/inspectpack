@@ -110,6 +110,23 @@ describe("Smoke tests", () => {
     }, (err, result) => {
       finishAsserts(done, err, () => {
         expect(result).to.have.property("sizes").with.lengthOf(4);
+
+        const codes = result.sizes;
+        expect(codes[0]).to.have.property("id", "1");
+        expect(codes[0]).to.have.property("fileName", "(webpack)/buildin/global.js");
+        expect(codes[0]).to.have.property("type", "code");
+
+        expect(codes[1]).to.have.property("id", "15");
+        expect(codes[1]).to.have.property("baseName", "(webpack)/buildin/module.js");
+        expect(codes[1]).to.have.property("type", "code");
+
+        expect(codes[2]).to.have.property("id", "36");
+        expect(codes[2]).to.have.property("baseName", "lodash/lodash.js");
+        expect(codes[2]).to.have.property("type", "code");
+
+        expect(codes[3]).to.have.property("id", "39");
+        expect(codes[3]).to.have.property("baseName", "./demo/index.js");
+        expect(codes[3]).to.have.property("type", "code");
       });
     });
   });

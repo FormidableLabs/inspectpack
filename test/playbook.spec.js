@@ -77,5 +77,50 @@ describe("playbook", () => {
     });
   });
 
+  it("allows empty bundles with flag"); // TODO: IMPLEMENT
+
+  describe("dll / shared libs", () => {
+    it.skip("parses shared libraries", (done) => {
+      sizes({
+        code: fixtures.sharedLibs.lib,
+        format: "object",
+        minified: false,
+        gzip: false
+      }, (err, result) => {
+        console.log(result);
+        finishAsserts(done, err, () => {
+          expect(result).to.have.property("sizes").that.has.lengthOf(3);
+
+          const codes = result.sizes;
+          expect(codes[0]).to.have.property("id", "0");
+          expect(codes[0]).to.have.property("fileName", "dll lib");
+          expect(codes[0]).to.have.property("type", "code");
+
+          expect(codes[1]).to.have.property("id", "1");
+          expect(codes[1]).to.have.property("fileName", "./lib.js");
+          expect(codes[1]).to.have.property("type", "code");
+
+          expect(codes[2]).to.have.property("id", "2");
+          expect(codes[2]).to.have.property("fileName", "./foo.js");
+          expect(codes[2]).to.have.property("type", "code");
+        });
+      });
+    });
+
+    it("parses consuming bundles", (done) => {
+      sizes({
+        code: fixtures.sharedLibs.app1,
+        format: "object",
+        minified: false,
+        gzip: false
+      }, (err, result) => {
+        console.log(err, result);
+
+        done();
+      });
+    });
+
+  });
+
 
 });
