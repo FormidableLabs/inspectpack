@@ -77,7 +77,19 @@ describe("playbook", () => {
     });
   });
 
-  it("allows empty bundles with flag"); // TODO: IMPLEMENT
+  it("allows empty bundles with flag", (done) => {
+    sizes({
+      code: fixtures.sourceMaps.app1,
+      allowEmpty: true,
+      format: "object",
+      minified: false,
+      gzip: false
+    }, (err, result) => {
+      finishAsserts(done, err, () => {
+        expect(result).to.have.property("sizes").that.has.lengthOf(0);
+      });
+    });
+  });
 
   describe("dll / shared libs", () => {
     it("parses shared libraries", (done) => {
