@@ -11,17 +11,13 @@ const sizes = require("../lib/actions/sizes");
 
 const finishAsserts = require("./util").finishAsserts;
 
-const EXTENDED_TIMEOUT = 15000;
-
 const fixtureRoot = path.dirname(require.resolve("formidable-playbook/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
 
 describe("Playbook", () => {
   let fixtures;
 
-  before(function () {
-    this.timeout(EXTENDED_TIMEOUT);
-
+  before(() => {
     fixtures = {
       codeSplittingEnsure: [
         "0",

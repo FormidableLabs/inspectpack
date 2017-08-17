@@ -11,8 +11,6 @@ const files = require("../lib/actions/files");
 const versions = require("../lib/actions/versions");
 const sizes = require("../lib/actions/sizes");
 
-const EXTENDED_TIMEOUT = 15000;
-
 const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
 
@@ -22,10 +20,6 @@ const badBundleFixture = readFile("dist/bad-bundle.js");
 const finishAsserts = require("./util").finishAsserts;
 
 describe("Smoke tests", () => {
-  before(function () {
-    this.timeout(EXTENDED_TIMEOUT);
-  });
-
   it("analyzes duplicates", (done) => {
     duplicates({
       code: badBundleFixture,
