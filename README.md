@@ -35,6 +35,7 @@ Options:
   --minified, -m      Calculate / display minified byte sizes              [boolean] [default: true]
   --gzip, -g          Calculate / display minified + gzipped byte size (implies `--minified`)
                                                                            [boolean] [default: true]
+  --allow-empty       Allow unparseable / empty bundles                   [boolean] [default: false]
   --pattern, -p       Regular expression string(s) to match on                 [array] [default: []]
   --path              Path to input file(s)                                    [array] [default: []]
   --suspect-patterns  Known 'suspicious' patterns for `--action=pattern`                   [boolean]
