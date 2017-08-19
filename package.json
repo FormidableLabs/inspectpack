@@ -32,7 +32,7 @@
     "lodash": "^4.6.1",
     "mkdirp": "^0.5.1",
     "pify": "^2.3.0",
-    "uglify-js": "^2.6.2",
+    "uglify-es": "^3.0.28",
     "workerpool": "^2.2.1",
     "yargs": "^4.3.1"
   },
