@@ -1,6 +1,10 @@
 History
 =======
 
+## Unreleased
+
+* Fix over-truncating `sourceMappingUrl` comment removal.
+
 ## 1.2.2
 
 * Improve module ID comment inference logic.
