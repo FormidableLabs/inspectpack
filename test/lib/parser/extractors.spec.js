@@ -22,4 +22,10 @@ describe("lib/parser/extractors", () => {
       expect(wrapped("!*** ./~/foo.js ***!")).to.eql("./~/foo.js");
     });
   });
+
+  describe("#getCode", () => {
+    it("handles empty code");
+    it("removes inline source mapping comments");
+    it("preserves code after source mapping comments");
+  });
 });
