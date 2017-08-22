@@ -11,8 +11,8 @@ const Compressor = require("../../../lib/utils/compressor");
 
 const EMPTY_SIZES = {
   full: 0,
-  min: '--',
-  minGz: '--'
+  min: "--",
+  minGz: "--"
 };
 const EMPTY_SIZES_GZ = {
   full: 0,
@@ -47,7 +47,7 @@ describe("lib/utils/compressor", () => {
             full: 4
           }));
         })
-      ])
+      ]);
     });
 
     it("handles basic bundles", () => {
@@ -80,7 +80,7 @@ describe("lib/utils/compressor", () => {
         source: "**SYNTAX_ERROR**",
         minified: true, gzip: true
       }).then(sizes => {
-        throw new Error("Expected failure. Instead got: " + JSON.stringify(sizes));
+        throw new Error(`Expected failure. Instead got: ${JSON.stringify(sizes)}`);
       }).catch(err => {
         expect(err).to.have.property("message", "Unexpected token: operator (**)");
       });
@@ -94,7 +94,8 @@ describe("lib/utils/compressor", () => {
 a=(function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return UPDATE_LOCATION; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a",
+function() { return UPDATE_LOCATION; });
 var UPDATE_LOCATION = "@angular-redux/router::UPDATE_LOCATION";
 //# sourceMappingURL=actions.js.map
 

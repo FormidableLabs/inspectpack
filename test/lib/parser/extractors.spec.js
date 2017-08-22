@@ -24,7 +24,7 @@ describe("lib/parser/extractors", () => {
     });
   });
 
-  describe.only("#getCode", () => {
+  describe("#getCode", () => {
     const getCode = extractors.getCode;
     const wrapped = (value) => getCode({
       start: 0, end: value.length
@@ -58,8 +58,18 @@ var foo = 'foo';
 
 var bar = 'bar';
       `).trim()).to.equal("var foo = 'foo';\nvar bar = 'bar';");
+
+      expect(wrapped(`
+var foo = 'foo';
+//# sourceMappingURL=foo.js.map
+
+var bar = 'bar';
+//# sourceMappingURL=bar.js.map
+
+var baz = 'baz';
+      `).trim()).to.equal("var foo = 'foo';\nvar bar = 'bar';\nvar baz = 'baz';");
     });
 
-    it("extracts webpack eval source map"); // TODO: GET SAMPLE
+    it("extracts webpack eval source map"); // TODO: Find example.
   });
 });
