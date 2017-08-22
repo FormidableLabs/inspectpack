@@ -1,7 +1,7 @@
 History
 =======
 
-## Unreleased
+## 1.2.3
 
 * Fix over-truncating `sourceMappingUrl` comment removal.
 
