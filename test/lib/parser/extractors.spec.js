@@ -50,6 +50,16 @@ var foo = 'foo';
       `).trim()).to.equal("var foo = 'foo';");
     });
 
-    it("preserves code after source mapping comments");
+    // Regression Test: https://github.com/FormidableLabs/webpack-dashboard/issues/182
+    it("preserves code after source mapping comments", () => {
+      expect(wrapped(`
+var foo = 'foo';
+//# sourceMappingURL=foo.js.map
+
+var bar = 'bar';
+      `).trim()).to.equal("var foo = 'foo';\nvar bar = 'bar';");
+    });
+
+    it("extracts webpack eval source map"); // TODO: GET SAMPLE
   });
 });
