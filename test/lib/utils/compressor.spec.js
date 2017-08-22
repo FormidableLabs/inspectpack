@@ -20,7 +20,7 @@ const EMPTY_SIZES_GZ = {
   minGz: 20 // (Cost of empty gzipping)
 };
 
-describe.only("lib/utils/compressor", () => {
+describe("lib/utils/compressor", () => {
   describe("#getFileName", () => {
     const create = (opts) => new Compressor(opts);
 

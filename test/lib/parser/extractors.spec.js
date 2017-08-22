@@ -2,6 +2,7 @@
 
 const expect = require("chai").expect;
 const extractors = require("../../../lib/parser/extractors");
+const moduleTypes = require("../../../lib/models/module-types");
 
 describe("lib/parser/extractors", () => {
   describe("#getFileName", () => {
@@ -23,9 +24,32 @@ describe("lib/parser/extractors", () => {
     });
   });
 
-  describe("#getCode", () => {
-    it("handles empty code");
-    it("removes inline source mapping comments");
+  describe.only("#getCode", () => {
+    const getCode = extractors.getCode;
+    const wrapped = (value) => getCode({
+      start: 0, end: value.length
+    }, moduleTypes.CODE, value);
+
+    it("handles empty code", () => {
+      expect(wrapped("")).to.equal("");
+      expect(wrapped("    ")).to.equal("    ");
+    });
+
+    it("handles basic code", () => {
+      const val = `
+var foo = 'foo';
+var bar = 'bar';
+`;
+      expect(wrapped(val)).to.equal(val);
+    });
+
+    it("removes inline source mapping comments", () => {
+      expect(wrapped(`
+var foo = 'foo';
+//# sourceMappingURL=foo.js.map
+      `).trim()).to.equal("var foo = 'foo';");
+    });
+
     it("preserves code after source mapping comments");
   });
 });
