@@ -1,9 +1,20 @@
 History
 =======
 
+## 1.3.1
+
+* Version bump to essentially `v1.2.3` as the complete most recent version.
+* Also add `.npmignore` to hone down files published.
+
+## 1.3.0
+
+* Switch to `uglify-es` for minification estimates.
+* **Note**: Missing `v1.2.3` changes.
+
 ## 1.2.3
 
 * Fix over-truncating `sourceMappingUrl` comment removal.
+* **Note**: Includes `v1.3.0` changes.
 
 ## 1.2.2
 
