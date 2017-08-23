@@ -1,6 +1,10 @@
 History
 =======
 
+## 1.3.2
+
+* Move `formidable-playbook` to `devDependencies`.
+
 ## 1.3.1
 
 * Version bump to essentially `v1.2.3` as the complete most recent version.
