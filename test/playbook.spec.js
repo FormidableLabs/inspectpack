@@ -87,6 +87,26 @@ describe("Playbook", () => {
     });
   });
 
+  describe("code splitting ensure", () => {
+    it("parses all bundle parts", (done) => {
+      sizes({
+        code: fixtures.codeSplittingEnsure[0],
+        format: "object",
+        minified: false,
+        gzip: false
+      }, (err, result) => {
+        finishAsserts(done, err, () => {
+          expect(result).to.have.property("sizes").that.has.lengthOf(1);
+
+          const codes = result.sizes;
+          expect(codes[0]).to.have.property("id", "3");
+          expect(codes[0]).to.have.property("fileName", "./foo.js");
+          expect(codes[0]).to.have.property("type", "code");
+        });
+      });
+    });
+  });
+
   describe("dll / shared libs", () => {
     it("parses shared libraries", (done) => {
       sizes({
