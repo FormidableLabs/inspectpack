@@ -6,10 +6,9 @@
 const fs = require("fs");
 const path = require("path");
 const expect = require("chai").expect;
+const pify = require("pify");
 
-const sizes = require("../lib/actions/sizes");
-
-const finishAsserts = require("./util").finishAsserts;
+const sizes = pify(require("../lib/actions/sizes"));
 
 const fixtureRoot = path.dirname(require.resolve("formidable-playbook/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
@@ -57,65 +56,65 @@ describe("Playbook", () => {
     };
   });
 
-  it("throws on no code found / minified / no pathinfo", (done) => {
+  it("throws on no code found / minified / no pathinfo", () =>
     sizes({
       code: fixtures.sourceMaps.app1,
       format: "object",
       minified: false,
       gzip: false
-    }, (err) => {
-      expect(err)
-        .to.be.ok.and
-        .to.have.property("message")
-          .that.contains("No code sections found");
+    })
+      .then(() => {
+        throw new Error("Should have errored");
+      })
+      .catch((err) => {
+        expect(err)
+          .to.be.ok.and
+          .to.have.property("message")
+            .that.contains("No code sections found");
+      })
+  );
 
-      done();
-    });
-  });
-
-  it("allows empty bundles with flag", (done) => {
+  it("allows empty bundles with flag", () =>
     sizes({
       code: fixtures.sourceMaps.app1,
       allowEmpty: true,
       format: "object",
       minified: false,
       gzip: false
-    }, (err, result) => {
-      finishAsserts(done, err, () => {
+    })
+      .then((result) => {
         expect(result).to.have.property("sizes").that.has.lengthOf(0);
-      });
-    });
-  });
+      })
+  );
 
   describe("code splitting ensure", () => {
-    it("parses all bundle parts", (done) => {
+    it("parses all bundle parts", () =>
       sizes({
         code: fixtures.codeSplittingEnsure[0],
         format: "object",
         minified: false,
         gzip: false
-      }, (err, result) => {
-        finishAsserts(done, err, () => {
+      })
+        .then((result) => {
           expect(result).to.have.property("sizes").that.has.lengthOf(1);
 
           const codes = result.sizes;
           expect(codes[0]).to.have.property("id", "3");
           expect(codes[0]).to.have.property("fileName", "./foo.js");
           expect(codes[0]).to.have.property("type", "code");
-        });
-      });
-    });
+        })
+    );
   });
 
   describe("dll / shared libs", () => {
-    it("parses shared libraries", (done) => {
+    it("parses shared libraries", () =>
       sizes({
         code: fixtures.sharedLibs.lib,
         format: "object",
         minified: false,
         gzip: false
-      }, (err, result) => {
-        finishAsserts(done, err, () => {
+      })
+        .then((result) => {
           expect(result).to.have.property("sizes").that.has.lengthOf(3);
 
           const codes = result.sizes;
@@ -130,21 +129,20 @@ describe("Playbook", () => {
           expect(codes[2]).to.have.property("id", "2");
           expect(codes[2]).to.have.property("fileName", "./foo.js");
           expect(codes[2]).to.have.property("type", "code");
-        });
-      });
-    });
+        })
+    );
 
     // TODO(RYAN): Update fileName for delegated file reference?
     // - https://github.com/FormidableLabs/inspectpack/issues/36
     // - https://github.com/FormidableLabs/inspectpack/issues/37
-    it("parses consuming bundles", (done) => {
+    it("parses consuming bundles", () =>
       sizes({
         code: fixtures.sharedLibs.app1,
         format: "object",
         minified: false,
         gzip: false
-      }, (err, result) => {
-        finishAsserts(done, err, () => {
+      })
+        .then((result) => {
           expect(result).to.have.property("sizes").that.has.lengthOf(3);
 
           const codes = result.sizes;
@@ -160,8 +158,8 @@ describe("Playbook", () => {
           expect(codes[2]).to.have.property("id", "2");
           expect(codes[2]).to.have.property("fileName", "./app1.js");
           expect(codes[2]).to.have.property("type", "code");
-        });
-      });
-    });
+        })
+    );
+
   });
 });
