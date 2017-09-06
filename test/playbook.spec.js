@@ -88,22 +88,56 @@ describe("Playbook", () => {
   );
 
   describe("code splitting ensure", () => {
-    it("parses all bundle parts", () =>
-      sizes({
-        code: fixtures.codeSplittingEnsure[0],
+    it("parses all bundle parts", () => {
+      const ensureSizes = (name) => sizes({
+        code: fixtures.codeSplittingEnsure[name],
         format: "object",
         minified: false,
         gzip: false
-      })
-        .then((result) => {
-          expect(result).to.have.property("sizes").that.has.lengthOf(1);
+      });
 
-          const codes = result.sizes;
-          expect(codes[0]).to.have.property("id", "3");
-          expect(codes[0]).to.have.property("fileName", "./foo.js");
-          expect(codes[0]).to.have.property("type", "code");
-        })
-    );
+      return Promise.all([
+        ensureSizes("0")
+          .then((result) => {
+            expect(result).to.have.property("sizes").that.has.lengthOf(1);
+
+            const codes = result.sizes;
+            expect(codes[0]).to.have.property("id", "3");
+            expect(codes[0]).to.have.property("fileName", "./foo.js");
+            expect(codes[0]).to.have.property("type", "code");
+          }),
+
+        ensureSizes("1")
+          .then((result) => {
+            expect(result).to.have.property("sizes").that.has.lengthOf(1);
+
+            const codes = result.sizes;
+            expect(codes[0]).to.have.property("id", "1");
+            expect(codes[0]).to.have.property("fileName", "./app2.js");
+            expect(codes[0]).to.have.property("type", "code");
+          }),
+
+        ensureSizes("2")
+          .then((result) => {
+            expect(result).to.have.property("sizes").that.has.lengthOf(1);
+
+            const codes = result.sizes;
+            expect(codes[0]).to.have.property("id", "0");
+            expect(codes[0]).to.have.property("fileName", "./app1.js");
+            expect(codes[0]).to.have.property("type", "code");
+          }),
+
+        ensureSizes("entry")
+          .then((result) => {
+            expect(result).to.have.property("sizes").that.has.lengthOf(1);
+
+            const codes = result.sizes;
+            expect(codes[0]).to.have.property("id", "2");
+            expect(codes[0]).to.have.property("fileName").that.contains("entry.js");
+            expect(codes[0]).to.have.property("type", "code");
+          })
+      ]);
+    });
   });
 
   describe("dll / shared libs", () => {
