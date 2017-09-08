@@ -33,6 +33,12 @@ describe("Playbook", () => {
       ].reduce((m, k) => Object.assign(m, {
         [k]: readFile(`examples/frontend/webpack-code-splitting/dist/js/${k}.js`)
       }), {}),
+      scopeHoisting: [
+        "app3",
+        "app3.nohoist"
+      ].reduce((m, k) => Object.assign(m, {
+        [k]: readFile(`examples/frontend/webpack-scope-hoisting/dist/js/${k}.js`)
+      }), {}),
       sharedLibs: [
         "app1",
         "app2",
@@ -138,6 +144,51 @@ describe("Playbook", () => {
           })
       ]);
     });
+  });
+
+  describe.only("scope hoisting", () => {
+    it("parses all bundle parts", () =>
+      Promise.all([
+        sizes({
+          code: fixtures.scopeHoisting.app3,
+          format: "object",
+          minified: false,
+          gzip: false
+        }),
+
+        sizes({
+          code: fixtures.scopeHoisting["app3.nohoist"],
+          format: "object",
+          minified: false,
+          gzip: false
+        }),
+      ])
+
+        .then((results) => {
+          const hoist = results[0];
+          const nohoist = results[1];
+          let codes;
+
+          // Baseline (nohoist)
+          expect(nohoist).to.have.property("sizes").that.has.lengthOf(4);
+
+          codes = nohoist.sizes;
+          expect(codes[0]).to.have.property("fileName", "./app3.js");
+          expect(codes[1]).to.have.property("fileName", "./util-2.js");
+          expect(codes[2]).to.have.property("fileName", "./util-1.js");
+          expect(codes[3]).to.have.property("fileName", "./util.js");
+
+          // TODO: HERE - Update for scope hoisting.
+          // - filename " + 1 modules"
+          // - ???
+          expect(hoist).to.have.property("sizes").that.has.lengthOf(4);
+
+          codes = hoist.sizes;
+          expect(codes[0]).to.have.property("id", "0");
+          expect(codes[0]).to.have.property("fileName", "./app3.js");
+          expect(codes[0]).to.have.property("type", "code");
+        })
+    );
   });
 
   describe("dll / shared libs", () => {
