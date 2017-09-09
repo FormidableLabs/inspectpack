@@ -2,6 +2,8 @@
 
 const fs = require("fs");
 const path = require("path");
+const mkdirp = require("mkdirp");
+const rimraf = require("rimraf");
 const expect = require("chai").expect;
 
 const duplicates = require("../lib/actions/duplicates");
@@ -11,11 +13,15 @@ const files = require("../lib/actions/files");
 const versions = require("../lib/actions/versions");
 const sizes = require("../lib/actions/sizes");
 
+const InspectpackDaemon = require("../lib/daemon");
+
 const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
 
 const basicFixture = readFile("built/basic-lodash-object-expression.js");
 const badBundleFixture = readFile("dist/bad-bundle.js");
+
+const testOutputDir = path.join(process.cwd(), "test-output");
 
 const finishAsserts = require("./util").finishAsserts;
 
@@ -151,6 +157,51 @@ describe("Smoke tests", () => {
         expect(codes[3]).to.have.property("id", "39");
         expect(codes[3]).to.have.property("baseName", "./demo/index.js");
         expect(codes[3]).to.have.property("type", "code");
+      });
+    });
+  });
+
+  describe("daemon", () => {
+    beforeEach(() => mkdirp(testOutputDir));
+    afterEach(() => rimraf.sync(testOutputDir));
+
+    it("runs actions in the daemon with a cache", () => {
+      const NS_PER_SEC = 1e9;
+
+      const daemon = InspectpackDaemon.create({
+        cacheFilename: path.join(
+          testOutputDir,
+          ".inspectpack-test-cache.db"
+        )
+      });
+
+      const coldStart = process.hrtime();
+      let coldTime;
+      let hotStart;
+      let hotTime;
+
+      return daemon.sizes({
+        code: badBundleFixture,
+        format: "object",
+        minified: false,
+        gzip: false
+      }).then(() => {
+        const [seconds, nanoseconds] = process.hrtime(coldStart);
+        coldTime = seconds * NS_PER_SEC + nanoseconds;
+        hotStart = process.hrtime();
+        return daemon.sizes({
+          code: badBundleFixture,
+          format: "object",
+          minified: false,
+          gzip: false
+        });
+      }).then(() => {
+        const [seconds, nanoseconds] = process.hrtime(hotStart);
+        hotTime = seconds * NS_PER_SEC + nanoseconds;
+
+        // Fail if the hot run isn't way faster than the cold run.
+        // This indicates that the cache is failing.
+        expect(hotTime).to.be.lessThan(coldTime / 3);
       });
     });
   });
