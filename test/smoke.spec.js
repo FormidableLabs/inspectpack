@@ -21,7 +21,7 @@ const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "
 const basicFixture = readFile("built/basic-lodash-object-expression.js");
 const badBundleFixture = readFile("dist/bad-bundle.js");
 
-const testOutputDir = path.join(process.cwd(), "test-output");
+const testOutputDir = path.resolve("test-output");
 
 const finishAsserts = require("./util").finishAsserts;
 
@@ -163,7 +163,7 @@ describe("Smoke tests", () => {
 
   describe("daemon", () => {
     beforeEach(() => mkdirp(testOutputDir));
-    afterEach(() => rimraf.sync(testOutputDir));
+    afterEach(done => rimraf(testOutputDir, done));
 
     it("runs actions in the daemon with a cache", () => {
       const NS_PER_SEC = 1e9;
@@ -186,8 +186,8 @@ describe("Smoke tests", () => {
         minified: false,
         gzip: false
       }).then(() => {
-        const [seconds, nanoseconds] = process.hrtime(coldStart);
-        coldTime = seconds * NS_PER_SEC + nanoseconds;
+        const time = process.hrtime(coldStart);
+        coldTime = time[0] * NS_PER_SEC + time[1];
         hotStart = process.hrtime();
         return daemon.sizes({
           code: badBundleFixture,
@@ -196,8 +196,8 @@ describe("Smoke tests", () => {
           gzip: false
         });
       }).then(() => {
-        const [seconds, nanoseconds] = process.hrtime(hotStart);
-        hotTime = seconds * NS_PER_SEC + nanoseconds;
+        const time = process.hrtime(hotStart);
+        hotTime = time[0] * NS_PER_SEC + time[1];
 
         // Fail if the hot run isn't way faster than the cold run.
         // This indicates that the cache is failing.
