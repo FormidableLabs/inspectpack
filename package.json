@@ -28,8 +28,8 @@
     "babel-traverse": "^6.7.6",
     "babel-types": "^6.7.2",
     "babylon": "^6.7.0",
+    "better-sqlite3": "^4.0.2",
     "lodash": "^4.6.1",
-    "mkdirp": "^0.5.1",
     "pify": "^2.3.0",
     "uglify-es": "^3.0.28",
     "workerpool": "^2.2.1",
@@ -50,6 +50,8 @@
     "eslint-plugin-lodash-fp": "^2.1.3",
     "formidable-playbook": "^0.1.0",
     "inspectpack-test-fixtures": "^1.2.0",
-    "mocha": "^3.2.0"
+    "mkdirp": "^0.5.1",
+    "mocha": "^3.2.0",
+    "rimraf": "^2.6.1"
   }
 }
