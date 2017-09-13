@@ -1054,9 +1054,9 @@ form-data@~2.1.1:
     combined-stream "^1.0.5"
     mime-types "^2.1.12"
 
-formidable-playbook@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/formidable-playbook/-/formidable-playbook-0.1.1.tgz#424b6979ca9e18d9bbcbaaeb2b61c52f9c4bd66f"
+formidable-playbook@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/formidable-playbook/-/formidable-playbook-0.1.2.tgz#e6437ae319df20310dae45d5ac778e674e3f531b"
 
 fs.realpath@^1.0.0:
   version "1.0.0"

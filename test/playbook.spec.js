@@ -161,7 +161,7 @@ describe("Playbook", () => {
           format: "object",
           minified: false,
           gzip: false
-        }),
+        })
       ])
 
         .then((results) => {
