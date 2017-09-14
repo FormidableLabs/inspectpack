@@ -16,3 +16,4 @@ build
 coverage
 Procfile
 .lankrc*
+test-output

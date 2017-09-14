@@ -2,6 +2,8 @@
 
 const fs = require("fs");
 const path = require("path");
+const mkdirp = require("mkdirp");
+const rimraf = require("rimraf");
 const expect = require("chai").expect;
 const pify = require("pify");
 
@@ -12,11 +14,14 @@ const files = pify(require("../lib/actions/files"));
 const versions = pify(require("../lib/actions/versions"));
 const sizes = pify(require("../lib/actions/sizes"));
 
+const InspectpackDaemon = require("../lib/daemon");
+
 const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
-
 const basicFixture = readFile("built/basic-lodash-object-expression.js");
 const badBundleFixture = readFile("dist/bad-bundle.js");
+
+const testOutputDir = path.resolve("test-output");
 
 describe("Smoke tests", () => {
   it("analyzes duplicates", () =>
@@ -146,4 +151,50 @@ describe("Smoke tests", () => {
       })
   );
 
+  describe("daemon", () => {
+    beforeEach(() => mkdirp(testOutputDir));
+    afterEach(done => rimraf(testOutputDir, done));
+
+    it("runs actions in the daemon with a cache", () => {
+      const NS_PER_SEC = 1e9;
+
+      const daemon = InspectpackDaemon.create({
+        cacheFilename: path.join(
+          testOutputDir,
+          ".inspectpack-test-cache.db"
+        )
+      });
+
+      const coldStart = process.hrtime();
+      let coldTime;
+      let hotStart;
+      let hotTime;
+
+      return daemon.sizes({
+        code: badBundleFixture,
+        format: "object",
+        minified: false,
+        gzip: false
+      })
+        .then(() => {
+          const time = process.hrtime(coldStart);
+          coldTime = time[0] * NS_PER_SEC + time[1];
+          hotStart = process.hrtime();
+          return daemon.sizes({
+            code: badBundleFixture,
+            format: "object",
+            minified: false,
+            gzip: false
+          });
+        })
+        .then(() => {
+          const time = process.hrtime(hotStart);
+          hotTime = time[0] * NS_PER_SEC + time[1];
+
+          // Fail if the hot run isn't way faster than the cold run.
+          // This indicates that the cache is failing.
+          expect(hotTime).to.be.lessThan(coldTime / 3);
+        });
+    });
+  });
 });

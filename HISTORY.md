@@ -1,6 +1,12 @@
 History
 =======
 
+## 2.0.0
+
+* Use `sqlite` to back the daemon cache
+* Parallelize workers
+* *Breaking*: rename factory methods from `init` to `create`.
+
 ## 1.3.2
 
 * Move `formidable-playbook` to `devDependencies`.
