@@ -169,7 +169,7 @@ describe("Playbook", () => {
           const nohoist = results[1];
 
           const strSort = (a, b) =>
-            a.fileName < b.fileName ? -1 :
+            a.fileName < b.fileName ? -1 : // eslint-disable-line no-nested-ternary
             a.fileName > b.fileName ? 1 :
             0;
 
