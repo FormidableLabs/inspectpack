@@ -187,9 +187,7 @@ describe("Playbook", () => {
           expect(nohoistCodes[3]).to.have.property("id").that.not.equal("0");
           expect(nohoistCodes[3]).to.have.property("fileName", "./util.js");
 
-          // TODO: HERE - Update for scope hoisting.
-          // - filename " + 1 modules"
-          // - ???
+          // Hoisted modules
           expect(hoist).to.have.property("sizes").that.has.lengthOf(4);
 
           const hoistCodes = hoist.sizes;
