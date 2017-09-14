@@ -146,7 +146,7 @@ describe("Playbook", () => {
     });
   });
 
-  describe.only("scope hoisting", () => {
+  describe("scope hoisting", () => {
     it("parses all bundle parts", () =>
       Promise.all([
         sizes({
@@ -167,26 +167,42 @@ describe("Playbook", () => {
         .then((results) => {
           const hoist = results[0];
           const nohoist = results[1];
-          let codes;
+
+          const strSort = (a, b) =>
+            a.fileName < b.fileName ? -1 :
+            a.fileName > b.fileName ? 1 :
+            0;
 
           // Baseline (nohoist)
           expect(nohoist).to.have.property("sizes").that.has.lengthOf(4);
 
-          codes = nohoist.sizes;
-          expect(codes[0]).to.have.property("fileName", "./app3.js");
-          expect(codes[1]).to.have.property("fileName", "./util-2.js");
-          expect(codes[2]).to.have.property("fileName", "./util-1.js");
-          expect(codes[3]).to.have.property("fileName", "./util.js");
+          const nohoistCodes = nohoist.sizes;
+          nohoistCodes.sort(strSort);
+          expect(nohoistCodes[0]).to.have.property("id", "0");
+          expect(nohoistCodes[0]).to.have.property("fileName", "./app3.js");
+          expect(nohoistCodes[1]).to.have.property("id").that.not.equal("0");
+          expect(nohoistCodes[1]).to.have.property("fileName", "./util-1.js");
+          expect(nohoistCodes[2]).to.have.property("id").that.not.equal("0");
+          expect(nohoistCodes[2]).to.have.property("fileName", "./util-2.js");
+          expect(nohoistCodes[3]).to.have.property("id").that.not.equal("0");
+          expect(nohoistCodes[3]).to.have.property("fileName", "./util.js");
 
           // TODO: HERE - Update for scope hoisting.
           // - filename " + 1 modules"
           // - ???
           expect(hoist).to.have.property("sizes").that.has.lengthOf(4);
 
-          codes = hoist.sizes;
-          expect(codes[0]).to.have.property("id", "0");
-          expect(codes[0]).to.have.property("fileName", "./app3.js");
-          expect(codes[0]).to.have.property("type", "code");
+          const hoistCodes = hoist.sizes;
+          hoistCodes.sort(strSort);
+          expect(hoistCodes[0]).to.have.property("id", "0");
+          expect(hoistCodes[0]).to.have.property("fileName", "./app3.js");
+          expect(hoistCodes[0]).to.have.property("type", "code");
+          expect(hoistCodes[1]).to.have.property("id", "0");
+          expect(hoistCodes[1]).to.have.property("fileName", "./util-1.js");
+          expect(hoistCodes[2]).to.have.property("id", "0");
+          expect(hoistCodes[2]).to.have.property("fileName", "./util-2.js");
+          expect(hoistCodes[3]).to.have.property("id", "0");
+          expect(hoistCodes[3]).to.have.property("fileName", "./util.js");
         })
     );
   });
