@@ -14,3 +14,4 @@ rules:
   no-unused-expressions: off
   max-nested-callbacks: off
   no-invalid-this: off
+  max-statements: off
