@@ -18,8 +18,8 @@ const InspectpackDaemon = require("../lib/daemon");
 
 const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
-const basicFixture = readFile("built/basic-lodash-object-expression.js");
 const fixtures = {
+  basic: readFile("built/basic-lodash-object-expression.js"),
   badBundle: readFile("dist/bad-bundle.js"),
   emptyManifest: readFile("dist/empty-manifest.js")
 };
@@ -54,7 +54,7 @@ describe("Smoke tests", () => {
 
   it("analyzes suspicious parses", () =>
     parse({
-      code: basicFixture,
+      code: fixtures.basic,
       parseFns: {
         TEST_PARSE(src) {
           return src.indexOf("oh hai mark") !== -1;
@@ -127,7 +127,7 @@ describe("Smoke tests", () => {
 
   it("analyzes bundle sizes in basic fixture", () =>
     sizes({
-      code: basicFixture,
+      code: fixtures.basic,
       format: "object",
       minified: false,
       gzip: false
@@ -151,6 +151,18 @@ describe("Smoke tests", () => {
         expect(codes[3]).to.have.property("id", "39");
         expect(codes[3]).to.have.property("baseName", "./demo/index.js");
         expect(codes[3]).to.have.property("type", "code");
+      })
+  );
+
+  it("handles empty manifest pattern", () =>
+    sizes({
+      code: fixtures.emptyManifest,
+      format: "object",
+      minified: false,
+      gzip: false
+    })
+      .then((result) => {
+        expect(result).to.have.property("sizes").with.lengthOf(0);
       })
   );
 
