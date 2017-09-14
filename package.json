@@ -18,8 +18,8 @@
   },
   "scripts": {
     "benchmark": "node benchmarks/index.js",
-    "lint-server": "eslint --color lib bin",
-    "lint-test": "eslint --color 'test/**/*.spec.js'",
+    "lint-server": "eslint lib bin",
+    "lint-test": "eslint test",
     "lint": "npm run lint-server && npm run lint-test",
     "check": "npm run lint && npm run test && npm run benchmark",
     "test": "mocha 'test/**/*.spec.js'"

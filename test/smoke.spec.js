@@ -19,14 +19,17 @@ const InspectpackDaemon = require("../lib/daemon");
 const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
 const basicFixture = readFile("built/basic-lodash-object-expression.js");
-const badBundleFixture = readFile("dist/bad-bundle.js");
+const fixtures = {
+  badBundle: readFile("dist/bad-bundle.js"),
+  emptyManifest: readFile("dist/empty-manifest.js")
+};
 
 const testOutputDir = path.resolve("test-output");
 
 describe("Smoke tests", () => {
   it("analyzes duplicates", () =>
     duplicates({
-      code: badBundleFixture,
+      code: fixtures.badBundle,
       format: "object",
       minified: false,
       gzip: false
@@ -38,7 +41,7 @@ describe("Smoke tests", () => {
 
   it("analyzes suspicious patterns", () =>
     pattern({
-      code: badBundleFixture,
+      code: fixtures.badBundle,
       suspectPatterns: true,
       format: "object",
       minified: false,
@@ -69,7 +72,7 @@ describe("Smoke tests", () => {
 
   it("analyzes suspicious files", () =>
     files({
-      code: badBundleFixture,
+      code: fixtures.badBundle,
       suspectFiles: true,
       format: "object",
       minified: false,
@@ -82,7 +85,7 @@ describe("Smoke tests", () => {
 
   it("analyzes version skews", () =>
     versions({
-      code: badBundleFixture,
+      code: fixtures.badBundle,
       root: fixtureRoot,
       format: "object",
       minified: false,
@@ -95,7 +98,7 @@ describe("Smoke tests", () => {
 
   it("analyzes bundle sizes in bad fixture", () =>
     sizes({
-      code: badBundleFixture,
+      code: fixtures.badBundle,
       format: "object",
       minified: false,
       gzip: false
@@ -171,7 +174,7 @@ describe("Smoke tests", () => {
       let hotTime;
 
       return daemon.sizes({
-        code: badBundleFixture,
+        code: fixtures.badBundle,
         format: "object",
         minified: false,
         gzip: false
@@ -181,7 +184,7 @@ describe("Smoke tests", () => {
           coldTime = time[0] * NS_PER_SEC + time[1];
           hotStart = process.hrtime();
           return daemon.sizes({
-            code: badBundleFixture,
+            code: fixtures.badBundle,
             format: "object",
             minified: false,
             gzip: false
