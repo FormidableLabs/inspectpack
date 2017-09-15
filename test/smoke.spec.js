@@ -154,7 +154,10 @@ describe("Smoke tests", () => {
       })
   );
 
-  it("handles empty manifest pattern", () =>
+  // Regression test:
+  // `Webpack empty manifest file produces "Error: No code sections found" exception.`
+  // https://github.com/FormidableLabs/webpack-dashboard/issues/189
+  it.only("handles empty manifest pattern", () =>
     sizes({
       code: fixtures.emptyManifest,
       format: "object",
