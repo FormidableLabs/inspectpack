@@ -8,5 +8,4 @@ plugins:
 
 rules:
   func-style: off
-  arrow-parens: off
   consistent-return: [error, { treatUndefinedAsUnspecified: true }]
