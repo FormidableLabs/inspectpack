@@ -1,6 +1,12 @@
 History
 =======
 
+## 2.1.0
+
+* Better parsing of bundle AST. (*[@tptee][]*)
+* Handle empty manifest. (*[@tptee][]*)
+* Handle `ModuleConcatenationPlugin` code sections.
+
 ## 2.0.0
 
 * Use `sqlite` to back the daemon cache
@@ -83,3 +89,4 @@ History
 [@kkerr1]: https://github.com/kkerr1
 [@rgerstenberger]: https://github.com/rgerstenberger
 [@ryan-roemer]: https://github.com/ryan-roemer
+[@tptee]: https://github.com/kkerr1
