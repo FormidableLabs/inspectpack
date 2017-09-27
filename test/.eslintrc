@@ -8,8 +8,6 @@ plugins:
   - lodash-fp
 
 rules:
-  func-style: off
-  arrow-parens: off
   no-magic-numbers: off
   no-unused-expressions: off
   max-nested-callbacks: off

@@ -28,21 +28,21 @@ describe("lib/utils/compressor", () => {
       const comp = create();
 
       return Promise.all([
-        comp.getSizes({ source: "" }).then(sizes => {
+        comp.getSizes({ source: "" }).then((sizes) => {
           expect(sizes).to.eql(EMPTY_SIZES);
         }),
 
-        comp.getSizes({ source: "", minified: true, gzip: true }).then(sizes => {
+        comp.getSizes({ source: "", minified: true, gzip: true }).then((sizes) => {
           expect(sizes).to.eql(EMPTY_SIZES_GZ);
         }),
 
-        comp.getSizes({ source: "    " }).then(sizes => {
+        comp.getSizes({ source: "    " }).then((sizes) => {
           expect(sizes).to.eql(Object.assign({}, EMPTY_SIZES, {
             full: 4
           }));
         }),
 
-        comp.getSizes({ source: "    ", minified: true, gzip: true }).then(sizes => {
+        comp.getSizes({ source: "    ", minified: true, gzip: true }).then((sizes) => {
           expect(sizes).to.eql(Object.assign({}, EMPTY_SIZES_GZ, {
             full: 4
           }));
@@ -56,7 +56,7 @@ describe("lib/utils/compressor", () => {
       return Promise.all([
         comp.getSizes({
           source: "const foo = () => 'foo';"
-        }).then(sizes => {
+        }).then((sizes) => {
           expect(sizes).to.eql(Object.assign({}, EMPTY_SIZES, {
             full: 24
           }));
@@ -65,7 +65,7 @@ describe("lib/utils/compressor", () => {
         comp.getSizes({
           source: "const foo = () => 'foo';",
           minified: true, gzip: true
-        }).then(sizes => {
+        }).then((sizes) => {
           expect(sizes).to.eql({
             full: 24,
             min: 20,
@@ -79,9 +79,9 @@ describe("lib/utils/compressor", () => {
       return create().getSizes({
         source: "**SYNTAX_ERROR**",
         minified: true, gzip: true
-      }).then(sizes => {
+      }).then((sizes) => {
         throw new Error(`Expected failure. Instead got: ${JSON.stringify(sizes)}`);
-      }).catch(err => {
+      }).catch((err) => {
         expect(err).to.have.property("message", "Unexpected token: operator (**)");
       });
     });
@@ -102,7 +102,7 @@ var UPDATE_LOCATION = "@angular-redux/router::UPDATE_LOCATION";
 /***/ })
 `,
         minified: true, gzip: true
-      }).then(sizes => {
+      }).then((sizes) => {
         expect(sizes).to.eql({
           full: 310,
           min: 111,
