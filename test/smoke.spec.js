@@ -199,9 +199,7 @@ describe("Smoke tests", () => {
 
     it("runs actions faster in the daemon with a cache", () => {
       const daemon = InspectpackDaemon.create({
-        cache: Cache.create({
-          filename: path.join(testOutputDir, ".inspectpack-test-cache.db")
-        })
+        cacheFilename: path.join(testOutputDir, ".inspectpack-test-cache.db")
       });
 
       const cache = daemon._cache;
