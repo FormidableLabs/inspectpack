@@ -21,6 +21,8 @@ const sizes = pify(require("../lib/actions/sizes"));
 
 const InspectpackDaemon = require("../lib/daemon");
 const Cache = require("../lib/utils/cache");
+const NoopCache = Cache.NoopCache;
+const SqliteCache = Cache.SqliteCache;
 
 const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
@@ -187,7 +189,7 @@ describe("Smoke tests", () => {
       })
   );
 
-  describe.only("daemon", () => {
+  describe("daemon", () => {
     beforeEach(function () {
       this.timeout(20000); // Extended timeout.
       return mkdirp(testOutputDir);
@@ -197,17 +199,16 @@ describe("Smoke tests", () => {
 
     it("runs actions faster in the daemon with a cache", () => {
       const daemon = InspectpackDaemon.create({
-        cacheFilename: path.join(
-          testOutputDir,
-          ".inspectpack-test-cache.db"
-        )
+        cache: Cache.create({
+          filename: path.join(testOutputDir, ".inspectpack-test-cache.db")
+        })
       });
 
       const cache = daemon._cache;
       sandbox.spy(cache, "get");
 
       // First verify CI environment _did_ install cache libs.
-      expect(cache).to.be.an.instanceOf(Cache._classes.SqliteCache);
+      expect(cache).to.be.an.instanceOf(SqliteCache);
 
       const coldStart = process.hrtime();
       let coldTime;
@@ -267,13 +268,13 @@ describe("Smoke tests", () => {
 
     it("runs actions correctly in the daemon without a cache", () => {
       const daemon = InspectpackDaemon.create({
-        cache: Cache._classes.NoopCache.create()
+        cache: NoopCache.create()
       });
       const cache = daemon._cache;
       sandbox.spy(cache, "get");
 
       // Verify empty cache.
-      expect(cache).to.be.an.instanceOf(Cache._classes.NoopCache);
+      expect(cache).to.be.an.instanceOf(NoopCache);
 
       return daemon.sizes({
         code: fixtures.badBundle,
