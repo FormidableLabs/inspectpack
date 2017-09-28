@@ -272,6 +272,7 @@ describe("Smoke tests", () => {
       });
       const cache = daemon._cache;
       sandbox.spy(cache, "get");
+      sandbox.spy(cache, "wrapAction");
 
       // Verify empty cache.
       expect(cache).to.be.an.instanceOf(NoopCache);
@@ -283,9 +284,10 @@ describe("Smoke tests", () => {
         gzip: false
       })
         .then(() => {
-          // Cache miss.
-          expect(cache.get).to.have.callCount(1);
-          expect(cache.get.returnValues[0]).to.equal(null);
+          // Cache get is not even called using `NoopCache.wrapAction`.
+          expect(cache.get).to.have.callCount(0);
+          expect(cache.wrapAction).to.have.callCount(1);
+          expect(cache.wrapAction.returnValues[0]).to.be.an.instanceOf(Function);
 
           return daemon.sizes({
             code: fixtures.badBundle,
@@ -295,9 +297,9 @@ describe("Smoke tests", () => {
           });
         })
         .then(() => {
-          // Cache miss.
-          expect(cache.get).to.have.callCount(2);
-          expect(cache.get.returnValues[1]).to.equal(null);
+          expect(cache.get).to.have.callCount(0);
+          expect(cache.wrapAction).to.have.callCount(2);
+          expect(cache.wrapAction.returnValues[1]).to.be.an.instanceOf(Function);
         });
     });
   });
