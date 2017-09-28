@@ -213,7 +213,6 @@ describe("Smoke tests", () => {
       const coldStart = process.hrtime();
       let coldTime;
       let hotStart;
-      let hotTime;
 
       return daemon.sizes({
         code: fixtures.badBundle,
@@ -239,7 +238,8 @@ describe("Smoke tests", () => {
         })
         .then(() => {
           const time = process.hrtime(hotStart);
-          hotTime = time[0] * NS_PER_SEC + time[1];
+          const hotTime = time[0] * NS_PER_SEC + time[1];
+
           // Fail if the hot run isn't way faster than the cold run.
           // This indicates that the cache is failing.
           //
