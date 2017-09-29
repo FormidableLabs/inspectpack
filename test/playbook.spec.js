@@ -146,6 +146,69 @@ describe("Playbook", () => {
     });
   });
 
+  describe("bundle variable types", () => {
+    it("handles string bundle", () =>
+      sizes({
+        code: fixtures.scopeHoisting["app3.nohoist"],
+        format: "object",
+        minified: false,
+        gzip: false
+      })
+        .then((results) => {
+          expect(results).to.have.property("sizes").that.has.lengthOf(4);
+        })
+    );
+
+    it("handles buffer bundles", () =>
+      sizes({
+        code: new Buffer(fixtures.scopeHoisting["app3.nohoist"]),
+        format: "object",
+        minified: false,
+        gzip: false
+      })
+        .then((results) => {
+          expect(results).to.have.property("sizes").that.has.lengthOf(4);
+        })
+    );
+
+    // Regression Test: https://github.com/FormidableLabs/webpack-dashboard/issues/193
+    //
+    // Can get a plain JS object like: `{ type: "Buffer", data: [INTEGERS] }`
+    // where the data is really an array buffer of integers for a real `Buffer`.
+    it("handles the weird {type,data} serialized buffer-like-thing", () => {
+      const raw = new Buffer(fixtures.scopeHoisting["app3.nohoist"]);
+      const weirdObj = {
+        type: "Buffer",
+        data: Array.from(raw)
+      };
+
+      return sizes({
+        code: weirdObj,
+        format: "object",
+        minified: false,
+        gzip: false
+      })
+        .then((results) => {
+          expect(results).to.have.property("sizes").that.has.lengthOf(4);
+        });
+    });
+
+    it("errors on unknown type", () =>
+      sizes({
+        code: { type: "weird" },
+        format: "object",
+        minified: false,
+        gzip: false
+      })
+        .then(() => {
+          throw new Error("Expected error for unkown type");
+        })
+        .catch((err) => {
+          expect(err).to.have.property("message").that.contains("Unknown code type");
+        })
+    );
+  });
+
   describe("scope hoisting", () => {
     it("parses all bundle parts", () =>
       Promise.all([
