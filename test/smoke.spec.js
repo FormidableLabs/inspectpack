@@ -4,8 +4,13 @@ const fs = require("fs");
 const path = require("path");
 const mkdirp = require("mkdirp");
 const rimraf = require("rimraf");
-const expect = require("chai").expect;
 const pify = require("pify");
+
+const sinon = require("sinon");
+const sinonChai = require("sinon-chai");
+const chai = require("chai");
+chai.use(sinonChai);
+const expect = chai.expect;
 
 const duplicates = pify(require("../lib/actions/duplicates"));
 const pattern = pify(require("../lib/actions/pattern"));
@@ -15,6 +20,9 @@ const versions = pify(require("../lib/actions/versions"));
 const sizes = pify(require("../lib/actions/sizes"));
 
 const InspectpackDaemon = require("../lib/daemon");
+const Cache = require("../lib/utils/cache");
+const NoopCache = Cache.NoopCache;
+const SqliteCache = Cache.SqliteCache;
 
 const fixtureRoot = path.dirname(require.resolve("inspectpack-test-fixtures/package.json"));
 const readFile = (relPath) => fs.readFileSync(path.join(fixtureRoot, relPath), "utf8");
@@ -26,7 +34,19 @@ const fixtures = {
 
 const testOutputDir = path.resolve("test-output");
 
+const NS_PER_SEC = 1e9;
+
 describe("Smoke tests", () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   it("analyzes duplicates", () =>
     duplicates({
       code: fixtures.badBundle,
@@ -171,22 +191,25 @@ describe("Smoke tests", () => {
 
   describe("daemon", () => {
     beforeEach(() => mkdirp(testOutputDir));
-    afterEach(done => rimraf(testOutputDir, done));
 
-    it("runs actions in the daemon with a cache", () => {
-      const NS_PER_SEC = 1e9;
+    afterEach((done) => rimraf(testOutputDir, done));
+
+    it("runs actions faster in the daemon with a cache", function () {
+      this.timeout(20000); // Extended timeout.
 
       const daemon = InspectpackDaemon.create({
-        cacheFilename: path.join(
-          testOutputDir,
-          ".inspectpack-test-cache.db"
-        )
+        cacheFilename: path.join(testOutputDir, ".inspectpack-test-cache.db")
       });
+
+      const cache = daemon._cache;
+      sandbox.spy(cache, "get");
+
+      // First verify CI environment _did_ install cache libs.
+      expect(cache).to.be.an.instanceOf(SqliteCache);
 
       const coldStart = process.hrtime();
       let coldTime;
       let hotStart;
-      let hotTime;
 
       return daemon.sizes({
         code: fixtures.badBundle,
@@ -197,6 +220,11 @@ describe("Smoke tests", () => {
         .then(() => {
           const time = process.hrtime(coldStart);
           coldTime = time[0] * NS_PER_SEC + time[1];
+
+          // Cache miss.
+          expect(cache.get).to.have.callCount(1);
+          expect(cache.get.returnValues[0]).to.equal(null);
+
           hotStart = process.hrtime();
           return daemon.sizes({
             code: fixtures.badBundle,
@@ -207,11 +235,70 @@ describe("Smoke tests", () => {
         })
         .then(() => {
           const time = process.hrtime(hotStart);
-          hotTime = time[0] * NS_PER_SEC + time[1];
+          const hotTime = time[0] * NS_PER_SEC + time[1];
 
           // Fail if the hot run isn't way faster than the cold run.
           // This indicates that the cache is failing.
-          expect(hotTime).to.be.lessThan(coldTime / 3);
+          //
+          // Using the following experimental times, we choose that the cache
+          // scenario should be at least 10x faster.
+          //
+          // w/w/o db Cold        Hot       Diff
+          // ======== =========== ========= =====
+          // Without  1879945971  471404939 0.251
+          //          1802303278  586886332 0.326
+          //          1747124272  604059657 0.346
+          //
+          // With     1676902494    9998125 0.006
+          //          2330906330    9696792 0.004
+          //
+          const speedup = coldTime / hotTime;
+          expect(speedup).to.be.greaterThan(10);
+
+          // Cache hit.
+          expect(cache.get).to.have.callCount(2);
+          expect(cache.get.returnValues[1])
+            .to.be.an("object").and
+            .to.have.keys("meta", "sizes");
+        });
+    });
+
+    it("runs actions correctly in the daemon without a cache", function () {
+      this.timeout(20000); // Extended timeout.
+
+      const daemon = InspectpackDaemon.create({
+        cache: NoopCache.create()
+      });
+      const cache = daemon._cache;
+      sandbox.spy(cache, "get");
+      sandbox.spy(cache, "wrapAction");
+
+      // Verify empty cache.
+      expect(cache).to.be.an.instanceOf(NoopCache);
+
+      return daemon.sizes({
+        code: fixtures.badBundle,
+        format: "object",
+        minified: false,
+        gzip: false
+      })
+        .then(() => {
+          // Cache get is not even called using `NoopCache.wrapAction`.
+          expect(cache.get).to.have.callCount(0);
+          expect(cache.wrapAction).to.have.callCount(1);
+          expect(cache.wrapAction.returnValues[0]).to.be.an.instanceOf(Function);
+
+          return daemon.sizes({
+            code: fixtures.badBundle,
+            format: "object",
+            minified: false,
+            gzip: false
+          });
+        })
+        .then(() => {
+          expect(cache.get).to.have.callCount(0);
+          expect(cache.wrapAction).to.have.callCount(2);
+          expect(cache.wrapAction.returnValues[1]).to.be.an.instanceOf(Function);
         });
     });
   });
