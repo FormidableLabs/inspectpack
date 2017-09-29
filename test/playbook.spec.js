@@ -192,6 +192,21 @@ describe("Playbook", () => {
           expect(results).to.have.property("sizes").that.has.lengthOf(4);
         });
     });
+
+    it("errors on unknown type", () =>
+      sizes({
+        code: { type: "weird" },
+        format: "object",
+        minified: false,
+        gzip: false
+      })
+        .then(() => {
+          throw new Error("Expected error for unkown type");
+        })
+        .catch((err) => {
+          expect(err).to.have.property("message").that.contains("Unknown code type");
+        })
+    );
   });
 
   describe("scope hoisting", () => {
