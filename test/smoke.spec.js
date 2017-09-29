@@ -190,14 +190,13 @@ describe("Smoke tests", () => {
   );
 
   describe("daemon", () => {
-    beforeEach(function () {
-      this.timeout(20000); // Extended timeout.
-      return mkdirp(testOutputDir);
-    });
+    beforeEach(() => mkdirp(testOutputDir));
 
     afterEach((done) => rimraf(testOutputDir, done));
 
-    it("runs actions faster in the daemon with a cache", () => {
+    it("runs actions faster in the daemon with a cache", function () {
+      this.timeout(20000); // Extended timeout.
+
       const daemon = InspectpackDaemon.create({
         cacheFilename: path.join(testOutputDir, ".inspectpack-test-cache.db")
       });
@@ -264,7 +263,9 @@ describe("Smoke tests", () => {
         });
     });
 
-    it("runs actions correctly in the daemon without a cache", () => {
+    it("runs actions correctly in the daemon without a cache", function () {
+      this.timeout(20000); // Extended timeout.
+
       const daemon = InspectpackDaemon.create({
         cache: NoopCache.create()
       });
