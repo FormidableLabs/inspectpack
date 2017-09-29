@@ -1,6 +1,15 @@
 History
 =======
 
+## 2.2.0
+
+* Make `better-sqlite3` and `optionalDependency`. Switch to noop cache if not present.
+  [#49](https://github.com/FormidableLabs/inspectpack/issues/49)
+* Add `Cache.wrapAction` helper for common use case of "try cache get, do action, set cache".
+* Change cross-process communication to just serialize/deserialize the applicable cache instance.
+* Add `cache` option for `InspectpackDaemon.create`.
+* Add error logging for worker errors.
+
 ## 2.1.0
 
 * Better parsing of bundle AST. (*[@tptee][]*)
