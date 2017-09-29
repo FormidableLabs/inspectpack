@@ -1,6 +1,11 @@
 History
 =======
 
+## 2.2.1
+
+* Handle weird `{ type: "Buffer", data: [INTEGERS] }` plain JavaScript object.
+  [webpack-dashboard#193](https://github.com/FormidableLabs/webpack-dashboard/issues/193)
+
 ## 2.2.0
 
 * Make `better-sqlite3` and `optionalDependency`. Switch to noop cache if not present.
