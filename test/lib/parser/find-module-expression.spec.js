@@ -26,7 +26,7 @@ describe("lib/parser/find-module-expression", () => {
     expect(find("webpackJsonp([0],[])")).to.have.property("type", "ArrayExpression");
     expect(find("webpackJsonp([0],{})")).to.have.property("type", "ObjectExpression");
 
-    expect(find(`webpackJsonp([0],Array(0).concat([]))`))
+    expect(find("webpackJsonp([0],Array(0).concat([]))"))
       .to.have.property("type", "CallExpression");
   });
 });
