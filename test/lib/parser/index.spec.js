@@ -4,7 +4,7 @@ const expect = require("chai").expect;
 
 const parse = require("../../../lib/parser/index");
 
-describe.only("lib/parser/index", () => {
+describe("lib/parser/index", () => {
   it("handles no-match cases", () => {
     expect(parse("")).to.eql([]);
     expect(parse("(function () {}());")).to.eql([]);
@@ -104,7 +104,33 @@ var foo = "foo";
     expect(parsed).to.have.deep.property("[1].type", "code");
   });
 
+  // Regression test - 'BUG: Handle `Array().concat()` version of `webpackJsonp`'
+  // https://github.com/FormidableLabs/inspectpack/issues/53
   it("handles webpackJsonp array concat", () => {
+    expect(parse(`
+webpackJsonp([1],Array(0).concat([]));
+    `))
+      .to.have.length(1).and
+      .to.have.deep.property("[0].type", "empty");
+
+    expect(parse(`
+webpackJsonp([1],Array(123).concat([
+/* 123 */
+/*!*****************!*\
+  !*** ./foo.js ***!
+  \*****************/
+/*! no static exports found */
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+var foo = "foo";
+/***/ })
+]));
+    `))
+      .to.have.length(1).and
+      .to.have.deep.property("[0].type", "code");
+  });
+
+  it("handles webpackJsonp object", () => {
     expect(parse(`
 webpackJsonp([1],{});
     `))
@@ -127,6 +153,4 @@ var foo = "foo";
       .to.have.length(1).and
       .to.have.deep.property("[0].type", "code");
   });
-
-  it("handles webpackJsonp object");
 });
