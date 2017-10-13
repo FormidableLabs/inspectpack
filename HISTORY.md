@@ -1,7 +1,7 @@
 History
 =======
 
-## Unreleased
+## 2.2.2
 
 * Handle bundle module form of `Array().concat()`. (*[@ryan-codingintrigue][]*)
   [#53](https://github.com/FormidableLabs/inspectpack/issues/53)
