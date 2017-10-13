@@ -1,6 +1,11 @@
 History
 =======
 
+## Unreleased
+
+* Handle bundle module form of `Array().concat()`. (*[@ryan-codingintrigue][]*)
+  [#53](https://github.com/FormidableLabs/inspectpack/issues/53)
+
 ## 2.2.1
 
 * Handle weird `{ type: "Buffer", data: [INTEGERS] }` plain JavaScript object.
@@ -102,5 +107,6 @@ History
 [@divmain]: https://github.com/divmain
 [@kkerr1]: https://github.com/kkerr1
 [@rgerstenberger]: https://github.com/rgerstenberger
+[@ryan-codingintrigue]: https://github.com/ryan-codingintrigue
 [@ryan-roemer]: https://github.com/ryan-roemer
 [@tptee]: https://github.com/kkerr1
