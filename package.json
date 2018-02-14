@@ -25,6 +25,7 @@
     "test": "mocha 'test/**/*.spec.js'"
   },
   "dependencies": {
+    "babel-traverse": "^6.26.0",
     "babel-types": "^6.7.2",
     "babylon": "^6.7.0",
     "lodash": "^4.6.1",
