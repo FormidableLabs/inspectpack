@@ -17,7 +17,7 @@
     "inspectpack": "bin/inspectpack.js"
   },
   "scripts": {
-    "preversion": "npm run check $$ npm run benchmark",
+    "preversion": "npm run check && npm run benchmark",
     "version": "true",
     "benchmark": "node benchmarks/index.js",
     "lint-server": "eslint lib bin",

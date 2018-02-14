@@ -1,11 +1,15 @@
 History
 =======
 
-## 2.2.3
+## 2.2.4
 
 * Add missing `babel-traverse` dependency. (*[@deadcoder0904][]*)
   [#55](https://github.com/FormidableLabs/inspectpack/issues/55)
 * Separate `npm run benchmark` from CI as it's slow and brittle.
+
+## 2.2.3
+
+* Bad version. (Not published).
 
 ## 2.2.2
 
