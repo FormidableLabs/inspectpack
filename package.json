@@ -17,11 +17,12 @@
     "inspectpack": "bin/inspectpack.js"
   },
   "scripts": {
+    "preversion": "npm run check $$ npm run benchmark",
     "benchmark": "node benchmarks/index.js",
     "lint-server": "eslint lib bin",
     "lint-test": "eslint test",
     "lint": "npm run lint-server && npm run lint-test",
-    "check": "npm run lint && npm run test && npm run benchmark",
+    "check": "npm run lint && npm run test",
     "test": "mocha 'test/**/*.spec.js'"
   },
   "dependencies": {
@@ -45,7 +46,7 @@
     "eslint": "^3.18.0",
     "eslint-config-formidable": "^2.0.1",
     "eslint-plugin-filenames": "^1.1.0",
-    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-lodash-fp": "^2.1.3",
     "formidable-playbook": "^0.1.2",
     "inspectpack-test-fixtures": "^1.3.0",

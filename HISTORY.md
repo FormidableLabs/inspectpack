@@ -1,6 +1,12 @@
 History
 =======
 
+## 2.2.3
+
+* Add missing `babel-traverse` dependency. (*[@deadcoder0904][]*)
+  [#55](https://github.com/FormidableLabs/inspectpack/issues/55)
+* Separate `npm run benchmark` from CI as it's slow and brittle.
+
 ## 2.2.2
 
 * Handle bundle module form of `Array().concat()`. (*[@ryan-codingintrigue][]*)
@@ -104,9 +110,10 @@ History
 
 * Add `--action=duplicates` report.
 
+[@deadcoder0904]: https://github.com/deadcoder0904
 [@divmain]: https://github.com/divmain
 [@kkerr1]: https://github.com/kkerr1
 [@rgerstenberger]: https://github.com/rgerstenberger
 [@ryan-codingintrigue]: https://github.com/ryan-codingintrigue
 [@ryan-roemer]: https://github.com/ryan-roemer
-[@tptee]: https://github.com/kkerr1
+[@tptee]: https://github.com/tptee

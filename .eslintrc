@@ -2,10 +2,13 @@
 extends:
   - plugin:lodash-fp/recommended
   - formidable/configurations/es6-node
+  - plugin:import/errors
 
 plugins:
   - lodash-fp
+  - import
 
 rules:
   func-style: off
   consistent-return: [error, { treatUndefinedAsUnspecified: true }]
+  import/no-unresolved: [error, { commonjs: true }]
