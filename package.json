@@ -18,6 +18,7 @@
   },
   "scripts": {
     "preversion": "npm run check $$ npm run benchmark",
+    "version": "true",
     "benchmark": "node benchmarks/index.js",
     "lint-server": "eslint lib bin",
     "lint-test": "eslint test",
