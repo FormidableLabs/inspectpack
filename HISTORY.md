@@ -1,6 +1,37 @@
 History
 =======
 
+## Unreleased
+
+### Breaking changes
+
+* Complete rewrite in TypeScript.
+* Limit `package.json:engine` to `>=6.0.0` (aka, the current supported Nodes).
+* Use webpack stats object instead of real bundle for data input.
+* The structure and substantive content of all `json` data structures has
+  changed, as well as the corollary `text` and `tsv` output formats.
+    * `sizes`
+        * Remove `bundle` field and all `min` + `min+gz` size fields.
+        * Code `type` field has been removed.
+    * `duplicates`: A complete revision of the JSON format and accompanying
+      other format outputs.
+    * `versions`: A complete rewrite of output formats **and** what is actually
+      reported on. Now, only reports versions information if there are 2+ files
+      of the same `baseName` (aka, the `foo.js` part of `lodash@1/foo.js`) with
+      the reasoning that version skews that _don't_ result in duplicated files
+      aren't technically a "problem".
+
+### Features
+
+* Support for `--action={sizes,duplicates,versions}`
+* Format options `--format={json,text,tsv}`
+* Colorized output for `--format=text`
+* Maintain support (with tests) for webpack versions 1-4.
+
+### Miscellaneous
+
+* Add AppVeyor Windows CI.
+
 ## 2.2.4
 
 * Add missing `babel-traverse` dependency. (*[@deadcoder0904][]*)

@@ -3,19 +3,17 @@
 
 .DS_Store
 .project
-bower_components
-node_modules
+/node_modules
 npm-debug.log*
 yarn-error.log*
-phantomjsdriver.log
+package-lock.json
 
 # Build
-dist
-*/dist
-build
-*/build
-coverage
-Procfile
-.lankrc*
-test-output
-package-lock.json
+/bin
+/lib
+
+
+# Test
+dist-*
+/.nyc_output
+/coverage

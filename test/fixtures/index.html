@@ -1,0 +1,55 @@
+<html>
+  <head>
+    <title>Test Fixture Loader</title>
+  </head>
+  <body>
+    <h2>Test Fixture Loader</h2>
+    <p>
+      As a debugging helpder, this page provides a general loader into known paths to built fixtures.
+    </p>
+    <p>
+      Examples:
+      <ul>
+        <li>
+            <a href="./index.html?script=./simple/dist-development-4/bundle.js">
+              <code>./simple/dist-development-4/bundle.js</code>
+            </a>
+          </li>
+        <li>
+          <a href="./index.html?script=./moment-app/dist-development-4/bundle.js">
+            <code>./moment-app/dist-development-4/bundle.js</code>
+          </a>
+        </li>
+        <li>
+          <em>(broken - webpack1 bug)</em><br />
+          <a href="./index.html?script=./multiple-chunks/dist-development-1/bundle-multiple.js">
+            <code>./multiple-chunks/dist-development-1/bundle-multiple.js</code>
+          </a>
+        </li>
+        <li>
+          <a href="./index.html?script=./multiple-chunks/dist-development-4/bundle-multiple.js">
+            <code>./multiple-chunks/dist-development-4/bundle-multiple.js</code>
+          </a>
+        </li>
+      </ul>
+    </p>
+    <p>
+      (<em>Note</em>: code-splitting with dynamic <code>import</code>/<code>require.ensure</code> presently does not work because of an incorrectly inferred root location (this page instead of relative to the bundle).
+    </p>
+    <script src="https://unpkg.com/little-loader@0.2.0/dist/little-loader.min.js"></script>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const script = urlParams.get("script");
+      if (script) {
+        console.log(`Loading ${script}`);
+        _lload(script, (err) => {
+          if (err) {
+            console.error(`Error: ${script}`, err);
+          } else {
+            console.log(`Finished ${script}`);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

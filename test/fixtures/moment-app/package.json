@@ -1,0 +1,9 @@
+{
+  "name": "moment-app",
+  "version": "1.2.3",
+  "description": "DUMMY APP",
+  "main": "src/index.js",
+  "dependencies": {
+    "moment": "^2.22.1"
+  }
+}

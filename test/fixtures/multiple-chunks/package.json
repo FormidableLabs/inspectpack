@@ -1,0 +1,10 @@
+{
+  "name": "multiple-roots",
+  "version": "1.2.3",
+  "description": "DUMMY APP",
+  "main": "src/index.js",
+  "dependencies": {
+    "different-foo": "^1.0.1",
+    "foo": "^1.0.0"
+  }
+}
