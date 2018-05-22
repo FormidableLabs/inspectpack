@@ -12,7 +12,6 @@ package-lock.json
 /bin
 /lib
 
-
 # Test
 dist-*
 /.nyc_output

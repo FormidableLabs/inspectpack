@@ -3,10 +3,16 @@
   "version": "2.2.4",
   "description": "An inspection tool for Webpack frontend JavaScript bundles.",
   "main": "lib/index.js",
-  "repository": "https://github.com/FormidableLabs/inspectpack.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FormidableLabs/inspectpack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FormidableLabs/inspectpack/issues"
+  },
+  "homepage": "https://github.com/FormidableLabs/inspectpack",
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "license": "MIT",
-  "private": true,
   "engines": {
     "node": ">=6.0.0"
   },
