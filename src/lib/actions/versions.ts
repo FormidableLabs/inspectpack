@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { join, normalize, relative, sep } from "path";
+import { join, relative, sep } from "path";
 
 import { IActionModule, IModule } from "../interfaces/modules";
 import {
@@ -93,10 +93,6 @@ const allPackages = (mods: IModule[]): string[] => {
       const lastIdx = parts.length - 1;
       parts[lastIdx] = _packageName(parts[lastIdx]);
 
-      // console.log("TODO HERE ALL PKGS", JSON.stringify({
-      //   parts
-      // }, null, 2))
-
       parts.forEach((pkgName) => {
         pkgs[pkgName] = true;
       });
@@ -136,31 +132,22 @@ const modulesByPackageNameByPackagePath = (
     modsMap[pkgName] = modsMap[pkgName] || {};
 
     // Insert package path. (All the different installs of package).
-    // **Note**: use `normalize` to convert package name _back_ to windows if applicable.
     const pkgMap = modsMap[pkgName];
-    const pkgPath = mod.identifier.substr(0, mod.identifier.length - mod.baseName.length)
-      + normalize(pkgName);
+    const modParts = mod.identifier.split(sep);
+    const nmIndex = modParts.lastIndexOf("node_modules");
+    const pkgPath = modParts
+      // Remove base name path suffix.
+      .slice(0, nmIndex + 1)
+      // Add in parts of the package name (split with "/" because posixified).
+      .concat(pkgName.split("/"))
+      // Back to string.
+      .join(sep);
 
-    // TODO: BUG -- identifier ends with `/`.
-
-    console.log("TODO HERE PKG PATH", JSON.stringify({
-      pkgName,
-      pkgPath,
-      id: mod.identifier,
-      idLen: mod.identifier.length,
-      base: mod.baseName,
-      baseLen: mod.baseName.length,
-    }, null, 2));
     pkgMap[pkgPath] = (pkgMap[pkgPath] || []).concat(mod);
   });
 
   // Now, remove any single item keys (no duplicates).
   Object.keys(modsMap).forEach((pkgName) => {
-    console.log("TODO HERE DELETE", JSON.stringify({
-      pkgName,
-      keys: Object.keys(modsMap[pkgName]),
-      //entry: modsMap[pkgName]
-    }, null, 2));
     if (Object.keys(modsMap[pkgName]).length === 1) {
       delete modsMap[pkgName];
     }
