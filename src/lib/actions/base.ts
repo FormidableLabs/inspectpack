@@ -62,8 +62,25 @@ export const _getBaseName = (name: string): string | null => {
   const lastName = parts[parts.length - 1];
 
   // Normalize out the rest of the string.
-  const candidate = normalize(relative(".", lastName));
-  return candidate === "." ? "" : toPosixPath(candidate);
+  let candidate = normalize(relative(".", lastName));
+
+  // Short-circuit on empty string / current path.
+  if (candidate === ".") {
+    return "";
+  }
+
+  // Special case -- synthetic modules can end up with trailing `/` because
+  // of a regular expression. Preserve this.
+  //
+  // E.g., `/PATH/TO/node_modules/moment/locale sync /es/`
+  //
+  // **Note**: The rest of this tranform _should_ be safe for synthetic regexps,
+  // but we can always revisit.
+  if (name[name.length - 1] === "/") {
+    candidate += "/";
+  }
+
+  return toPosixPath(candidate);
 };
 
 export abstract class Action {

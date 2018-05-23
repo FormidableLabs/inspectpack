@@ -766,5 +766,9 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	duplicates-cjs@1.2.3 
       expect(_packageName("  @scope/foo/index.js")).to.equal("@scope/foo");
       expect(_packageName("@scope/foo/bar/car.js")).to.equal("@scope/foo");
     });
+
+    it("handles synthetic packages", () => {
+      expect(_packageName("moment/locale sync /es/")).to.equal("moment");
+    });
   });
 });

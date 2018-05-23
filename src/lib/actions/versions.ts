@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { join, normalize, relative, sep } from "path";
+import { join, relative, sep } from "path";
 
 import { IActionModule, IModule } from "../interfaces/modules";
 import {
@@ -132,10 +132,17 @@ const modulesByPackageNameByPackagePath = (
     modsMap[pkgName] = modsMap[pkgName] || {};
 
     // Insert package path. (All the different installs of package).
-    // **Note**: use `normalize` to convert package name _back_ to windows if applicable.
     const pkgMap = modsMap[pkgName];
-    const pkgPath = mod.identifier.substr(0, mod.identifier.length - mod.baseName.length)
-      + normalize(pkgName);
+    const modParts = mod.identifier.split(sep);
+    const nmIndex = modParts.lastIndexOf("node_modules");
+    const pkgPath = modParts
+      // Remove base name path suffix.
+      .slice(0, nmIndex + 1)
+      // Add in parts of the package name (split with "/" because posixified).
+      .concat(pkgName.split("/"))
+      // Back to string.
+      .join(sep);
+
     pkgMap[pkgPath] = (pkgMap[pkgPath] || []).concat(mod);
   });
 

@@ -27,6 +27,13 @@ describe("lib/actions/base", () => {
       expect(_getBaseName("bruh\\node_modules\\bar\\foo.js")).to.equal("bar/foo.js");
     });
 
+    it("handles synthetic modules", () => {
+      expect(_getBaseName("node_modules/moment/locale sync /es/"))
+        .to.equal("moment/locale sync /es/");
+      expect(_getBaseName("node_modules\\moment/locale sync /es/"))
+        .to.equal("moment/locale sync /es/");
+    });
+
     // All of this behavior is negotiable.
     it("handles weird cases that should never come up", () => {
       expect(_getBaseName("node_modules")).to.equal("");
