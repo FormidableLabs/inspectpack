@@ -3,7 +3,6 @@
 /**
  * An "all versions" webpack configuration.
  */
-
 const { resolve } = require("path");
 const { StatsWriterPlugin } = require("webpack-stats-plugin");
 
