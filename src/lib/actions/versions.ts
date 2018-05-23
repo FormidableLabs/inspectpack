@@ -93,6 +93,10 @@ const allPackages = (mods: IModule[]): string[] => {
       const lastIdx = parts.length - 1;
       parts[lastIdx] = _packageName(parts[lastIdx]);
 
+      // console.log("TODO HERE ALL PKGS", JSON.stringify({
+      //   parts
+      // }, null, 2))
+
       parts.forEach((pkgName) => {
         pkgs[pkgName] = true;
       });
@@ -136,11 +140,27 @@ const modulesByPackageNameByPackagePath = (
     const pkgMap = modsMap[pkgName];
     const pkgPath = mod.identifier.substr(0, mod.identifier.length - mod.baseName.length)
       + normalize(pkgName);
+
+    // TODO: BUG -- identifier ends with `/`.
+
+    console.log("TODO HERE PKG PATH", JSON.stringify({
+      pkgName,
+      pkgPath,
+      id: mod.identifier,
+      idLen: mod.identifier.length,
+      base: mod.baseName,
+      baseLen: mod.baseName.length,
+    }, null, 2));
     pkgMap[pkgPath] = (pkgMap[pkgPath] || []).concat(mod);
   });
 
   // Now, remove any single item keys (no duplicates).
   Object.keys(modsMap).forEach((pkgName) => {
+    console.log("TODO HERE DELETE", JSON.stringify({
+      pkgName,
+      keys: Object.keys(modsMap[pkgName]),
+      //entry: modsMap[pkgName]
+    }, null, 2));
     if (Object.keys(modsMap[pkgName]).length === 1) {
       delete modsMap[pkgName];
     }

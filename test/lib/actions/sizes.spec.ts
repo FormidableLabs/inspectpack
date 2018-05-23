@@ -14,7 +14,7 @@ import {
 } from "../../utils";
 
 const PATCHED_MOMENT_LOCALE_ES = {
-  baseName: "moment/locale sync /es",
+  baseName: "moment/locale sync /es/",
   identifier: resolve(__dirname, "../../../node_modules/moment/locale sync /es/"),
   size: 100,
   source: "REMOVED",
@@ -22,10 +22,10 @@ const PATCHED_MOMENT_LOCALE_ES = {
 
 // Keyed off `baseName`.
 const PATCHED_MODS = {
-  "moment/locale /es": PATCHED_MOMENT_LOCALE_ES,
-  "moment/locale sync /es": PATCHED_MOMENT_LOCALE_ES,
+  "moment/locale /es/": PATCHED_MOMENT_LOCALE_ES,
+  "moment/locale sync /es/": PATCHED_MOMENT_LOCALE_ES,
   "webpack/buildin/module.js": {
-    baseName: "moment/locale sync /es",
+    baseName: "webpack/buildin/module.js",
     identifier: resolve(__dirname, "../../../node_modules/webpack/buildin/module.js"),
     size: 200,
     source: "REMOVED",
@@ -291,6 +291,20 @@ describe("lib/actions/sizes", () => {
                     },
                   },
                   {
+                    baseName: "bar/index.js",
+                    fileName: "scoped/node_modules/bar/index.js",
+                    size: {
+                      full: "NUM",
+                    },
+                  },
+                  {
+                    baseName: "bar/tender.js",
+                    fileName: "scoped/node_modules/bar/tender.js",
+                    size: {
+                      full: "NUM",
+                    },
+                  },
+                  {
                     baseName: "flattened-foo/index.js",
                     fileName: "scoped/node_modules/flattened-foo/index.js",
                     size: {
@@ -405,6 +419,10 @@ inspectpack --action=sizes
   * Size: NUM
 * scoped/node_modules/@scope/foo/index.js
   * Size: NUM
+* scoped/node_modules/bar/index.js
+  * Size: NUM
+* scoped/node_modules/bar/tender.js
+  * Size: NUM
 * scoped/node_modules/flattened-foo/index.js
   * Size: NUM
 * scoped/node_modules/unscoped-foo/index.js
@@ -441,6 +459,8 @@ inspectpack --action=sizes
 Asset	Full Name	Short Name	Size
 bundle.js	scoped/node_modules/@scope/foo/bike.js	@scope/foo/bike.js	NUM
 bundle.js	scoped/node_modules/@scope/foo/index.js	@scope/foo/index.js	NUM
+bundle.js	scoped/node_modules/bar/index.js	bar/index.js	NUM
+bundle.js	scoped/node_modules/bar/tender.js	bar/tender.js	NUM
 bundle.js	scoped/node_modules/flattened-foo/index.js	flattened-foo/index.js	NUM
 bundle.js	scoped/node_modules/unscoped-foo/index.js	unscoped-foo/index.js	NUM
 bundle.js	scoped/node_modules/unscoped-foo/node_modules/deeper-unscoped/index.js	deeper-unscoped/index.js	NUM
