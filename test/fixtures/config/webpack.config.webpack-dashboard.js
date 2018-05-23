@@ -11,20 +11,23 @@
  * $ cd webpack-dashboard
  * $ mv node_modules/webpack node_modules/webpack_DISABLED
  *
+ * # (To later undo...)
+ * $ mv node_modules/webpack_DISABLED node_modules/webpack
+ *
  * # Switch to `inspectpack` directory.
  * $ cd ../inspectpack
  *
  * # Now you can use these environment variables to swap scenarios, webpack
  * # versions, etc.
  * # Note: `WEBPACK_DASHBOARD_PORT` needs env var and separate number on CLI.
- * $ WEBPACK_VERSION=3 \
+ * $ export WEBPACK_VERSION=4; \
+ *   export WEBPACK_DASHBOARD_PORT=9003; \
  *   WEBPACK_MODE=development \
- *   WEBPACK_CWD=../../test/fixtures/multiple-chunks \
+ *   WEBPACK_CWD=../../test/fixtures/duplicates-cjs \
  *   WEBPACK_DASHBOARD_PATH="${PWD}/.." \
- *   WEBPACK_DASHBOARD_PORT=9003 \
- *   NODE_PATH="${PWD}/node_modules/webpack${WEBPACK_VERSION}/node_modules" \
- *   node "${PWD}/../webpack-dashboard/bin/webpack-dashboard.js" -p 9003 -- \
- *   node test/fixtures/packages/webpack.js \
+ *   NODE_PATH="${PWD}/node_modules/webpack${WEBPACK_VERSION}/node_modules:${PWD}/node_modules/" \
+ *   node "${PWD}/../webpack-dashboard/bin/webpack-dashboard.js" -p ${WEBPACK_DASHBOARD_PORT} -- \
+ *   node --trace-deprecation test/fixtures/packages/webpack.js \
  *     --config "${PWD}/test/fixtures/config/webpack.config.webpack-dashboard.js" \
  *     --watch
  * ```
