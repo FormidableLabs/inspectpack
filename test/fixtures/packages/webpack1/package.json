@@ -1,0 +1,10 @@
+{
+  "name": "webpack1",
+  "version": "0.0.1",
+  "description": "Webpack1 installs",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "webpack": "^1.15.0"
+  }
+}

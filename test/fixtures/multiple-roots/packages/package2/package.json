@@ -1,0 +1,9 @@
+{
+  "name": "package2",
+  "version": "2.2.2",
+  "description": "DUMMY PACKAGE",
+  "main": "index.js",
+  "dependencies": {
+    "foo": "^1.0.0"
+  }
+}
