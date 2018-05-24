@@ -183,21 +183,21 @@ inspectpack --action=versions
   * 1.1.1
     * ~/@scope/foo
       * Num deps: 2, files: 2
-      * duplicates-cjs@1.2.3 -> @scope/foo@1.1.1
-      * duplicates-cjs@1.2.3 -> flattened-foo@1.1.1 -> @scope/foo@1.1.1
+      * scoped@1.2.3 -> @scope/foo@1.1.1
+      * scoped@1.2.3 -> flattened-foo@1.1.1 -> @scope/foo@1.1.1
   * 2.2.2
     * ~/uses-foo/~/@scope/foo
       * Num deps: 1, files: 1
-      * duplicates-cjs@1.2.3 -> uses-foo@1.1.1 -> @scope/foo@2.2.2
+      * scoped@1.2.3 -> uses-foo@1.1.1 -> @scope/foo@2.2.2
 * foo
   * 3.3.3
     * ~/unscoped-foo/~/foo
       * Num deps: 1, files: 2
-      * duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3
+      * scoped@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3
   * 4.3.3
     * ~/unscoped-foo/~/deeper-unscoped/~/foo
       * Num deps: 1, files: 2
-      * duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> deeper-unscoped@1.1.1 -> foo@4.3.3
+      * scoped@1.2.3 -> different-foo@1.1.1 -> deeper-unscoped@1.1.1 -> foo@4.3.3
 ```
 
 Digging in to this report, we see:
