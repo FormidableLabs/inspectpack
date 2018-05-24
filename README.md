@@ -1,9 +1,9 @@
 inspectpack
 ===========
+[![npm version][npm_img]][npm_site]
 [![Travis Status][trav_img]][trav_site]
 [![AppVeyor Status][appveyor_img]][appveyor_site]
-[![npm version][npm_img]][npm_site]
-<!--[![Coverage Status][cov_img]][cov_site]-->
+[![Coverage Status][cov_img]][cov_site]
 
 An inspection tool for Webpack frontend JavaScript bundles.
 
@@ -183,21 +183,21 @@ inspectpack --action=versions
   * 1.1.1
     * ~/@scope/foo
       * Num deps: 2, files: 2
-      * duplicates-cjs@1.2.3 -> @scope/foo@1.1.1
-      * duplicates-cjs@1.2.3 -> flattened-foo@1.1.1 -> @scope/foo@1.1.1
+      * scoped@1.2.3 -> @scope/foo@1.1.1
+      * scoped@1.2.3 -> flattened-foo@1.1.1 -> @scope/foo@1.1.1
   * 2.2.2
     * ~/uses-foo/~/@scope/foo
       * Num deps: 1, files: 1
-      * duplicates-cjs@1.2.3 -> uses-foo@1.1.1 -> @scope/foo@2.2.2
+      * scoped@1.2.3 -> uses-foo@1.1.1 -> @scope/foo@2.2.2
 * foo
   * 3.3.3
     * ~/unscoped-foo/~/foo
       * Num deps: 1, files: 2
-      * duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3
+      * scoped@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3
   * 4.3.3
     * ~/unscoped-foo/~/deeper-unscoped/~/foo
       * Num deps: 1, files: 2
-      * duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> deeper-unscoped@1.1.1 -> foo@4.3.3
+      * scoped@1.2.3 -> different-foo@1.1.1 -> deeper-unscoped@1.1.1 -> foo@4.3.3
 ```
 
 Digging in to this report, we see:
@@ -285,12 +285,12 @@ Other tools that inspect Webpack bundles:
 * [webpack-visualizer](https://github.com/chrisbateman/webpack-visualizer)
 * [webpack-chart](https://github.com/alexkuz/webpack-chart)
 
-[trav_img]: https://api.travis-ci.org/FormidableLabs/inspectpack.svg
-[trav_site]: https://travis-ci.org/FormidableLabs/inspectpack
-[cov]: https://coveralls.io
-[cov_img]: https://img.shields.io/coveralls/FormidableLabs/inspectpack.svg
-[cov_site]: https://coveralls.io/r/FormidableLabs/inspectpack
 [npm_img]: https://badge.fury.io/js/inspectpack.svg
 [npm_site]: http://badge.fury.io/js/inspectpack
+[trav_img]: https://api.travis-ci.org/FormidableLabs/inspectpack.svg
+[trav_site]: https://travis-ci.org/FormidableLabs/inspectpack
 [appveyor_img]: https://ci.appveyor.com/api/projects/status/github/formidablelabs/inspectpack?branch=master&svg=true
 [appveyor_site]: https://ci.appveyor.com/project/FormidableLabs/inspectpack
+[cov]: https://coveralls.io
+[cov_img]: https://coveralls.io/repos/github/FormidableLabs/inspectpack/badge.svg?branch=master
+[cov_site]: https://coveralls.io/github/FormidableLabs/inspectpack?branch=master
