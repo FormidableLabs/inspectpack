@@ -8,7 +8,10 @@ inspectpack
 An inspection tool for Webpack frontend JavaScript bundles.
 
 `inspectpack` provides insight into your webpack-built JS bundles and detailed
-analysis of opportunites to reduce module sizes, unneeded duplicates, etc.
+analysis of opportunites to reduce module sizes, unneeded duplicates, etc. It is
+also the engine for the handy
+[`webpack-dashboard`](https://github.com/FormidableLabs/webpack-dashboard)
+plugin.
 
 ## Install
 
@@ -117,7 +120,7 @@ inspectpack --action=duplicates
 * Extra Sources (non-unique):   3
 * Extra Bytes (non-unique):     172
 
-## Duplicates
+## `bundle.js`
 * foo/index.js
   * Meta: Files 2, Sources 3, Bytes 172
   0. (Files 1, Sources 1, Bytes 64)
@@ -129,6 +132,7 @@ inspectpack --action=duplicates
 
 Let's decipher the report:
 
+* Each heading (e.g., `## bundle.js`) is per outputted asset.
 * The first level is a unique file name (here, `foo/index.js`). `inspectpack`
   considers all modules that resolve to a package path as potential
   "duplicates".
@@ -136,7 +140,7 @@ Let's decipher the report:
   indexes `0` and `1`. Each file at this level corresponds to a unique code
   block. This means, e.g., that
   `node_modules/different-foo/node_modules/foo/index.js` (`0`) and
-  `node_modules/foo/index.js` have _different_ sources (`1`0.
+  `node_modules/foo/index.js` have _different_ sources (`1`).
 * Within each "File" are 1+ "Sources". These comprise multiple modules with
   *identical* sources. This means that `node_modules/foo/index.js` is completely
   identical to `node_modules/uses-foo/node_modules/foo/index.js` in our example
@@ -174,7 +178,7 @@ inspectpack --action=versions
 * Total depended packages:  5
 * Total bundled files:      7
 
-## Versions
+## `bundle.js`
 * @scope/foo
   * 1.1.1
     * ~/@scope/foo
@@ -198,6 +202,7 @@ inspectpack --action=versions
 
 Digging in to this report, we see:
 
+* Each heading (e.g., `## bundle.js`) is per outputted asset.
 * A top-level hierarchy of package names (`@scoped/foo` and `foo`).
 * Within each package name, are _different_ installed versions found in the tree
   (e.g., `1.1.1` for `~/@scope/foo` and `2.2.2` for `~/uses-foo/~/@scope/foo`).
@@ -226,13 +231,18 @@ inspectpack --action=sizes
 ==========================
 
 ## Summary
-* Bytes: 1616
+* Bytes: 9892
 
-## Files
+## `bundle.js`
+* Bytes: 9892
 * /PATH/TO/MY_PROJECT/node_modules/@scope/foo/bike.js
   * Size: 63
 * /PATH/TO/MY_PROJECT/node_modules/@scope/foo/index.js
   * Size: 54
+* /PATH/TO/MY_PROJECT/node_modules/bar/index.js
+  * Size: 54
+* /PATH/TO/MY_PROJECT/node_modules/bar/tender.js
+  * Size: 69
 * /PATH/TO/MY_PROJECT/node_modules/flattened-foo/index.js
   * Size: 103
 * /PATH/TO/MY_PROJECT/node_modules/unscoped-foo/index.js
@@ -252,7 +262,7 @@ inspectpack --action=sizes
 * /PATH/TO/MY_PROJECT/node_modules/uses-foo/node_modules/@scope/foo/index.js
   * Size: 54
 * /PATH/TO/MY_PROJECT/src/index.js
-  * Size: 515
+  * Size: 655
 ```
 
 #### _Note_: Source size calculations and the webpack lifecycle
