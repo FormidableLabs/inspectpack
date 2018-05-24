@@ -1,9 +1,9 @@
 inspectpack
 ===========
+[![npm version][npm_img]][npm_site]
 [![Travis Status][trav_img]][trav_site]
 [![AppVeyor Status][appveyor_img]][appveyor_site]
-[![npm version][npm_img]][npm_site]
-<!--[![Coverage Status][cov_img]][cov_site]-->
+[![Coverage Status][cov_img]][cov_site]
 
 An inspection tool for Webpack frontend JavaScript bundles.
 
@@ -285,12 +285,12 @@ Other tools that inspect Webpack bundles:
 * [webpack-visualizer](https://github.com/chrisbateman/webpack-visualizer)
 * [webpack-chart](https://github.com/alexkuz/webpack-chart)
 
-[trav_img]: https://api.travis-ci.org/FormidableLabs/inspectpack.svg
-[trav_site]: https://travis-ci.org/FormidableLabs/inspectpack
-[cov]: https://coveralls.io
-[cov_img]: https://img.shields.io/coveralls/FormidableLabs/inspectpack.svg
-[cov_site]: https://coveralls.io/r/FormidableLabs/inspectpack
 [npm_img]: https://badge.fury.io/js/inspectpack.svg
 [npm_site]: http://badge.fury.io/js/inspectpack
+[trav_img]: https://api.travis-ci.org/FormidableLabs/inspectpack.svg
+[trav_site]: https://travis-ci.org/FormidableLabs/inspectpack
 [appveyor_img]: https://ci.appveyor.com/api/projects/status/github/formidablelabs/inspectpack?branch=master&svg=true
 [appveyor_site]: https://ci.appveyor.com/project/FormidableLabs/inspectpack
+[cov]: https://coveralls.io
+[cov_img]: https://coveralls.io/repos/github/FormidableLabs/inspectpack/badge.svg?branch=master
+[cov_site]: https://coveralls.io/github/FormidableLabs/inspectpack?branch=master

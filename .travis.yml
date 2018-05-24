@@ -19,3 +19,5 @@ script:
   - yarn run build
   - yarn run build-test
   - yarn run check
+  # Upload to coveralls, but don't _fail_ if coveralls is down.
+  - cat coverage/lcov.info | node_modules/.bin/coveralls || echo "Coveralls upload failed"

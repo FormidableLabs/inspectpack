@@ -53,6 +53,7 @@
     "babel-eslint": "^8.2.3",
     "builder": "^4.0.0",
     "chai": "^4.1.2",
+    "coveralls": "^3.0.1",
     "css-loader": "^0.28.11",
     "deepmerge": "^2.1.0",
     "eslint": "^4.19.1",
@@ -73,11 +74,11 @@
     "tslint": "^5.9.1",
     "typescript": "^2.8.1",
     "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14",
+    "webpack-stats-plugin": "^0.2.1",
     "webpack1": "file:test/fixtures/packages/webpack1",
     "webpack2": "file:test/fixtures/packages/webpack2",
     "webpack3": "file:test/fixtures/packages/webpack3",
-    "webpack4": "file:test/fixtures/packages/webpack4",
-    "webpack-cli": "^2.0.14",
-    "webpack-stats-plugin": "^0.2.1"
+    "webpack4": "file:test/fixtures/packages/webpack4"
   }
 }
