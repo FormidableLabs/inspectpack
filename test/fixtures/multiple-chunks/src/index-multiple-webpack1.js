@@ -1,7 +1,9 @@
 /* eslint-disable no-console*/
 
-// TODO: I think webpack1 has a bug with actually running this code. Runtime
-// gets an error like:
+// TODO(67): I think webpack1 has a bug with actually running this code.
+// https://github.com/FormidableLabs/inspectpack/issues/67
+//
+// Runtime gets an error like:
 //
 // ```
 // bundle-multiple.js:50 Uncaught TypeError: Cannot read property 'call' of undefined
