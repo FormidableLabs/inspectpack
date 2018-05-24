@@ -1,3 +1,5 @@
 describe("bin/lib/args", () => {
-  it("needs tests"); // TODO(TESTS): `bin` tests.
+  // TODO(65): `bin` tests.
+  // https://github.com/FormidableLabs/inspectpack/issues/65
+  it("needs tests");
 });

@@ -64,7 +64,8 @@ const webpackOld = {
   context: webpack4.context,
   entry: webpack4.entry,
   output: webpack4.output,
-  // TODO: Add minify thing here -- mode === "production",
+  // TODO(66): Add minify thing here -- mode === "production",
+  // https://github.com/FormidableLabs/inspectpack/issues/66
   module: vers === "1" ? webpack1Module : webpack4.module,
   plugins: webpack4.plugins
 };
