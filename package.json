@@ -54,7 +54,7 @@
     "babel-eslint": "^8.2.3",
     "builder": "^4.0.0",
     "chai": "^4.1.2",
-    "coveralls": "^3.0.1",
+    "codecov": "^3.0.2",
     "css-loader": "^0.28.11",
     "deepmerge": "^2.1.0",
     "eslint": "^4.19.1",

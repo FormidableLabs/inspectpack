@@ -291,6 +291,6 @@ Other tools that inspect Webpack bundles:
 [trav_site]: https://travis-ci.org/FormidableLabs/inspectpack
 [appveyor_img]: https://ci.appveyor.com/api/projects/status/github/formidablelabs/inspectpack?branch=master&svg=true
 [appveyor_site]: https://ci.appveyor.com/project/FormidableLabs/inspectpack
-[cov]: https://coveralls.io
-[cov_img]: https://coveralls.io/repos/github/FormidableLabs/inspectpack/badge.svg?branch=master
-[cov_site]: https://coveralls.io/github/FormidableLabs/inspectpack?branch=master
+[cov]: (https://codecov.io
+[cov_img]: https://codecov.io/gh/FormidableLabs/inspectpack/branch/master/graph/badge.svg
+[cov_site]: https://codecov.io/gh/FormidableLabs/inspectpack
