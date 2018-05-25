@@ -20,4 +20,4 @@ script:
   - yarn run build-test
   - yarn run check-ci
   # Upload to coveralls, but don't _fail_ if coveralls is down.
-  - cat coverage/lcov.info | node_modules/.bin/coveralls || echo "Coveralls upload failed"
+  - cat coverage/lcov.info | node node_modules/coveralls/bin/coveralls.js || echo "Coveralls upload failed"
