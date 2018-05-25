@@ -16,8 +16,8 @@ install:
 
 script:
   - yarn --version
-  - yarn run build
+  - yarn run clean
+  - yarn run build-lib --sourcemap
   - yarn run build-test
-  - yarn run check
-  # Upload to coveralls, but don't _fail_ if coveralls is down.
-  - cat coverage/lcov.info | node_modules/.bin/coveralls || echo "Coveralls upload failed"
+  - yarn run check-ci
+  - codecov coverage/*.json

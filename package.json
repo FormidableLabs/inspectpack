@@ -35,7 +35,8 @@
     "lint": "builder concurrent eslint tslint --buffer",
     "test": "mocha \"test/**/*.spec.ts\"",
     "test-cov": "nyc mocha \"test/**/*.spec.ts\"",
-    "check": "npm run lint && npm run test"
+    "check": "npm run lint && npm run test",
+    "check-ci": "npm run lint && npm run test-cov"
   },
   "dependencies": {
     "chalk": "^2.4.0",
@@ -53,7 +54,7 @@
     "babel-eslint": "^8.2.3",
     "builder": "^4.0.0",
     "chai": "^4.1.2",
-    "coveralls": "^3.0.1",
+    "codecov": "^3.0.2",
     "css-loader": "^0.28.11",
     "deepmerge": "^2.1.0",
     "eslint": "^4.19.1",
