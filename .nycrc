@@ -7,7 +7,6 @@
   ],
   "reporter": [
     "lcov",
-    "json",
     "text"
   ],
   "all": true

@@ -20,4 +20,4 @@ script:
   - yarn run build-lib --sourcemap
   - yarn run build-test
   - yarn run check-ci
-  - codecov coverage/*.json
+  - codecov
