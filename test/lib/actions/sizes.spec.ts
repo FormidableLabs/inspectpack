@@ -24,6 +24,12 @@ const PATCHED_MOMENT_LOCALE_ES = {
 const PATCHED_MODS = {
   "moment/locale /es/": PATCHED_MOMENT_LOCALE_ES,
   "moment/locale sync /es/": PATCHED_MOMENT_LOCALE_ES,
+  "webpack/buildin/global.js": {
+    baseName: "webpack/buildin/global.js",
+    identifier: resolve(__dirname, "../../../node_modules/webpack/buildin/global.js"),
+    size: 300,
+    source: "REMOVED",
+  },
   "webpack/buildin/module.js": {
     baseName: "webpack/buildin/module.js",
     identifier: resolve(__dirname, "../../../node_modules/webpack/buildin/module.js"),
