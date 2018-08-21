@@ -2,7 +2,9 @@ environment:
   matrix:
     - nodejs_version: "6"
     - nodejs_version: "8"
-    - nodejs_version: "10"
+    # `mock-fs` doesn't support `node@10.5+`
+    # https://github.com/FormidableLabs/inspectpack/issues/83
+    - nodejs_version: "10.4"
 
 # Install scripts. (runs after repo cloning)
 install:

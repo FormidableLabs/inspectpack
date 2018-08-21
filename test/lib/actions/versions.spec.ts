@@ -179,8 +179,7 @@ describe("lib/actions/versions", () => {
     });
 
     describe("node_modules scenarios", () => {
-      // TODO: REENABLE - EXPERIMENT
-      it.skip("errors on malformed root package.json", () => {
+      it("errors on malformed root package.json", () => {
         mock({
           "test/fixtures/duplicates-cjs": {
             "package.json": "BAD_NOT_JSON",
