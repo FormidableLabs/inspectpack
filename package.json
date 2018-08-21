@@ -3,6 +3,9 @@
   "version": "3.0.1",
   "description": "An inspection tool for Webpack frontend JavaScript bundles.",
   "main": "lib/index.js",
+  "bin": {
+    "inspectpack": "bin/inspectpack.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/FormidableLabs/inspectpack.git"
@@ -65,7 +68,7 @@
     "expose-loader": "^0.7.5",
     "inspectpack-test-fixtures": "file:test/fixtures",
     "mocha": "^5.1.0",
-    "mock-fs": "^4.4.2",
+    "mock-fs": "^4.6.0",
     "nyc": "^11.6.0",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.6.2",

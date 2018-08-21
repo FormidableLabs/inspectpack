@@ -3,7 +3,9 @@ language: node_js
 node_js:
   - "6"
   - "8"
-  - "10"
+  # `mock-fs` doesn't support `node@10.5+`
+  # https://github.com/FormidableLabs/inspectpack/issues/83
+  - "10.4"
 
 branches:
   only:
