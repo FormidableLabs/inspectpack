@@ -113,6 +113,11 @@ describe("lib/actions/versions", () => {
         scopedInstance,
         multipleRootsInstance,
       ] = instances;
+
+      expect(simpleInstance).to.not.be.an("undefined");
+      expect(dupsCjsInstance).to.not.be.an("undefined");
+      expect(scopedInstance).to.not.be.an("undefined");
+      expect(multipleRootsInstance).to.not.be.an("undefined");
     }),
   );
 
