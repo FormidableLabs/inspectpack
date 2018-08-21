@@ -3,6 +3,9 @@
   "version": "3.0.1",
   "description": "An inspection tool for Webpack frontend JavaScript bundles.",
   "main": "lib/index.js",
+  "bin": {
+    "inspectpack": "bin/inspectpack.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/FormidableLabs/inspectpack.git"
