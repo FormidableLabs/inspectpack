@@ -14,8 +14,10 @@ interface Stats {
 export class InspectpackPlugin {
   public apply(compiler: Compiler) {
     if (compiler.hooks) {
+      // Webpack4 integration
       compiler.hooks.done.tap("inspectpack-plugin", this.analyze.bind(this));
     } else {
+      // Webpack1-3 integration
       compiler.plugin("done", this.analyze.bind(this));
     }
   }
