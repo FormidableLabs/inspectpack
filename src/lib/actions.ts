@@ -47,7 +47,7 @@ export const actions = (
  *
  * @param opts {IRenderOpts} action + render options
  * @param opts.action {String} name of action
- * @param opts.format {Object} webpack stats object
+ * @param opts.format {Object} output format
  * @param opts.stats {Object} webpack stats object
  * @returns {Promise<string>} Rendered result
  */
