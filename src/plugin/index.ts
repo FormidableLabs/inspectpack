@@ -28,11 +28,12 @@ export class InspectpackPlugin {
     Promise.all([
       actions("duplicates", { stats }),
       actions("versions", { stats }),
-    ].map((p) => p.then((action) => action.getData())))
+    ].map((p) => p.then((action) => action.template.text())))
       .then((datas) => {
-        const [ duplicates, versions ] = datas;
-        const out = JSON.stringify({ duplicates, versions }, null, 2);
-        console.log(out); // tslint:disable-line no-console
+        // TODO HERE;
+        // TODO: 1 `plugin` specific text
+        // TODO: 2 a header with WARNING and stuff like other plugins
+        console.log(datas.join("\n\n")); // tslint:disable-line no-console
       });
   }
 }
