@@ -30,10 +30,7 @@ export class InspectpackPlugin {
       actions("versions", { stats }),
     ].map((p) => p.then((action) => action.template.plugin())))
       .then((datas) => {
-        // TODO HERE;
-        // TODO: 1 `plugin` specific text
-        // TODO: 2 a header with WARNING and stuff like other plugins
-        console.log(datas.join("\n\n")); // tslint:disable-line no-console
+        console.log(`\n${datas.join("\n\n")}`); // tslint:disable-line no-console
       });
   }
 }

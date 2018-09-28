@@ -489,7 +489,7 @@ class VersionsTemplate extends Template {
     return Promise.resolve()
       .then(() => this.action.getData() as Promise<IDuplicatesData>)
       .then(({ meta, assets }) => {
-        const header = chalk`{gray Package version skews (Inspectpack)}`;
+        const header = chalk`Package version skews {gray (Inspectpack)}`;
 
         // No duplicates
         if (meta.files.num === 0) {
@@ -504,6 +504,8 @@ class VersionsTemplate extends Template {
 
         const report = this.trim(chalk`
           ${header}
+
+          {red Found ${meta.skewedPackages.num} packages with skewed versions}
 
           ${Object.keys(assets)
             .filter((name) => Object.keys(assets[name].packages).length)

@@ -274,7 +274,7 @@ class DuplicatesTemplate extends Template {
     return Promise.resolve()
       .then(() => this.action.getData() as Promise<IDuplicatesData>)
       .then(({ meta, assets }) => {
-        const header = chalk`{gray Duplicates (Inspectpack)}`;
+        const header = chalk`Duplicates {gray (Inspectpack)}`;
 
         // No duplicates
         if (meta.extraFiles.num === 0) {
@@ -288,11 +288,10 @@ class DuplicatesTemplate extends Template {
         const dupFiles = (name: string) => Object.keys(assets[name].files)
           .map((baseName) => {
             const { files } = assets[name];
-            const base = files[baseName];
 
             const sources = files[baseName].sources
-              .map((sourceGroup, i) => sourceGroup.modules
-                .map((mod) => `(${mod.size.full}) ${chalk.gray(mod.fileName)}`)
+              .map((sourceGroup) => sourceGroup.modules
+                .map((mod) => `(${mod.size.full}) ${chalk.gray(mod.fileName)}`),
               )
               .reduce((m, a) => m.concat(a), [])
               .join("\n  ");
@@ -303,8 +302,6 @@ class DuplicatesTemplate extends Template {
             `, 14);
           })
           .join("\n");
-
-        console.log("TODO HERE", meta);
 
         const report = this.trim(chalk`
           ${header}
