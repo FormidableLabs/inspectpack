@@ -274,14 +274,14 @@ class DuplicatesTemplate extends Template {
     return Promise.resolve()
       .then(() => this.action.getData() as Promise<IDuplicatesData>)
       .then(({ meta, assets }) => {
-        const header = chalk`Duplicates {gray (Inspectpack)}`;
+        const header = chalk`{underline.bold.cyan Duplicates} {gray (Inspectpack)}`;
 
         // No duplicates
         if (meta.extraFiles.num === 0) {
           return this.trim(chalk`
             ${header}
 
-            {green No duplicates found}
+            {green No duplicates found.}
           `, 12);
         }
 
@@ -303,10 +303,15 @@ class DuplicatesTemplate extends Template {
           })
           .join("\n");
 
+        // tslint:disable-next-line max-line-length
+        const explain  = "Each duplicate source adds unncessary bytes to your bundle for what should be the same source file/module.";
+
         const report = this.trim(chalk`
           ${header}
 
-          {red Found ${meta.extraSources.num} duplicate sources in bundle}
+          ${explain}
+
+          {red Found ${meta.extraSources.num} duplicate sources in bundle.}
 
           ${Object.keys(assets)
             .filter((name) => Object.keys(assets[name].files).length)

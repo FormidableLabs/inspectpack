@@ -489,23 +489,28 @@ class VersionsTemplate extends Template {
     return Promise.resolve()
       .then(() => this.action.getData() as Promise<IDuplicatesData>)
       .then(({ meta, assets }) => {
-        const header = chalk`Package version skews {gray (Inspectpack)}`;
+        const header = chalk`{underline.bold.cyan Package version skews} {gray (Inspectpack)}`;
 
         // No duplicates
         if (meta.files.num === 0) {
           return this.trim(chalk`
             ${header}
 
-            {green No version skews found}
+            {green No version skews found.}
           `, 12);
         }
 
         const versions = () => "TODO VERSIONS FUNCTION";
 
+        // tslint:disable-next-line max-line-length
+        const explain  = "These are the different package version \"skews\" that result in duplicate sources of files that could otherwise collapse to a single package dependency.";
+
         const report = this.trim(chalk`
           ${header}
 
-          {red Found ${meta.skewedPackages.num} packages with skewed versions}
+          ${explain}
+
+          {red Found ${meta.skewedPackages.num} packages with skewed versions.}
 
           ${Object.keys(assets)
             .filter((name) => Object.keys(assets[name].packages).length)
