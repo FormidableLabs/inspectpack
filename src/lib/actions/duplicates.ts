@@ -269,6 +269,56 @@ class DuplicatesTemplate extends Template {
           .join("\n"))
         .join("\n"));
   }
+
+  public plugin(): Promise<string> {
+    return Promise.resolve()
+      .then(() => this.action.getData() as Promise<IDuplicatesData>)
+      .then(({ meta, assets }) => {
+        const header = chalk`{gray Duplicates (Inspectpack)}`;
+
+        // No duplicates
+        if (meta.extraFiles.num === 0) {
+          return this.trim(chalk`
+            ${header}
+
+            {green No duplicates found}
+          `, 12);
+        }
+
+        const dupFiles = (name: string) => Object.keys(assets[name].files)
+          .map((baseName) => {
+            const { files } = assets[name];
+            const base = files[baseName];
+
+            const sources = files[baseName].sources
+              .map((sourceGroup, i) => sourceGroup.modules
+                .map((mod) => `(${mod.size.full}) ${chalk.gray(mod.fileName)}`)
+              )
+              .reduce((m, a) => m.concat(a), [])
+              .join("\n  ");
+
+            return this.trim(chalk`
+              * {yellow ${baseName}}
+                ${sources}
+            `, 14);
+          })
+          .join("\n");
+
+        console.log("TODO HERE", meta);
+
+        const report = this.trim(chalk`
+          ${header}
+
+          {red Found ${meta.extraSources.num} duplicate sources in bundle}
+
+          ${Object.keys(assets)
+            .filter((name) => Object.keys(assets[name].files).length)
+            .map(dupFiles).join("\n")}
+        `, 10);
+
+        return report;
+      });
+  }
 }
 
 export const create = (opts: IActionConstructor): IAction => {

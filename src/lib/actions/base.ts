@@ -258,6 +258,7 @@ export interface ITemplate {
   json(): Promise<string>;
   text(): Promise<string>;
   tsv(): Promise<string>;
+  plugin(): Promise<string>;
   render(format: TemplateFormat): Promise<string>;
 }
 
@@ -274,6 +275,11 @@ export abstract class Template implements ITemplate {
 
   public abstract text(): Promise<string>;
   public abstract tsv(): Promise<string>;
+
+  // For use by the inspectpack plugin.
+  public plugin(): Promise<string> {
+    return this.text();
+  }
 
   public render(format: TemplateFormat): Promise<string> {
     return this[format]();

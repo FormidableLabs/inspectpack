@@ -28,7 +28,7 @@ export class InspectpackPlugin {
     Promise.all([
       actions("duplicates", { stats }),
       actions("versions", { stats }),
-    ].map((p) => p.then((action) => action.template.text())))
+    ].map((p) => p.then((action) => action.template.plugin())))
       .then((datas) => {
         // TODO HERE;
         // TODO: 1 `plugin` specific text
