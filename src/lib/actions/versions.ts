@@ -484,6 +484,36 @@ class VersionsTemplate extends Template {
           .join("\n"))
         .join("\n"));
   }
+
+  public plugin(): Promise<string> {
+    return Promise.resolve()
+      .then(() => this.action.getData() as Promise<IDuplicatesData>)
+      .then(({ meta, assets }) => {
+        const header = chalk`{gray Package version skews (Inspectpack)}`;
+
+        // No duplicates
+        if (meta.files.num === 0) {
+          return this.trim(chalk`
+            ${header}
+
+            {green No version skews found}
+          `, 12);
+        }
+
+        const versions = () => "TODO VERSIONS FUNCTION";
+
+        const report = this.trim(chalk`
+          ${header}
+
+          ${Object.keys(assets)
+            .filter((name) => Object.keys(assets[name].packages).length)
+            .map(versions)
+            .join("\n")}
+        `, 10);
+
+        return report;
+      });
+  }
 }
 
 export const create = (opts: IActionConstructor): IAction => {
