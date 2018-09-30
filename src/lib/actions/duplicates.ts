@@ -297,7 +297,7 @@ class DuplicatesTemplate extends Template {
               .join("\n  ");
 
             return this.trim(chalk`
-              * {yellow ${baseName}}
+              * {green ${baseName}}
                 ${sources}
             `, 14);
           })

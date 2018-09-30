@@ -503,7 +503,7 @@ class VersionsTemplate extends Template {
         const versions = (name: string) => Object.keys(assets[name].packages)
           .sort(sort)
           .map((pkgName) => this.trim(chalk`
-            * {yellow ${pkgName}}
+            * {green.bold.underline ${pkgName}}
               ${Object.keys(assets[name].packages[pkgName])
                 .sort(sort)
                 .map((version) => this.trim(chalk`
@@ -517,9 +517,9 @@ class VersionsTemplate extends Template {
 
                       return this.trim(chalk`
                       ${skews
-                        .map((pkgParts) => pkgParts.map((part) => ({
+                        .map((pkgParts) => pkgParts.map((part, i) => ({
                           ...part,
-                          name: chalk.gray(part.name),
+                          name: chalk[i < pkgParts.length - 1 ? "gray" : "green"](part.name),
                         })))
                         .map(pkgNamePath)
                         .sort(sort)
@@ -537,7 +537,7 @@ class VersionsTemplate extends Template {
           .join("\n");
 
         // tslint:disable-next-line max-line-length
-        const explain  = "These are the different package version \"skews\" that result in duplicate sources of files that could otherwise collapse to a single package dependency.";
+        const explain  = "These are the different package version \"skews\" that result in duplicate sources of files that could otherwise collapse to a single package dependency. Also note this is a view \"as depended on\", not what is actually flattened in your installed `node_modules` folder on disk.";
 
         const report = this.trim(chalk`
           ${header}
