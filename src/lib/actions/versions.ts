@@ -500,7 +500,41 @@ class VersionsTemplate extends Template {
           `, 12);
         }
 
-        const versions = () => "TODO VERSIONS FUNCTION";
+        const versions = (name: string) => Object.keys(assets[name].packages)
+          .sort(sort)
+          .map((pkgName) => this.trim(chalk`
+            * {yellow ${pkgName}}
+              ${Object.keys(assets[name].packages[pkgName])
+                .sort(sort)
+                .map((version) => this.trim(chalk`
+                  ${Object.keys(assets[name].packages[pkgName][version])
+                    .sort(sort)
+                    .map((filePath) => {
+                      const {
+                        skews,
+                        modules,
+                      } = assets[name].packages[pkgName][version][filePath];
+
+                      return this.trim(chalk`
+                      ${skews
+                        .map((pkgParts) => pkgParts.map((part) => ({
+                          ...part,
+                          name: chalk.gray(part.name),
+                        })))
+                        .map(pkgNamePath)
+                        .sort(sort)
+                        .map((pkgStr) => chalk`({gray ${version}}) ${pkgStr}`)
+                        .join("\n  ")
+                      }
+                      `, 20);
+                    })
+                    .join("\n    ")
+                  }
+                `, 16))
+                .join("\n  ")
+              }
+          `, 12))
+          .join("\n");
 
         // tslint:disable-next-line max-line-length
         const explain  = "These are the different package version \"skews\" that result in duplicate sources of files that could otherwise collapse to a single package dependency.";

@@ -291,7 +291,7 @@ class DuplicatesTemplate extends Template {
 
             const sources = files[baseName].sources
               .map((sourceGroup) => sourceGroup.modules
-                .map((mod) => `(${mod.size.full}) ${chalk.gray(mod.fileName)}`),
+                .map((mod) => chalk`({gray ${mod.size.full}}) ${chalk.gray(mod.fileName)}`),
               )
               .reduce((m, a) => m.concat(a), [])
               .join("\n  ");
