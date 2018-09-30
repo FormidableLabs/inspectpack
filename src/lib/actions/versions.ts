@@ -487,7 +487,7 @@ class VersionsTemplate extends Template {
 
   public plugin(): Promise<string> {
     return Promise.resolve()
-      .then(() => this.action.getData() as Promise<IDuplicatesData>)
+      .then(() => this.action.getData() as Promise<IVersionsData>)
       .then(({ meta, assets }) => {
         const header = chalk`{underline.bold.cyan Package version skews} {gray (Inspectpack)}`;
 
@@ -510,7 +510,7 @@ class VersionsTemplate extends Template {
 
           ${explain}
 
-          {red Found ${meta.skewedPackages.num} packages with skewed versions.}
+          {red Found ${numF(meta.skewedPackages.num)} packages with skewed versions.}
 
           ${Object.keys(assets)
             .filter((name) => Object.keys(assets[name].packages).length)

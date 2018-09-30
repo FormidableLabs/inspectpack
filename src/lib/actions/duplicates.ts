@@ -311,7 +311,7 @@ class DuplicatesTemplate extends Template {
 
           ${explain}
 
-          {red Found ${meta.extraSources.num} duplicate sources in bundle.}
+          {red Found ${numF(meta.extraSources.num)} duplicate sources in bundle.}
 
           ${Object.keys(assets)
             .filter((name) => Object.keys(assets[name].files).length)
