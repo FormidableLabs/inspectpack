@@ -43,8 +43,23 @@ export class DuplicatesPlugin {
 ${header}
 
 {green No duplicates found.}
-          `)
+          `.trimRight())
+          return;
         }
+
+        // Have duplicates. Report summary.
+        const dupMeta = dupData.meta;
+        const pkgMeta = pkgData.meta;
+        console.log(chalk`
+${header}
+
+{red Warning - Duplicates found!!!}
+
+{cyan Sources:} Found {magenta ${dupMeta.extraSources.num.toString()}} extra duplicated sources resulting in around {yellow ${dupMeta.extraSources.bytes.toString()}} wasted bytes.
+
+{cyan Packages:} Found {magenta ${pkgMeta.skewedPackages.num.toString()}} packages with version skews resulting in {yellow ${pkgMeta.skewedVersions.num.toString()}} total skewed versions.
+
+        `.trimRight());
 
         // TODO: Handle no duplicates / version skews.
         //
