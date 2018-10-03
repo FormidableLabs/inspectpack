@@ -30,10 +30,16 @@ export class DuplicatesPlugin {
       .then((a) => a.getData() as Promise<IVersionsData>)
       .then((data) => {
         // TODO: Handle no duplicates / version skews.
+        // - Number of duplicated sources (`duplicateSources`)
+        // - Number of files total at issue across packages.  (`files`)
+        // - Number of packages with skews  (`skewedPackages`)
+        // - Number of differing versions across all packages (`skewedVersions`)
+        const { meta } = data;
+        console.log("TODO HERE META", JSON.stringify({ meta }, null, 2));
 
         Object.keys(data.assets).forEach((dupAssetName) => {
           const pkgAsset = data.assets[dupAssetName];
-          console.log("TODO HERE ASSET", { dupAssetName });
+          console.log("TODO HERE ASSET", { dupAssetName, pkgAsset });
 
           const { packages } = pkgAsset;
           Object.keys(packages).forEach((pkgName) => {
