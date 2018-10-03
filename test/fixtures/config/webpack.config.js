@@ -18,16 +18,16 @@ const { resolve } = require("path");
 const { StatsWriterPlugin } = require("webpack-stats-plugin");
 
 // We have to _build_ the plugin, so just skip if not available.
-let InspectpackPlugin;
+let DuplicatesPlugin;
 try {
   // eslint-disable-next-line global-require
-  InspectpackPlugin = require("../../../plugin").InspectpackPlugin;
+  DuplicatesPlugin = require("../../../plugin").DuplicatesPlugin;
 } catch (err) {
   if (err.code !== "MODULE_NOT_FOUND") {
     throw err;
   }
   // eslint-disable-next-line no-console
-  console.log("InspectpackPlugin not found/built. Skipping");
+  console.log("DuplicatesPlugin not found/built. Skipping");
 }
 
 const mode = process.env.WEBPACK_MODE;
@@ -73,7 +73,7 @@ const webpack4 = {
     new StatsWriterPlugin({
       fields: ["assets", "modules"]
     }),
-    InspectpackPlugin ? new InspectpackPlugin() : null
+    DuplicatesPlugin ? new DuplicatesPlugin() : null
   ].filter(Boolean)
 };
 

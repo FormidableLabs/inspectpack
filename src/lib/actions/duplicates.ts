@@ -269,58 +269,6 @@ class DuplicatesTemplate extends Template {
           .join("\n"))
         .join("\n"));
   }
-
-  public plugin(): Promise<string> {
-    return Promise.resolve()
-      .then(() => this.action.getData() as Promise<IDuplicatesData>)
-      .then(({ meta, assets }) => {
-        const header = chalk`{underline.bold.cyan Duplicates} {gray (Inspectpack)}`;
-
-        // No duplicates
-        if (meta.extraFiles.num === 0) {
-          return this.trim(chalk`
-            ${header}
-
-            {green No duplicates found.}
-          `, 12);
-        }
-
-        const dupFiles = (name: string) => Object.keys(assets[name].files)
-          .map((baseName) => {
-            const { files } = assets[name];
-
-            const sources = files[baseName].sources
-              .map((sourceGroup) => sourceGroup.modules
-                .map((mod) => chalk`({gray ${mod.size.full}}) ${chalk.gray(mod.fileName)}`),
-              )
-              .reduce((m, a) => m.concat(a), [])
-              .join("\n  ");
-
-            return this.trim(chalk`
-              * {green ${baseName}}
-                ${sources}
-            `, 14);
-          })
-          .join("\n");
-
-        // tslint:disable-next-line max-line-length
-        const explain  = "Each duplicate source adds unncessary bytes to your bundle for what should be the same source file/module.";
-
-        const report = this.trim(chalk`
-          ${header}
-
-          ${explain}
-
-          {red Found ${numF(meta.extraSources.num)} duplicate sources in bundle.}
-
-          ${Object.keys(assets)
-            .filter((name) => Object.keys(assets[name].files).length)
-            .map(dupFiles).join("\n")}
-        `, 10);
-
-        return report;
-      });
-  }
 }
 
 export const create = (opts: IActionConstructor): IAction => {
