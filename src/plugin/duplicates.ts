@@ -1,6 +1,8 @@
 import { actions } from "../lib";
 import { IVersionsData } from "../lib/actions/versions";
 import { IWebpackStats } from "../lib/interfaces/webpack-stats";
+import { IDuplicatesData } from "../lib/actions/duplicates";
+import chalk from "chalk";
 
 // Simple interfaces for webpack work.
 // See, e.g. https://github.com/TypeStrong/ts-loader/blob/master/src/interfaces.ts
@@ -26,16 +28,39 @@ export class DuplicatesPlugin {
 
   public analyze(statsObj: IStats) {
     const stats = statsObj.toJson();
-    actions("versions", { stats })
-      .then((a) => a.getData() as Promise<IVersionsData>)
-      .then((data) => {
+
+    Promise.all([
+      actions("duplicates", { stats }).then((a) => a.getData() as Promise<IDuplicatesData>),
+      actions("versions", { stats }).then((a) => a.getData() as Promise<IVersionsData>)
+    ])
+      .then((datas) => {
+        const [dupData, pkgData] = datas;
+        const header = chalk`{underline.bold.cyan Duplicate Sources / Packages} {gray (Inspectpack)}`;
+
+        // No duplicates
+        if (dupData.meta.extraFiles.num === 0) {
+          console.log(chalk`
+${header}
+
+{green No duplicates found.}
+          `)
+        }
+
         // TODO: Handle no duplicates / version skews.
-        // - Number of duplicated sources (`duplicateSources`)
+        //
+        // From versions
         // - Number of files total at issue across packages.  (`files`)
         // - Number of packages with skews  (`skewedPackages`)
         // - Number of differing versions across all packages (`skewedVersions`)
-        const { meta } = data;
-        console.log("TODO HERE META", JSON.stringify({ meta }, null, 2));
+        //
+        // From duplicates
+        // - Number of duplicated sources (`duplicateSources`)
+        console.log("TODO HERE META", JSON.stringify({
+          dup: dupData.meta,
+          pkg: pkgData.meta
+        }, null, 2));
+
+        return;
 
         Object.keys(data.assets).forEach((dupAssetName) => {
           const pkgAsset = data.assets[dupAssetName];

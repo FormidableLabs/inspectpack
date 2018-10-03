@@ -39,7 +39,7 @@ interface IDuplicatesFiles {
   };
 }
 
-interface IDuplicatesData {
+export interface IDuplicatesData {
   meta: IDuplicatesSummary;
   assets: {
     [asset: string]: {
