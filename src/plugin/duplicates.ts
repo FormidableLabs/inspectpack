@@ -77,8 +77,8 @@ ${header}
 
         return;
 
-        Object.keys(data.assets).forEach((dupAssetName) => {
-          const pkgAsset = data.assets[dupAssetName];
+        Object.keys(pkgData.assets).forEach((dupAssetName) => {
+          const pkgAsset = pkgData.assets[dupAssetName];
           console.log("TODO HERE ASSET", { dupAssetName, pkgAsset });
 
           const { packages } = pkgAsset;
