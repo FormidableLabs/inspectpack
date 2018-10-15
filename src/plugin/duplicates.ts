@@ -28,16 +28,28 @@ const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
   "",
 );
 
-// TODO(RYAN): HERE --  Need to re-organize by **INSTALLED PATH** as lookup key.
+// TODO(RYAN): HERE --  Need to re-organize by **FULL INSTALLED FILE PATH** as lookup key.
 // TODO: Need to **ALSO** capture "identical" vs. "similar" (use proper naming.)
+//       As you go through structure, can see up:
+//       1. `extraSources.num > 1` means "identical match"
+//       2. `extraSources.bytes` "size of this file."
+// TODO: Figure out capture "wasted bytes maybe???" (total bytes - min bytes).
 // Organize duplicates by package name.
-const dupsByPkg = (files) => {
-  const dups = {};
+const getDuplicatesByFile = (files) => {
+  const dupsByFile = {};
 
   Object.keys(files).forEach((fileName) => {
-    const pkgName = _packageName(fileName);
-    console.log({ pkgName, fileName });
+    files[fileName].sources.forEach((source) => {
+      source.modules.forEach((mod) => {
+        dupsByFile[mod.fileName] = {
+          isIdentical: source.meta.extraSources.num > 1,
+          bytes: mod.size.full
+        };
+      });
+    });
   });
+
+  return dupsByFile;
 };
 
 export class DuplicatesPlugin {
@@ -104,16 +116,14 @@ TODO_SUMMARY
           // TODO(RYAN): Don't output asset if only 1 asset. (???)
           log(chalk`{gray ##} {yellow ${dupAssetName}}`);
 
-          let dups = null;
+          let dupsByFile = null;
           if (dupData.assets[dupAssetName] &&
             dupData.assets[dupAssetName].files) {
-            dups = dupsByPkg(dupData.assets[dupAssetName].files);
+            dupsByFile = getDuplicatesByFile(dupData.assets[dupAssetName].files);
           }
 
           const { packages } = pkgAsset;
           Object.keys(packages).forEach((pkgName) => {
-
-
             log(chalk`{cyan ${pkgName}}:`);
             Object.keys(packages[pkgName]).forEach((version) => {
               log(chalk`  {green ${version}}`);
@@ -140,6 +150,10 @@ TODO_SUMMARY
               });
             });
           });
+
+          console.log("TODO HERE dupsByFile", JSON.stringify({
+            dupsByFile
+          }, null, 2));
         });
 
         // From versions
@@ -153,7 +167,7 @@ TODO_SUMMARY
           dup: dupData.meta,
           pkg: pkgData.meta,
           dupAssets: dupData.assets,
-          //pkgAssets: pkgData.assets
+          pkgAssets: pkgData.assets,
         }, null, 2));
 
         // TODO: Add meta level "found X foo's across Y bar's..." summary.
