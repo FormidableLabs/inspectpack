@@ -3,10 +3,13 @@ import { IVersionsData, _packageName } from "../lib/actions/versions";
 import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { IDuplicatesData } from "../lib/actions/duplicates";
 import chalk from "chalk";
-import { sort } from "../lib/util/strings";
+import { sort, numF } from "../lib/util/strings";
 import { INpmPackageBase } from "../lib/util/dependencies";
 
 const { log } = console;
+
+const NOTE_IDENTICAL = chalk`{bold.red I}`;
+const NOTE_SIMILAR = chalk`{bold.yellow S}`;
 
 // Simple interfaces for webpack work.
 // See, e.g. https://github.com/TypeStrong/ts-loader/blob/master/src/interfaces.ts
@@ -42,6 +45,7 @@ const getDuplicatesByFile = (files) => {
     files[fileName].sources.forEach((source) => {
       source.modules.forEach((mod) => {
         dupsByFile[mod.fileName] = {
+          baseName: mod.baseName,
           isIdentical: source.meta.extraSources.num > 1,
           bytes: mod.size.full
         };
@@ -85,9 +89,6 @@ export class DuplicatesPlugin {
         }
 
         // Have duplicates. Report summary.
-        const dupMeta = dupData.meta;
-        const pkgMeta = pkgData.meta;
-
         // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
         log(chalk`
 {underline.bold.yellow ${header}}
@@ -138,7 +139,14 @@ TODO_SUMMARY
                   .map((pkgStr) => chalk`({green ${version}}) ${pkgStr}`)
                   .join("\n        ")
 
-                const duplicates = "TODO";
+                const duplicates = packages[pkgName][version][installed].modules
+                  .map((mod) => dupsByFile ? dupsByFile[mod.fileName] : undefined)
+                  .filter(Boolean)
+                  .map((mod) => {
+                    const note = mod.isIdentical ? NOTE_IDENTICAL : NOTE_SIMILAR;
+                    return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
+                  })
+                  .join("\n        ");
 
                 log(chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
@@ -150,10 +158,6 @@ TODO_SUMMARY
               });
             });
           });
-
-          console.log("TODO HERE dupsByFile", JSON.stringify({
-            dupsByFile
-          }, null, 2));
         });
 
         // From versions
@@ -163,12 +167,12 @@ TODO_SUMMARY
         //
         // From duplicates
         // - Number of duplicated sources (`duplicateSources`)
-        console.log("TODO HERE DATA", JSON.stringify({
-          dup: dupData.meta,
-          pkg: pkgData.meta,
-          dupAssets: dupData.assets,
-          pkgAssets: pkgData.assets,
-        }, null, 2));
+        // console.log("TODO HERE DATA", JSON.stringify({
+        //   dup: dupData.meta,
+        //   pkg: pkgData.meta,
+        //   dupAssets: dupData.assets,
+        //   pkgAssets: pkgData.assets,
+        // }, null, 2));
 
         // TODO: Add meta level "found X foo's across Y bar's..." summary.
       });
