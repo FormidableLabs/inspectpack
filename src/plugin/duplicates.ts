@@ -69,19 +69,22 @@ export class DuplicatesPlugin {
 
 {bold.yellow Warning - Duplicates found! ⚠️}
 
-- {bold Identical code sources} from the {bold same package}:
-    - TODO: PICK A COLOR
-    - TODO: NUMBER
-    - TODO: WASTED_BYTES
-- {bold Similar code files} from {bold different packages}:
-    - TODO: PICK A COLOR
-    - TODO: NUMBER
-    - TODO: WASTED_BYTES
-- {bold Identical code sources} from {bold different packages}:
-    - TODO: PICK A COLOR
-    - TODO: NUMBER
-    - TODO: WASTED_BYTES
+TODO_SUMMARY
         `.trimRight());
+
+        // TODO(RYAN): SUMMARY
+        // - {bold Identical code sources} from the {bold same package}:
+        //     - TODO: PICK A COLOR
+        //     - TODO: NUMBER
+        //     - TODO: WASTED_BYTES
+        // - {bold Similar code files} from {bold different packages}:
+        //     - TODO: PICK A COLOR
+        //     - TODO: NUMBER
+        //     - TODO: WASTED_BYTES
+        // - {bold Identical code sources} from {bold different packages}:
+        //     - TODO: PICK A COLOR
+        //     - TODO: NUMBER
+        //     - TODO: WASTED_BYTES
 
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
@@ -129,12 +132,12 @@ export class DuplicatesPlugin {
         //
         // From duplicates
         // - Number of duplicated sources (`duplicateSources`)
-        console.log("TODO HERE DATA", JSON.stringify({
-          dup: dupData.meta,
-          pkg: pkgData.meta,
-          dupAssets: dupData.assets,
-          pkgAssets: pkgData.assets
-        }, null, 2));
+        // console.log("TODO HERE DATA", JSON.stringify({
+        //   dup: dupData.meta,
+        //   pkg: pkgData.meta,
+        //   dupAssets: dupData.assets,
+        //   pkgAssets: pkgData.assets
+        // }, null, 2));
 
         // TODO: Add meta level "found X foo's across Y bar's..." summary.
       });
