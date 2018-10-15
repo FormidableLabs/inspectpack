@@ -87,6 +87,7 @@ ${header}
 
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
+          // TODO(RYAN): Don't output asset if only 1 asset. (???)
           console.log("TODO HERE ASSET", { dupAssetName, pkgAsset });
 
           const { packages } = pkgAsset;
