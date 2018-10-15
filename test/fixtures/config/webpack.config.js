@@ -16,6 +16,7 @@
  */
 const { resolve } = require("path");
 const { StatsWriterPlugin } = require("webpack-stats-plugin");
+const DuplicatePackageCheckerPlugin = require("duplicate-package-checker-webpack-plugin");
 
 // We have to _build_ the plugin, so just skip if not available.
 let DuplicatesPlugin;
@@ -72,6 +73,11 @@ const webpack4 = {
   plugins: [
     new StatsWriterPlugin({
       fields: ["assets", "modules"]
+    }),
+    new DuplicatePackageCheckerPlugin({
+      verbose: true,
+      strict: true,
+      emitError: false
     }),
     DuplicatesPlugin ? new DuplicatesPlugin() : null
   ].filter(Boolean)

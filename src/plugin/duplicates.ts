@@ -35,14 +35,15 @@ export class DuplicatesPlugin {
     ])
       .then((datas) => {
         const [dupData, pkgData] = datas;
-        const header = chalk`{underline.bold.cyan Duplicate Sources / Packages} {gray (Inspectpack)}`;
+        // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
+        const header = chalk`{underline.bold.cyan Duplicate Sources / Packages}`;
 
         // No duplicates
         if (dupData.meta.extraFiles.num === 0) {
           console.log(chalk`
 ${header}
 
-{green No duplicates found.}
+{green No duplicates found. 🚀}
           `.trimRight())
           return;
         }
@@ -53,11 +54,20 @@ ${header}
         console.log(chalk`
 ${header}
 
-{red Warning - Duplicates found!!!}
+{red.bold Warning - Duplicates found! ⚠️}
 
-{cyan Sources:} Found {magenta ${dupMeta.extraSources.num.toString()}} extra duplicated sources resulting in around {yellow ${dupMeta.extraSources.bytes.toString()}} wasted bytes.
-
-{cyan Packages:} Found {magenta ${pkgMeta.skewedPackages.num.toString()}} packages with version skews resulting in {yellow ${pkgMeta.skewedVersions.num.toString()}} total skewed versions.
+- {bold Identical code sources} from the {bold same package}:
+    - TODO: PICK A COLOR
+    - TODO: NUMBER
+    - TODO: WASTED_BYTES
+- {bold Similar code files} from {bold different packages}:
+    - TODO: PICK A COLOR
+    - TODO: NUMBER
+    - TODO: WASTED_BYTES
+- {bold Identical code sources} from {bold different packages}:
+    - TODO: PICK A COLOR
+    - TODO: NUMBER
+    - TODO: WASTED_BYTES
 
         `.trimRight());
 
@@ -74,8 +84,6 @@ ${header}
           dup: dupData.meta,
           pkg: pkgData.meta
         }, null, 2));
-
-        return;
 
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
