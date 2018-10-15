@@ -1,5 +1,5 @@
 import { actions } from "../lib";
-import { IVersionsData } from "../lib/actions/versions";
+import { IVersionsData, _packageName } from "../lib/actions/versions";
 import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { IDuplicatesData } from "../lib/actions/duplicates";
 import chalk from "chalk";
@@ -21,11 +21,24 @@ interface IStats {
 
 // `~/different-foo/~/foo`
 const shortPath = (filePath: string) => filePath.replace(/node_modules/g, "~");
+
 // `duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3`
 const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
   (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.version}`,
   "",
 );
+
+// TODO(RYAN): HERE --  Need to re-organize by **INSTALLED PATH** as lookup key.
+// TODO: Need to **ALSO** capture "identical" vs. "similar" (use proper naming.)
+// Organize duplicates by package name.
+const dupsByPkg = (files) => {
+  const dups = {};
+
+  Object.keys(files).forEach((fileName) => {
+    const pkgName = _packageName(fileName);
+    console.log({ pkgName, fileName });
+  });
+};
 
 export class DuplicatesPlugin {
   public apply(compiler: ICompiler) {
@@ -91,8 +104,16 @@ TODO_SUMMARY
           // TODO(RYAN): Don't output asset if only 1 asset. (???)
           log(chalk`{gray ##} {yellow ${dupAssetName}}`);
 
+          let dups = null;
+          if (dupData.assets[dupAssetName] &&
+            dupData.assets[dupAssetName].files) {
+            dups = dupsByPkg(dupData.assets[dupAssetName].files);
+          }
+
           const { packages } = pkgAsset;
           Object.keys(packages).forEach((pkgName) => {
+
+
             log(chalk`{cyan ${pkgName}}:`);
             Object.keys(packages[pkgName]).forEach((version) => {
               log(chalk`  {green ${version}}`);
@@ -107,11 +128,7 @@ TODO_SUMMARY
                   .map((pkgStr) => chalk`({green ${version}}) ${pkgStr}`)
                   .join("\n        ")
 
-                let duplicates = "";
-                if (dupData.assets[dupAssetName] &&
-                  dupData.assets[dupAssetName].files) {
-                  duplicates = "TODO";
-                }
+                const duplicates = "TODO";
 
                 log(chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
@@ -132,12 +149,12 @@ TODO_SUMMARY
         //
         // From duplicates
         // - Number of duplicated sources (`duplicateSources`)
-        // console.log("TODO HERE DATA", JSON.stringify({
-        //   dup: dupData.meta,
-        //   pkg: pkgData.meta,
-        //   dupAssets: dupData.assets,
-        //   pkgAssets: pkgData.assets
-        // }, null, 2));
+        console.log("TODO HERE DATA", JSON.stringify({
+          dup: dupData.meta,
+          pkg: pkgData.meta,
+          dupAssets: dupData.assets,
+          //pkgAssets: pkgData.assets
+        }, null, 2));
 
         // TODO: Add meta level "found X foo's across Y bar's..." summary.
       });
