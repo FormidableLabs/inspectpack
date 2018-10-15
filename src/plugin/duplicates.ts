@@ -104,19 +104,21 @@ export class DuplicatesPlugin {
                   .map((pkgStr) => chalk`({green ${version}}) ${pkgStr}`)
                   .join("\n        ")
 
+                let duplicates = "";
+                if (dupData.assets[dupAssetName] &&
+                  dupData.assets[dupAssetName].files) {
+                  duplicates = "TODO";
+                }
+
                 log(chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
         ${skews}
 
       {white * Duplicates}
+        ${duplicates}
 `);
               });
             });
-
-            console.log("TODO HERE PACKAGE", JSON.stringify({
-              pkgName,
-              versions: packages[pkgName]
-            }, null, 2));
           });
         });
 
@@ -127,27 +129,14 @@ export class DuplicatesPlugin {
         //
         // From duplicates
         // - Number of duplicated sources (`duplicateSources`)
-        // console.log("TODO HERE DATA", JSON.stringify({
-        //   dup: dupData.meta,
-        //   pkg: pkgData.meta,
-        //   dupAssets: dupData.assets,
-        //   pkgAssets: pkgData.assets
-        // }, null, 2));
+        console.log("TODO HERE DATA", JSON.stringify({
+          dup: dupData.meta,
+          pkg: pkgData.meta,
+          dupAssets: dupData.assets,
+          pkgAssets: pkgData.assets
+        }, null, 2));
 
         // TODO: Add meta level "found X foo's across Y bar's..." summary.
-
-        // const { assets } = datas[0];
-        // const { packages } = datas[1]
-
-        // Object.keys(datas[0].assets).forEach((assetName) => {
-        //   console.log(JSON.stringify({
-        //     assetName,
-        //     files: Object.keys(datas[0].assets[assetName].files).map(_packageName)
-        //   }, null, 2));
-        // });
-
-        // // tslint:disable-next-line no-console
-        // console.log(JSON.stringify(datas, null, 2));
       });
   }
 }
