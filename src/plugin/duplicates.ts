@@ -3,6 +3,10 @@ import { IVersionsData } from "../lib/actions/versions";
 import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { IDuplicatesData } from "../lib/actions/duplicates";
 import chalk from "chalk";
+import { sort } from "../lib/util/strings";
+import { INpmPackageBase } from "../lib/util/dependencies";
+
+const { log } = console;
 
 // Simple interfaces for webpack work.
 // See, e.g. https://github.com/TypeStrong/ts-loader/blob/master/src/interfaces.ts
@@ -14,6 +18,14 @@ interface ICompiler {
 interface IStats {
   toJson: () => IWebpackStats;
 }
+
+// `~/different-foo/~/foo`
+const shortPath = (filePath: string) => filePath.replace(/node_modules/g, "~");
+// `duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3`
+const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
+  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.version}`,
+  "",
+);
 
 export class DuplicatesPlugin {
   public apply(compiler: ICompiler) {
@@ -35,13 +47,12 @@ export class DuplicatesPlugin {
     ])
       .then((datas) => {
         const [dupData, pkgData] = datas;
-        // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
-        const header = chalk`{underline.bold.cyan Duplicate Sources / Packages}`;
+        const header = "Duplicate Sources / Packages";
 
         // No duplicates
         if (dupData.meta.extraFiles.num === 0) {
-          console.log(chalk`
-${header}
+          log(chalk`
+{underline.bold.green ${header}}
 
 {green No duplicates found. 🚀}
           `.trimRight())
@@ -51,10 +62,12 @@ ${header}
         // Have duplicates. Report summary.
         const dupMeta = dupData.meta;
         const pkgMeta = pkgData.meta;
-        console.log(chalk`
-${header}
 
-{red.bold Warning - Duplicates found! ⚠️}
+        // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
+        log(chalk`
+{underline.bold.yellow ${header}}
+
+{bold.yellow Warning - Duplicates found! ⚠️}
 
 - {bold Identical code sources} from the {bold same package}:
     - TODO: PICK A COLOR
@@ -68,11 +81,45 @@ ${header}
     - TODO: PICK A COLOR
     - TODO: NUMBER
     - TODO: WASTED_BYTES
-
         `.trimRight());
 
-        // TODO: Handle no duplicates / version skews.
-        //
+        Object.keys(pkgData.assets).forEach((dupAssetName) => {
+          const pkgAsset = pkgData.assets[dupAssetName];
+          // TODO(RYAN): Don't output asset if only 1 asset. (???)
+          log(chalk`{gray ##} {yellow ${dupAssetName}}`);
+
+          const { packages } = pkgAsset;
+          Object.keys(packages).forEach((pkgName) => {
+            log(chalk`{cyan ${pkgName}}:`);
+            Object.keys(packages[pkgName]).forEach((version) => {
+              log(chalk`  {green ${version}}`);
+              Object.keys(packages[pkgName][version]).forEach((installed) => {
+                const skews = packages[pkgName][version][installed].skews
+                  .map((pkgParts) => pkgParts.map((part, i) => ({
+                    ...part,
+                    name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
+                  })))
+                  .map(pkgNamePath)
+                  .sort(sort)
+                  .map((pkgStr) => chalk`({green ${version}}) ${pkgStr}`)
+                  .join("\n        ")
+
+                log(chalk`    {gray ${shortPath(installed)}}
+      {white * Dependency graph}
+        ${skews}
+
+      {white * Duplicates}
+`);
+              });
+            });
+
+            console.log("TODO HERE PACKAGE", JSON.stringify({
+              pkgName,
+              versions: packages[pkgName]
+            }, null, 2));
+          });
+        });
+
         // From versions
         // - Number of files total at issue across packages.  (`files`)
         // - Number of packages with skews  (`skewedPackages`)
@@ -80,24 +127,12 @@ ${header}
         //
         // From duplicates
         // - Number of duplicated sources (`duplicateSources`)
-        console.log("TODO HERE META", JSON.stringify({
-          dup: dupData.meta,
-          pkg: pkgData.meta
-        }, null, 2));
-
-        Object.keys(pkgData.assets).forEach((dupAssetName) => {
-          const pkgAsset = pkgData.assets[dupAssetName];
-          // TODO(RYAN): Don't output asset if only 1 asset. (???)
-          console.log("TODO HERE ASSET", { dupAssetName, pkgAsset });
-
-          const { packages } = pkgAsset;
-          Object.keys(packages).forEach((pkgName) => {
-            console.log("TODO HERE PACKAGE", JSON.stringify({
-              pkgName,
-              versions: packages[pkgName]
-            }, null, 2));
-          });
-        });
+        // console.log("TODO HERE DATA", JSON.stringify({
+        //   dup: dupData.meta,
+        //   pkg: pkgData.meta,
+        //   dupAssets: dupData.assets,
+        //   pkgAssets: pkgData.assets
+        // }, null, 2));
 
         // TODO: Add meta level "found X foo's across Y bar's..." summary.
 
