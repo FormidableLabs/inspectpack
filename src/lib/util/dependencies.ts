@@ -223,10 +223,26 @@ const _recurseDependencies = ({
       // Short-circuit on not founds.
       if (pkgPath === null || pkgObj === null) { return null; }
 
+      // Range from this path (need to preserve, esp. for circular references).
+      const range = ranges[pkgObj.name] || pkgObj.version || "*";
+
       // Build and check cache.
       const found = _foundMap[pkgPath] = _foundMap[pkgPath] || {};
+      if (pkgObj.name === "@scope/foo") {
+        console.log("TODO HERE _recurseDependencies", JSON.stringify({
+          filePath,
+          ranges,
+          pkgPath,
+          found,
+          range,
+        }, null, 2));
+      }
+
       if (found[name]) {
-        return { pkg: found[name] as IDependencies, pkgRanges: {} as IPackageRanges };
+        return {
+          pkg: found[name] as IDependencies,
+          pkgRanges: {} as IPackageRanges,
+        };
       }
 
       // Start building object.

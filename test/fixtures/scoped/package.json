@@ -4,7 +4,7 @@
   "description": "DUMMY APP",
   "main": "src/index.js",
   "dependencies": {
-    "@scope/foo": "^1.0.0",
+    "@scope/foo": "^1.0.9",
     "bar": "^1.0.0",
     "different-foo": "^1.0.1",
     "flattened-foo": "^1.1.0",

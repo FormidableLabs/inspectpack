@@ -381,9 +381,9 @@ class Versions extends Action {
 
 // `~/different-foo/~/foo`
 const shortPath = (filePath: string) => filePath.replace(/node_modules/g, "~");
-// `duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3`
+// `duplicates-cjs@1.2.3 -> different-foo@^1.0.1 -> foo@^2.2.0`
 const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
-  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.version}`,
+  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.range}`,
   "",
 );
 
@@ -413,9 +413,9 @@ class VersionsTemplate extends Template {
                         * {green ${shortPath(filePath)}}
                           * Num deps: ${numF(skews.length)}, files: ${numF(modules.length)}
                           ${skews
-                            .map((pkgParts) => pkgParts.map((part) => ({
+                            .map((pkgParts) => pkgParts.map((part, i) => ({
                               ...part,
-                              name: chalk.gray(part.name),
+                              name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
                             })))
                             .map(pkgNamePath)
                             .sort(sort)
