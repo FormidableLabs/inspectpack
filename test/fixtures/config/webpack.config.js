@@ -74,11 +74,11 @@ const webpack4 = {
     new StatsWriterPlugin({
       fields: ["assets", "modules"]
     }),
-    new DuplicatePackageCheckerPlugin({
+    process.env.TODO_DUP_CHECKER ? new DuplicatePackageCheckerPlugin({
       verbose: true,
       strict: true,
       emitError: false
-    }),
+    }) : null,
     DuplicatesPlugin ? new DuplicatesPlugin() : null
   ].filter(Boolean)
 };

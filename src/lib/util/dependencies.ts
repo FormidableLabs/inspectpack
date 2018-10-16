@@ -3,6 +3,7 @@ import { readDir, readJson, toPosixPath } from "./files";
 
 export interface INpmPackageBase {
   name: string;
+  range: string; // the range from upstream (may be `*` for unset)
   version: string;
 }
 
@@ -28,6 +29,10 @@ export interface IDependencies extends INpmPackageBase {
   dependencies: IDependencies[];
   // Real path to installed package
   filePath: string;
+}
+
+interface IPackageRanges {
+  [name: string]: string;
 }
 
 // **Testing**: Stubbable accessor for readJson.
@@ -191,14 +196,14 @@ const _findPackage = ({
 const _recurseDependencies = ({
   filePath,
   foundMap,
-  names,
+  ranges,
   pkgMap,
   pkgsFilter,
   rootPath,
 }: {
   filePath: string,
   foundMap?: { [filePath: string]: { [name: string]: IDependencies | null } },
-  names: string[],
+  ranges: IPackageRanges,
   pkgMap: INpmPackageMap,
   pkgsFilter?: string[],
   rootPath: string,
@@ -208,10 +213,10 @@ const _recurseDependencies = ({
 
   const isIncludedPkg = _isIncludedPkg(pkgsFilter);
 
-  return names
+  return Object.keys(ranges)
     .filter(isIncludedPkg)
     // Inflated current level.
-    .map((name): { pkg: IDependencies, pkgNames: string[] } | null => {
+    .map((name): { pkg: IDependencies, pkgRanges: IPackageRanges } | null => {
       // Find actual location.
       const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, rootPath, pkgMap });
 
@@ -221,7 +226,7 @@ const _recurseDependencies = ({
       // Build and check cache.
       const found = _foundMap[pkgPath] = _foundMap[pkgPath] || {};
       if (found[name]) {
-        return { pkg: found[name] as IDependencies, pkgNames: [] };
+        return { pkg: found[name] as IDependencies, pkgRanges: {} as IPackageRanges };
       }
 
       // Start building object.
@@ -229,6 +234,7 @@ const _recurseDependencies = ({
         dependencies: [],
         filePath: pkgPath,
         name: pkgObj.name,
+        range: ranges[pkgObj.name] || "*",
         version: pkgObj.version,
       } as IDependencies;
 
@@ -240,28 +246,28 @@ const _recurseDependencies = ({
       // Get list of package names to recurse.
       // We **don't** traverse devDeps here because shouldn't have with
       // real, installed packages.
-      const pkgNames = Object.keys(pkgObj.dependencies || {});
-      return { pkg, pkgNames };
+      const pkgRanges = pkgObj.dependencies || {};
+      return { pkg, pkgRanges };
     })
     // Remove empties
     .filter(Boolean)
     // Lazy recurse after all caches have been filled for current level.
     .map((obj) => {
       // TS: Have to cast because boolean filter isn't inferred correctly.
-      const { pkg, pkgNames } = obj as { pkg: IDependencies, pkgNames: string[] };
+      const { pkg, pkgRanges } = obj as { pkg: IDependencies, pkgRanges: IPackageRanges };
 
       // Only recurse when have dependencies.
       //
       // **Note**: This also serves as a way for found / cached dependency
       // hits to have this mutation step avoided since we manually return
       // `[]` on a cache hit.
-      if (pkgNames.length) {
+      if (Object.keys(pkgRanges).length) {
         pkg.dependencies = _recurseDependencies({
           filePath: pkg.filePath,
           foundMap: _foundMap,
-          names: pkgNames,
           pkgMap,
           pkgsFilter,
+          ranges: pkgRanges,
           rootPath,
         });
       }
@@ -338,6 +344,7 @@ const _resolveRefsOrNull = (
       .filter(Boolean),
     filePath: pkg.filePath,
     name: pkg.name,
+    range: pkg.range,
     version: pkg.version,
   } as IDependencies;
 
@@ -388,20 +395,21 @@ export const dependencies = (
       // Have a real package, start inflating.
       // Include devDependencies in root of project because _could_ end up in
       // real final bundle.
-      const names = ([] as string[]).concat(
-        Object.keys(rootPkg.dependencies || {}),
-        Object.keys(rootPkg.devDependencies || {}),
-      );
+      const ranges = {
+        ...rootPkg.devDependencies || {},
+        ...rootPkg.dependencies || {},
+      };
       let pkg: IDependencies = {
         dependencies: _recurseDependencies({
           filePath,
-          names,
           pkgMap,
           pkgsFilter,
+          ranges,
           rootPath: filePath,
         }),
         filePath,
         name: rootPkg.name || "ROOT",
+        range: ranges[rootPkg.name] || "*",
         version: rootPkg.version || "*",
       };
 
@@ -431,6 +439,7 @@ const _mapDepsToPackageName = (
   // Current level, path.
   const curPath = (pkgsPath || []).concat({
     name: deps.name,
+    range: deps.range,
     version: deps.version,
   });
 

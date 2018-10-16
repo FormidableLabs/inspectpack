@@ -347,6 +347,7 @@ describe("lib/actions/versions", () => {
               "assets.bundle\\.js.packages.foo.1\\.1\\.1.node_modules/foo.skews[0][0]",
             ).that.eql({
               name: "ROOT",
+              range: "*",
               version: "*",
             });
           });

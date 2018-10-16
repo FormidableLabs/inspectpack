@@ -254,6 +254,7 @@ describe("lib/util/dependencies", () => {
             dependencies: [],
             filePath,
             name: "hi",
+            range: "*",
             version: "*",
           });
         });
@@ -276,6 +277,7 @@ describe("lib/util/dependencies", () => {
             dependencies: [],
             filePath,
             name: "hi",
+            range: "*",
             version: "1.2.3",
           });
         });
@@ -327,16 +329,19 @@ describe("lib/util/dependencies", () => {
                     dependencies: [],
                     filePath: join(filePath, "node_modules/foo/node_modules/bar"),
                     name: "bar",
+                    range: "^3.4.5",
                     version: "3.4.7",
                   },
                 ],
                 filePath: join(filePath, "node_modules/foo"),
                 name: "foo",
+                range: "^2.3.4",
                 version: "2.3.5",
               },
             ],
             filePath,
             name: "hi",
+            range: "*",
             version: "1.2.3",
           });
         });

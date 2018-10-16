@@ -1,6 +1,11 @@
 History
 =======
 
+## Unreleased
+
+* Add `range` information to dependency items.
+* Add `DuplicatesPlugin` webpack plugin.
+
 ## 3.0.0
 
 ### Breaking changes
