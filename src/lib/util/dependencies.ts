@@ -3,7 +3,7 @@ import { readDir, readJson, toPosixPath } from "./files";
 
 export interface INpmPackageBase {
   name: string;
-  range: string; // the range from upstream (may be `*` for unset)
+  range: string; // the range from upstream (default to `version` if unset)
   version: string;
 }
 
@@ -234,7 +234,7 @@ const _recurseDependencies = ({
         dependencies: [],
         filePath: pkgPath,
         name: pkgObj.name,
-        range: ranges[pkgObj.name] || "*",
+        range: ranges[pkgObj.name] || pkgObj.version || "*",
         version: pkgObj.version,
       } as IDependencies;
 
@@ -409,7 +409,7 @@ export const dependencies = (
         }),
         filePath,
         name: rootPkg.name || "ROOT",
-        range: ranges[rootPkg.name] || "*",
+        range: ranges[rootPkg.name] || rootPkg.version ||  "*",
         version: rootPkg.version || "*",
       };
 
