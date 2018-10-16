@@ -96,7 +96,7 @@ export class DuplicatesPlugin {
 {bold.yellow Warning - Duplicates found! ⚠️}
 
 TODO_SUMMARY
-        `.trimRight());
+`);
 
         // TODO(RYAN): SUMMARY
         // - {bold Identical code sources} from the {bold same package}:
@@ -136,7 +136,6 @@ TODO_SUMMARY
                   })))
                   .map(pkgNamePath)
                   .sort(sort)
-                  .map((pkgStr) => chalk`({green ${version}}) ${pkgStr}`)
                   .join("\n        ")
 
                 const duplicates = packages[pkgName][version][installed].modules
@@ -151,7 +150,6 @@ TODO_SUMMARY
                 log(chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
         ${skews}
-
       {white * Duplicates}
         ${duplicates}
 `);
