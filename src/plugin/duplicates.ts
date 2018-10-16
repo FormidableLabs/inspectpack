@@ -1,10 +1,10 @@
-import { actions } from "../lib";
-import { IVersionsData, _packageName } from "../lib/actions/versions";
-import { IWebpackStats } from "../lib/interfaces/webpack-stats";
-import { IDuplicatesData } from "../lib/actions/duplicates";
 import chalk from "chalk";
-import { sort, numF } from "../lib/util/strings";
+import { actions } from "../lib";
+import { IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
+import { IVersionsData } from "../lib/actions/versions";
+import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { INpmPackageBase } from "../lib/util/dependencies";
+import { numF, sort } from "../lib/util/strings";
 
 const { log } = console;
 
@@ -20,6 +20,16 @@ interface ICompiler {
 
 interface IStats {
   toJson: () => IWebpackStats;
+}
+
+interface IDuplicatesByFileModule {
+  baseName: string;
+  bytes: number;
+  isIdentical: boolean;
+}
+
+interface IDuplicatesByFile {
+  [fileName: string]: IDuplicatesByFileModule;
 }
 
 // `~/different-foo/~/foo`
@@ -38,16 +48,16 @@ const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
 //       2. `extraSources.bytes` "size of this file."
 // TODO: Figure out capture "wasted bytes maybe???" (total bytes - min bytes).
 // Organize duplicates by package name.
-const getDuplicatesByFile = (files) => {
-  const dupsByFile = {};
+const getDuplicatesByFile = (files: IDuplicatesFiles) => {
+  const dupsByFile: IDuplicatesByFile = {};
 
   Object.keys(files).forEach((fileName) => {
     files[fileName].sources.forEach((source) => {
       source.modules.forEach((mod) => {
         dupsByFile[mod.fileName] = {
-          baseName: mod.baseName,
+          baseName: mod.baseName || mod.fileName,
+          bytes: mod.size.full,
           isIdentical: source.meta.extraSources.num > 1,
-          bytes: mod.size.full
         };
       });
     });
@@ -72,7 +82,7 @@ export class DuplicatesPlugin {
 
     Promise.all([
       actions("duplicates", { stats }).then((a) => a.getData() as Promise<IDuplicatesData>),
-      actions("versions", { stats }).then((a) => a.getData() as Promise<IVersionsData>)
+      actions("versions", { stats }).then((a) => a.getData() as Promise<IVersionsData>),
     ])
       .then((datas) => {
         const [dupData, pkgData] = datas;
@@ -84,7 +94,7 @@ export class DuplicatesPlugin {
 {underline.bold.green ${header}}
 
 {green No duplicates found. 🚀}
-          `.trimRight())
+          `.trimRight());
           return;
         }
 
@@ -117,7 +127,7 @@ TODO_SUMMARY
           // TODO(RYAN): Don't output asset if only 1 asset. (???)
           log(chalk`{gray ##} {yellow ${dupAssetName}}`);
 
-          let dupsByFile = null;
+          let dupsByFile: IDuplicatesByFile = {};
           if (dupData.assets[dupAssetName] &&
             dupData.assets[dupAssetName].files) {
             dupsByFile = getDuplicatesByFile(dupData.assets[dupAssetName].files);
@@ -136,10 +146,10 @@ TODO_SUMMARY
                   })))
                   .map(pkgNamePath)
                   .sort(sort)
-                  .join("\n        ")
+                  .join("\n        ");
 
                 const duplicates = packages[pkgName][version][installed].modules
-                  .map((mod) => dupsByFile ? dupsByFile[mod.fileName] : undefined)
+                  .map((mod) => dupsByFile[mod.fileName])
                   .filter(Boolean)
                   .map((mod) => {
                     const note = mod.isIdentical ? NOTE_IDENTICAL : NOTE_SIMILAR;
@@ -166,9 +176,9 @@ TODO_SUMMARY
         // From duplicates
         // - Number of duplicated sources (`duplicateSources`)
         // console.log("TODO HERE DATA", JSON.stringify({
-        //   dup: dupData.meta,
-        //   pkg: pkgData.meta,
-        //   dupAssets: dupData.assets,
+        //   // dup: dupData.meta,
+        //   // pkg: pkgData.meta,
+        //   // dupAssets: dupData.assets,
         //   pkgAssets: pkgData.assets,
         // }, null, 2));
 
