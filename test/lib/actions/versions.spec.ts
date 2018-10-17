@@ -684,11 +684,11 @@ inspectpack --action=versions
   * 3.3.3
     * ~/unscoped-foo/~/foo
       * Num deps: 1, files: 2
-      * scoped@1.2.3 -> different-foo@^1.0.1 -> foo@^2.2.0
+      * scoped@1.2.3 -> unscoped-foo@^1.0.9 -> foo@^3.3.0
   * 4.3.3
     * ~/unscoped-foo/~/deeper-unscoped/~/foo
       * Num deps: 1, files: 2
-      * scoped@1.2.3 -> different-foo@^1.0.1 -> deeper-unscoped@^1.0.0 -> foo@^4.0.0
+      * scoped@1.2.3 -> unscoped-foo@^1.0.9 -> deeper-unscoped@^1.0.0 -> foo@^4.0.0
           `.trim());
         });
     });
@@ -739,8 +739,8 @@ Asset	Package	Version	Installed Path	Dependency Path
 bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> @scope/foo@^1.0.9
 bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> flattened-foo@^1.1.0 -> @scope/foo@^1.1.1
 bundle.js	@scope/foo	2.2.2	~/uses-foo/~/@scope/foo	scoped@1.2.3 -> uses-foo@^1.0.9 -> @scope/foo@^2.2.0
-bundle.js	foo	3.3.3	~/unscoped-foo/~/foo	scoped@1.2.3 -> different-foo@^1.0.1 -> foo@^2.2.0
-bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> different-foo@^1.0.1 -> deeper-unscoped@^1.0.0 -> foo@^4.0.0
+bundle.js	foo	3.3.3	~/unscoped-foo/~/foo	scoped@1.2.3 -> unscoped-foo@^1.0.9 -> foo@^3.3.0
+bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unscoped-foo@^1.0.9 -> deeper-unscoped@^1.0.0 -> foo@^4.0.0
           `.trim());
           /*tslint:enable max-line-length*/
         });
