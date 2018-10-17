@@ -6,8 +6,6 @@ import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { INpmPackageBase } from "../lib/util/dependencies";
 import { numF, sort } from "../lib/util/strings";
 
-const { log } = console;
-
 const identical = (val: string) => chalk`{bold.magenta ${val}}`;
 const similar = (val: string) => chalk`{bold.blue ${val}}`;
 const warning = (val: string) => chalk`{bold.yellow ${val}}`;
@@ -20,8 +18,12 @@ interface ICompiler {
   plugin: (name: string, callback: () => void) => void;
 }
 
-interface IStats {
-  toJson: () => IWebpackStats;
+interface ICompilation {
+  errors: Error[];
+  warnings: Error[];
+  getStats: () => {
+    toJson: () => IWebpackStats;
+  }
 }
 
 interface IDuplicatesByFileModule {
@@ -62,21 +64,40 @@ const getDuplicatesByFile = (files: IDuplicatesFiles) => {
   return dupsByFile;
 };
 
+interface IDuplicatesPluginConstructor {
+  verbose?: boolean;
+  emitErrors?: boolean;
+}
+
 export class DuplicatesPlugin {
+  private opts: IDuplicatesPluginConstructor;
+
+  constructor(opts: IDuplicatesPluginConstructor | null) {
+    opts = opts || {};
+
+    this.opts = {};
+    this.opts.verbose = opts.verbose === true; // default `false`
+    this.opts.emitErrors = opts.emitErrors === true; // default `false`
+  }
+
   public apply(compiler: ICompiler) {
     if (compiler.hooks) {
       // Webpack4 integration
-      compiler.hooks.done.tap("inspectpack-duplicates-plugin", this.analyze.bind(this));
+      compiler.hooks.emit.tapPromise("inspectpack-duplicates-plugin", this.analyze.bind(this));
     } else {
       // Webpack1-3 integration
-      compiler.plugin("done", this.analyze.bind(this));
+      compiler.plugin("emit", this.analyze.bind(this));
     }
   }
 
-  public analyze(statsObj: IStats) {
-    const stats = statsObj.toJson();
+  public analyze(compilation: ICompilation, callback: () => void) {
+    const { errors, warnings } = compilation;
+    const stats = compilation.getStats().toJson();
 
-    Promise.all([
+    const msgs: string[] = [];
+    const log = (msg: string) => msgs.push(msg);
+
+    return Promise.all([
       actions("duplicates", { stats }).then((a) => a.getData() as Promise<IDuplicatesData>),
       actions("versions", { stats }).then((a) => a.getData() as Promise<IVersionsData>),
     ])
@@ -93,8 +114,7 @@ export class DuplicatesPlugin {
         // Have duplicates. Report summary.
         // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
         // tslint:disable max-line-length
-        log(chalk`
-${header} - ${warning("Duplicates found! ⚠️")}
+        log(chalk`${header} - ${warning("Duplicates found! ⚠️")}
 
 * {yellow.bold.underline Duplicates}: Found a total of ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similiar) accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
 * {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.skewedPackages.num)} packages with ${numF(pkgData.meta.skewedVersions.num)} {underline resolved}, ${numF(pkgData.meta.installedPackages.num)} {underline installed}, and ${numF(pkgData.meta.dependedPackages.num)} {underline depended} versions.
@@ -152,21 +172,12 @@ ${header} - ${warning("Duplicates found! ⚠️")}
           });
         });
 
-        // From versions
-        // - Number of files total at issue across packages.  (`files`)
-        // - Number of packages with skews  (`skewedPackages`)
-        // - Number of differing versions across all packages (`skewedVersions`)
-        //
-        // From duplicates
-        // - Number of duplicated sources (`duplicateSources`)
-        // console.log("TODO HERE DATA", JSON.stringify({
-        //   //dup: dupData.meta,
-        //   pkg: pkgData.meta,
-        //   // dupAssets: dupData.assets,
-        //   //pkgAssets: pkgData.assets,
-        // }, null, 2));
+        // Drain messages into warnings or Errors.
+        const output = this.opts.emitErrors ? errors : warnings;
+        output.push(new Error(msgs.concat("").join("\n")));
 
-        // TODO: Add meta level "found X foo's across Y bar's..." summary.
+        // Handle old plugin API callback.
+        if (callback) { return void callback(); }
       });
   }
 }
