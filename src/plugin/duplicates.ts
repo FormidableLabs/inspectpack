@@ -8,8 +8,10 @@ import { numF, sort } from "../lib/util/strings";
 
 const { log } = console;
 
-const NOTE_IDENTICAL = chalk`{bold.red I}`;
-const NOTE_SIMILAR = chalk`{bold.yellow S}`;
+const identical = (val: string) => chalk`{bold.red ${val}}`;
+const similar = (val: string) => chalk`{bold.red ${val}}`;
+const warning = (val: string) => chalk`{bold.yellow ${val}}`;
+const error = (val: string) => chalk`{bold.red ${val}}`;
 
 // Simple interfaces for webpack work.
 // See, e.g. https://github.com/TypeStrong/ts-loader/blob/master/src/interfaces.ts
@@ -37,16 +39,10 @@ const shortPath = (filePath: string) => filePath.replace(/node_modules/g, "~");
 
 // `duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3`
 const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
-  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.version}`,
+  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.range}`,
   "",
 );
 
-// TODO(RYAN): HERE --  Need to re-organize by **FULL INSTALLED FILE PATH** as lookup key.
-// TODO: Need to **ALSO** capture "identical" vs. "similar" (use proper naming.)
-//       As you go through structure, can see up:
-//       1. `extraSources.num > 1` means "identical match"
-//       2. `extraSources.bytes` "size of this file."
-// TODO: Figure out capture "wasted bytes maybe???" (total bytes - min bytes).
 // Organize duplicates by package name.
 const getDuplicatesByFile = (files: IDuplicatesFiles) => {
   const dupsByFile: IDuplicatesByFile = {};
@@ -86,24 +82,18 @@ export class DuplicatesPlugin {
     ])
       .then((datas) => {
         const [dupData, pkgData] = datas;
-        const header = "Duplicate Sources / Packages";
+        const header = chalk`{bold.underline Duplicate Sources / Packages}`;
 
         // No duplicates
         if (dupData.meta.extraFiles.num === 0) {
-          log(chalk`
-{underline.bold.green ${header}}
-
-{green No duplicates found. 🚀}
-          `.trimRight());
+          log(chalk`${header} - {green No duplicates found. 🚀}`);
           return;
         }
 
         // Have duplicates. Report summary.
         // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
         log(chalk`
-{underline.bold.yellow ${header}}
-
-{bold.yellow Warning - Duplicates found! ⚠️}
+${header} - ${warning("Duplicates found! ⚠️")}
 
 TODO_SUMMARY
 `);
@@ -152,7 +142,7 @@ TODO_SUMMARY
                   .map((mod) => dupsByFile[mod.fileName])
                   .filter(Boolean)
                   .map((mod) => {
-                    const note = mod.isIdentical ? NOTE_IDENTICAL : NOTE_SIMILAR;
+                    const note = mod.isIdentical ? identical("I") : similar("S");
                     return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
                   })
                   .join("\n        ");
