@@ -31,10 +31,6 @@ export interface IDependencies extends INpmPackageBase {
   filePath: string;
 }
 
-interface IPackageRanges {
-  [name: string]: string;
-}
-
 // **Testing**: Stubbable accessor for readJson.
 export const _files = { readJson };
 
@@ -199,14 +195,14 @@ const _findPackage = ({
 const _recurseDependencies = ({
   filePath,
   foundMap,
-  ranges,
+  names,
   pkgMap,
   pkgsFilter,
   rootPath,
 }: {
   filePath: string,
   foundMap?: { [filePath: string]: { [name: string]: IDependencies | null } },
-  ranges: IPackageRanges,
+  names: string[],
   pkgMap: INpmPackageMap,
   pkgsFilter?: string[],
   rootPath: string,
@@ -216,10 +212,10 @@ const _recurseDependencies = ({
 
   const isIncludedPkg = _isIncludedPkg(pkgsFilter);
 
-  return Object.keys(ranges)
+  return names
     .filter(isIncludedPkg)
     // Inflated current level.
-    .map((name): { pkg: IDependencies, pkgRanges: IPackageRanges } | null => {
+    .map((name): { pkg: IDependencies, pkgNames: string[] } | null => {
       // Find actual location.
       const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, rootPath, pkgMap });
 
@@ -229,10 +225,7 @@ const _recurseDependencies = ({
       // Build and check cache.
       const found = _foundMap[pkgPath] = _foundMap[pkgPath] || {};
       if (found[name]) {
-        return {
-          pkg: found[name] as IDependencies,
-          pkgRanges: {} as IPackageRanges,
-        };
+        return { pkg: found[name] as IDependencies, pkgNames: [] };
       }
 
       // Start building object.
@@ -240,7 +233,7 @@ const _recurseDependencies = ({
         dependencies: [],
         filePath: pkgPath,
         name: pkgObj.name,
-        range: ranges[pkgObj.name] || pkgObj.version || "*",
+        range: "*", // Temporary value. Correct in post-processing.
         version: pkgObj.version,
       } as IDependencies;
 
@@ -252,28 +245,28 @@ const _recurseDependencies = ({
       // Get list of package names to recurse.
       // We **don't** traverse devDeps here because shouldn't have with
       // real, installed packages.
-      const pkgRanges = pkgObj.dependencies || {};
-      return { pkg, pkgRanges };
+      const pkgNames = Object.keys(pkgObj.dependencies || {});
+      return { pkg, pkgNames };
     })
     // Remove empties
     .filter(Boolean)
     // Lazy recurse after all caches have been filled for current level.
     .map((obj) => {
       // TS: Have to cast because boolean filter isn't inferred correctly.
-      const { pkg, pkgRanges } = obj as { pkg: IDependencies, pkgRanges: IPackageRanges };
+      const { pkg, pkgNames } = obj as { pkg: IDependencies, pkgNames: string[] };
 
       // Only recurse when have dependencies.
       //
       // **Note**: This also serves as a way for found / cached dependency
       // hits to have this mutation step avoided since we manually return
       // `[]` on a cache hit.
-      if (Object.keys(pkgRanges).length) {
+      if (pkgNames.length) {
         pkg.dependencies = _recurseDependencies({
           filePath: pkg.filePath,
           foundMap: _foundMap,
+          names: pkgNames,
           pkgMap,
           pkgsFilter,
-          ranges: pkgRanges,
           rootPath,
         });
       }
@@ -443,21 +436,21 @@ export const dependencies = (
       // Have a real package, start inflating.
       // Include devDependencies in root of project because _could_ end up in
       // real final bundle.
-      const ranges = {
-        ...rootPkg.devDependencies || {},
-        ...rootPkg.dependencies || {},
-      };
+      const names = ([] as string[]).concat(
+        Object.keys(rootPkg.dependencies || {}),
+        Object.keys(rootPkg.devDependencies || {}),
+      );
       let pkg: IDependencies = {
         dependencies: _recurseDependencies({
           filePath,
+          names,
           pkgMap,
           pkgsFilter,
-          ranges,
           rootPath: filePath,
         }),
         filePath,
         name: rootPkg.name || "ROOT",
-        range: ranges[rootPkg.name] || rootPkg.version ||  "*",
+        range: rootPkg.version || "*", // Root package doesn't have a range.
         version: rootPkg.version || "*",
       };
 
