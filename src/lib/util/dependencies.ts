@@ -193,6 +193,9 @@ const _findPackage = ({
   return { isFlattened, pkgPath: null, pkgObj: null };
 };
 
+// - Populates `pkgMap` with installed `package.json`s
+// - Creates a recursive `IDependencies[]` object that later needs to be
+//   flattened and ranges fixed.
 const _recurseDependencies = ({
   filePath,
   foundMap,
@@ -458,10 +461,17 @@ export const dependencies = (
         version: rootPkg.version || "*",
       };
 
+      // At this point, we now have a potentially circular object with pointers.
+      // We want to convert it as follows:
+      // 1. Unwind and "flatten" the pointers.
+      // 2. Resolve any circular pointers.
+      // 3. Fix any ranges from last path before flattened package.
+
       // Post process the object and resolve circular references + flatten.
       pkg = _resolveRefs(pkg);
 
-      // Post process to correct ranges.
+      // Post process to correct ranges. There will likely be some wrong before
+      // we do this.
       pkg = _resolveRanges(pkg, pkgMap);
 
       return pkg;
