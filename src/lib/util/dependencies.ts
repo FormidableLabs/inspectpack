@@ -233,7 +233,7 @@ const _recurseDependencies = ({
         dependencies: [],
         filePath: pkgPath,
         name: pkgObj.name,
-        range: "*", // Temporary value. Correct in post-processing.
+        range: pkgObj.version || "*", // Temporary value. Correct in post-processing.
         version: pkgObj.version,
       } as IDependencies;
 
