@@ -81,6 +81,8 @@ So, we've got inefficient code that we discovered via a _manual_ inspection. Wou
 
 #### Diagnosing duplicates
 
+##### Simple report
+
 With our plugin enabled in the standard configuration:
 
 ```js
@@ -111,15 +113,104 @@ of the report.
 * The `Duplicates` summary looks at **what is in the `webpack` bundle**. It tells us there are 2 files that are not identical, but the same package file path (e.g `3.1.0` vs `4.2.3` for `lodash/index.js`) and that there are 3 code sources that end up in our final bundle (which includes _two_ for `4.2.3`). We also get a byte count for all the files at issue (`703` bytes), which presumably could roughly be cut by 2/3 if we could collapse to just **one** file to do the same thing.
 * The `Packages` summary looks at **what `npm` installed to `node_modules`**. This is the other "view" into our problems. Notably, we see that we have one package (`lodash`) that has 2 resolved versions (`3.1.0` and `4.2.3`), 3 installed version (since we place the package on disk three times), and is depended on 3 times (from root application, `one`, and `two).
 
-Then moving on the report, we get package output for each asset (e.g. outputed "bundle" files)
+After the plugin runs, we get a duplicates/package report for asset (e.g. outputted "bundle" files) with duplicate packages that produce duplicate sources in our bundles in the form of:
+
+```
+## {ASSET_NAME}
+{PACKAGE_NAME}
+  {INSTALLED_PACKAGE_VERSION NO 1} {INSTALLED_PACKAGE_PATH NO 1}
+    {DEPENDENCY PATH NO 1}
+    {DEPENDENCY PATH NO 2}
+    ...
+  {INSTALLED_PACKAGE_VERSION NO 1} {INSTALLED_PACKAGE_PATH NO 2}
+  ...
+  {INSTALLED_PACKAGE_VERSION NO 2} {INSTALLED_PACKAGE_PATH NO 3}
+  ...
+```
+
+Looking to our specific report for `lodash`, we see that we have:
+
+* Two installed paths (`~/one/~/lodash`, `~/two/~/lodash`) for one version (`3.1.0`). These are part of the dependency tree because of the graphs:
+    * `ROOT -> one@1.2.3 -> lodash@^3.0.0`
+    * `ROOT -> two@2.3.4 -> lodash@^3.0.0`
+* One installed path (`~/lodash`) for another version (`4.2.3`). This is part of the dependency tree because of a root dependency (`ROOT -> lodash@^4.1.0`).
+
+Thus for actionable information, there is a naive "quick out" that if we could switch the root dependency _also_ to `^3.0.0` or something that resolves to `lodash@3.1.0` all three packages would collapse to one using modern `npm` or `yarn`!
+
+#### Verbose report
+
+But, let's say we want a little more information of not just what the dependency tree is that ends up with these packages on disk, but also includes the bundled files that webpack is bringing in. For this, we want to enable verbose output with:
+
+```js
+new DuplicatesPlugin({
+  verbose: true
+})
+```
+
+Our resulting report is:
+
+```
+WARNING in Duplicate Sources / Packages - Duplicates found! ⚠️
+
+* Duplicates: Found a total of 2 similar files across 3 code sources (both identical + similiar) accounting for 703 bundled bytes.
+* Packages: Found a total of 1 packages with 2 resolved, 3 installed, and 3 depended versions.
+
+## bundle.js
+lodash:
+  3.1.0
+    ~/one/~/lodash
+      * Dependency graph
+        scenario-new-webpack-new-npm-unflattened@* -> one@1.2.3 -> lodash@^3.0.0
+      * Duplicates
+        lodash/index.js (I, 249)
+
+    ~/two/~/lodash
+      * Dependency graph
+        scenario-new-webpack-new-npm-unflattened@* -> two@2.3.4 -> lodash@^3.0.0
+      * Duplicates
+        lodash/index.js (I, 249)
+
+  4.2.3
+    ~/lodash
+      * Dependency graph
+        scenario-new-webpack-new-npm-unflattened@* -> lodash@^4.1.0
+      * Duplicates
+        lodash/index.js (S, 205)
+```
+
+We've got the same summary and organization as our previous report, but now we additionally have the bundled code sources with some additional information. Let's look at our first one for `3.1.0 ~/one/~/lodash`:
+
+```
+lodash/index.js (I, 249)
+```
+
+this takes the form of:
+
+```
+{FILE_PATH} ({[I]DENTICAL or [S]IMILAR}, {NUMBER_OF_BYTES})
+```
+
+which means the file `index.js` from the `lodash` package is _identical_ to at least one other file in the bundle (the `I` designation) is `249` bytes in size.
+
+Looking at the last one for `4.2.3 ~/lodash`:
+
+```
+lodash/index.js (S, 205)
+```
+
+we have the same file name as the others, but it is not identical to any other file in the bundle -- instead it is only _similar_ (the `S` designation) and is `205` bytes in size.
+
+So now, with this verbose report we can see:
+
+* The specific files in play that are duplicated sources in the bundle.
+* Whether they have any _identical_  matches elsewhere in the bundle.
+* The byte size (and hence the impact) of each source.
 
 
 
 
 
-### Options
 
-TODO
 
 
 ### Fixing bundle duplicates
