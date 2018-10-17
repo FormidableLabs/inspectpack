@@ -8,8 +8,8 @@ import { numF, sort } from "../lib/util/strings";
 
 const { log } = console;
 
-const identical = (val: string) => chalk`{bold.red ${val}}`;
-const similar = (val: string) => chalk`{bold.red ${val}}`;
+const identical = (val: string) => chalk`{bold.magenta ${val}}`;
+const similar = (val: string) => chalk`{bold.blue ${val}}`;
 const warning = (val: string) => chalk`{bold.yellow ${val}}`;
 const error = (val: string) => chalk`{bold.red ${val}}`;
 
@@ -86,31 +86,20 @@ export class DuplicatesPlugin {
 
         // No duplicates
         if (dupData.meta.extraFiles.num === 0) {
-          log(chalk`${header} - {green No duplicates found. 🚀}`);
+          log(chalk`\n${header} - {green No duplicates found. 🚀}\n`);
           return;
         }
 
         // Have duplicates. Report summary.
         // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
+        // tslint:disable max-line-length
         log(chalk`
 ${header} - ${warning("Duplicates found! ⚠️")}
 
-TODO_SUMMARY
+* {yellow.bold.underline Duplicates}: Found a total of ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similiar) accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
+* {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.skewedPackages.num)} packages with ${numF(pkgData.meta.skewedVersions.num)} {underline resolved}, ${numF(pkgData.meta.installedPackages.num)} {underline installed}, and ${numF(pkgData.meta.dependedPackages.num)} {underline depended} versions.
 `);
-
-        // TODO(RYAN): SUMMARY
-        // - {bold Identical code sources} from the {bold same package}:
-        //     - TODO: PICK A COLOR
-        //     - TODO: NUMBER
-        //     - TODO: WASTED_BYTES
-        // - {bold Similar code files} from {bold different packages}:
-        //     - TODO: PICK A COLOR
-        //     - TODO: NUMBER
-        //     - TODO: WASTED_BYTES
-        // - {bold Identical code sources} from {bold different packages}:
-        //     - TODO: PICK A COLOR
-        //     - TODO: NUMBER
-        //     - TODO: WASTED_BYTES
+        // tslint:enable max-line-length
 
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
@@ -126,9 +115,9 @@ TODO_SUMMARY
           const { packages } = pkgAsset;
           Object.keys(packages).forEach((pkgName) => {
             log(chalk`{cyan ${pkgName}}:`);
+
             Object.keys(packages[pkgName]).forEach((version) => {
-              log(chalk`  {green ${version}}`);
-              Object.keys(packages[pkgName][version]).forEach((installed) => {
+              const installs = Object.keys(packages[pkgName][version]).map((installed) => {
                 const skews = packages[pkgName][version][installed].skews
                   .map((pkgParts) => pkgParts.map((part, i) => ({
                     ...part,
@@ -147,13 +136,18 @@ TODO_SUMMARY
                   })
                   .join("\n        ");
 
-                log(chalk`    {gray ${shortPath(installed)}}
+                return chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
         ${skews}
       {white * Duplicates}
         ${duplicates}
-`);
+`;
               });
+
+              // Delay output to gather aggregates.
+              // TODO(RYAN): Add aggregates conditionally for verbose: false???
+              log(chalk`  {green ${version}}`);
+              installs.forEach((val) => log(val));
             });
           });
         });
@@ -166,10 +160,10 @@ TODO_SUMMARY
         // From duplicates
         // - Number of duplicated sources (`duplicateSources`)
         // console.log("TODO HERE DATA", JSON.stringify({
-        //   // dup: dupData.meta,
-        //   // pkg: pkgData.meta,
+        //   //dup: dupData.meta,
+        //   pkg: pkgData.meta,
         //   // dupAssets: dupData.assets,
-        //   pkgAssets: pkgData.assets,
+        //   //pkgAssets: pkgData.assets,
         // }, null, 2));
 
         // TODO: Add meta level "found X foo's across Y bar's..." summary.

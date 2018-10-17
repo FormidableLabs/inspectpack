@@ -17,6 +17,7 @@ History
 
 * Add `range` information to all dependency items returned internally for
   dependencies utilities and ultimately all the way to `versions` data.
+* Add `installedPackages` aggregate statistic to `versions` metadata.
 * Add `DuplicatesPlugin` webpack plugin.
 
 ## 3.0.0

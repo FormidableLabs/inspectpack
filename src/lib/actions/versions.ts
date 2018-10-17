@@ -165,6 +165,10 @@ export interface IVersionsMeta {
   files: {
     num: number,
   };
+  // Total number of _on-disk_ packages installed for implicated versions.
+  installedPackages: {
+    num: number,
+  };
   // Unique package names with skews.
   skewedPackages: {
     num: number,
@@ -208,6 +212,9 @@ const createEmptyMeta = (): IVersionsMeta => ({
     num: 0,
   },
   files: {
+    num: 0,
+  },
+  installedPackages: {
     num: 0,
   },
   skewedPackages: {
@@ -364,6 +371,7 @@ class Versions extends Action {
               Object.keys(pkgVers).forEach((filePath) => {
                 data.meta.files.num += pkgVers[filePath].modules.length;
                 data.meta.dependedPackages.num += pkgVers[filePath].skews.length;
+                data.meta.installedPackages.num += 1;
               });
             });
           });
@@ -442,6 +450,7 @@ class VersionsTemplate extends Template {
           {gray ## Summary}
           * Packages w/ Skews:        ${numF(meta.skewedPackages.num)}
           * Total skewed versions:    ${numF(meta.skewedVersions.num)}
+          * Total installed packages: ${numF(meta.installedPackages.num)}
           * Total depended packages:  ${numF(meta.dependedPackages.num)}
           * Total bundled files:      ${numF(meta.files.num)}
 

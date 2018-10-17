@@ -25,6 +25,9 @@ const EMPTY_VERSIONS_META: IVersionsMeta = {
   files: {
     num: 0,
   },
+  installedPackages: {
+    num: 0,
+  },
   skewedPackages: {
     num: 0,
   },
@@ -332,6 +335,9 @@ describe("lib/actions/versions", () => {
               files: {
                 num: 2,
               },
+              installedPackages: {
+                num: 1,
+              },
               skewedPackages: {
                 num: 1,
               },
@@ -456,6 +462,9 @@ describe("lib/actions/versions", () => {
               files: {
                 num: 4,
               },
+              installedPackages: {
+                num: 2,
+              },
               skewedPackages: {
                 num: 1,
               },
@@ -496,6 +505,9 @@ describe("lib/actions/versions", () => {
               },
               files: {
                 num: 5,
+              },
+              installedPackages: {
+                num: 3,
               },
               skewedPackages: {
                 num: 1,
@@ -541,6 +553,9 @@ describe("lib/actions/versions", () => {
               },
               files: {
                 num: 7,
+              },
+              installedPackages: {
+                num: 4,
               },
               skewedPackages: {
                 num: 2,
@@ -600,6 +615,9 @@ describe("lib/actions/versions", () => {
             },
             files: {
               num: 7,
+            },
+            installedPackages: {
+              num: 4,
             },
             skewedPackages: {
               num: 2,
@@ -666,6 +684,7 @@ inspectpack --action=versions
 ## Summary
 * Packages w/ Skews:        2
 * Total skewed versions:    4
+* Total installed packages: 4
 * Total depended packages:  5
 * Total bundled files:      7
 
@@ -707,6 +726,7 @@ inspectpack --action=versions
 ## Summary
 * Packages w/ Skews:        1
 * Total skewed versions:    2
+* Total installed packages: 2
 * Total depended packages:  2
 * Total bundled files:      4
 
