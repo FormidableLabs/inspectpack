@@ -223,21 +223,8 @@ const _recurseDependencies = ({
       // Short-circuit on not founds.
       if (pkgPath === null || pkgObj === null) { return null; }
 
-      // Range from this path (need to preserve, esp. for circular references).
-      const range = ranges[pkgObj.name] || pkgObj.version || "*";
-
       // Build and check cache.
       const found = _foundMap[pkgPath] = _foundMap[pkgPath] || {};
-      if (pkgObj.name === "@scope/foo") {
-        console.log("TODO HERE _recurseDependencies", JSON.stringify({
-          filePath,
-          ranges,
-          pkgPath,
-          found,
-          range,
-        }, null, 2));
-      }
-
       if (found[name]) {
         return {
           pkg: found[name] as IDependencies,
@@ -375,6 +362,48 @@ const _resolveRefs = (
   pkg: IDependencies,
 ): IDependencies => _resolveRefsOrNull(pkg) as IDependencies;
 
+// TS: null-allowing-intermediate function.
+const _resolveRangesOrNull = (
+  pkg: IDependencies,
+  pkgMap: INpmPackageMap,
+  lastFilePath?: string,
+): IDependencies | null => {
+  // Try a lookup pkgMap with lastFilePath to switch range from dependencies directly.
+  let range;
+  if (lastFilePath) {
+    const item = pkgMap[join(lastFilePath, "package.json")];
+    if (item && item.dependencies) {
+      range = item.dependencies[pkg.name];
+    }
+    if (!range && item && item.devDependencies) {
+      range = item.devDependencies[pkg.name];
+    }
+  }
+
+  // Mutate the object.
+  const resolvedPkg: IDependencies = {
+    ...pkg,
+    // Recurse.
+    dependencies: pkg.dependencies
+      .map((dep) => _resolveRangesOrNull(
+        dep,
+        pkgMap,
+        pkg.filePath,
+      ))
+      .filter(Boolean),
+    // Patch ranges
+    range: range || pkg.range,
+  } as IDependencies;
+
+  return resolvedPkg;
+};
+
+// Correct ranges from package map.
+const _resolveRanges = (
+  pkg: IDependencies,
+  pkgMap: INpmPackageMap,
+): IDependencies => _resolveRangesOrNull(pkg, pkgMap) as IDependencies;
+
 /**
  * Create a dependency graph as **depended**, irrespective of tree flattening.
  *
@@ -431,6 +460,9 @@ export const dependencies = (
 
       // Post process the object and resolve circular references + flatten.
       pkg = _resolveRefs(pkg);
+
+      // Post process to correct ranges.
+      pkg = _resolveRanges(pkg, pkgMap);
 
       return pkg;
     });
