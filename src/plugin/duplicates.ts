@@ -96,6 +96,10 @@ export class DuplicatesPlugin {
     const { errors, warnings } = compilation;
     const stats = compilation.getStats().toJson();
 
+    const { emitErrors, verbose } = this.opts;
+
+    // Stash messages for output to console (success) or compilation warnings
+    // or errors arrays on duplicates found.
     const msgs: string[] = [];
     const addMsg = (msg: string) => msgs.push(msg);
 
@@ -114,7 +118,7 @@ export class DuplicatesPlugin {
         }
 
         // Choose output format.
-        const fmt = this.opts.emitErrors ? error : warning;
+        const fmt = emitErrors ? error : warning;
 
         // Have duplicates. Report summary.
         // tslint:disable max-line-length
@@ -127,8 +131,7 @@ export class DuplicatesPlugin {
 
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
-          // TODO(RYAN): Don't output asset if only 1 asset. (???)
-          addMsg(chalk`{gray ##} {yellow ${dupAssetName}}`);
+          addMsg(chalk`{gray ## ${dupAssetName}}`);
 
           let dupsByFile: IDuplicatesByFile = {};
           if (dupData.assets[dupAssetName] &&
@@ -148,8 +151,12 @@ export class DuplicatesPlugin {
                     name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
                   })))
                   .map(pkgNamePath)
-                  .sort(sort)
-                  .join("\n        ");
+                  .sort(sort);
+
+                if (!verbose) {
+                  return chalk`  {green ${version}} {gray ${shortPath(installed)}}
+    ${skews.join("\n    ")}`;
+                }
 
                 const duplicates = packages[pkgName][version][installed].modules
                   .map((mod) => dupsByFile[mod.fileName])
@@ -157,28 +164,32 @@ export class DuplicatesPlugin {
                   .map((mod) => {
                     const note = mod.isIdentical ? identical("I") : similar("S");
                     return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
-                  })
-                  .join("\n        ");
+                  });
 
                 return chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
-        ${skews}
+        ${skews.join("\n        ")}
       {white * Duplicates}
-        ${duplicates}
+        ${duplicates.join("\n        ")}
 `;
               });
 
               // Delay output to gather aggregates.
-              // TODO(RYAN): Add aggregates conditionally for verbose: false???
-              addMsg(chalk`  {green ${version}}`);
+              if (verbose) {
+                addMsg(chalk`  {green ${version}}`);
+              }
               installs.forEach(addMsg);
             });
+
+            if (!verbose) {
+              addMsg(""); // extra newline in terse mode.
+            }
           });
         });
 
         // Drain messages into warnings or Errors.
-        const output = this.opts.emitErrors ? errors : warnings;
-        output.push(new Error(msgs.concat("").join("\n")));
+        const output = emitErrors ? errors : warnings;
+        output.push(new Error(msgs.join("\n")));
 
         // Handle old plugin API callback.
         if (callback) { return void callback(); }

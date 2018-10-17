@@ -80,7 +80,7 @@ const webpack4 = {
       emitError: false
     }) : null,
     DuplicatesPlugin ? new DuplicatesPlugin({
-      verbose: true,
+      verbose: false,
       emitErrors: false
     }) : null
   ].filter(Boolean)
