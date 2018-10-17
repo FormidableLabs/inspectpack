@@ -6,6 +6,8 @@ import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { INpmPackageBase } from "../lib/util/dependencies";
 import { numF, sort } from "../lib/util/strings";
 
+const { log } = console;
+
 const identical = (val: string) => chalk`{bold.magenta ${val}}`;
 const similar = (val: string) => chalk`{bold.blue ${val}}`;
 const warning = (val: string) => chalk`{bold.yellow ${val}}`;
@@ -23,7 +25,7 @@ interface ICompilation {
   warnings: Error[];
   getStats: () => {
     toJson: () => IWebpackStats;
-  }
+  };
 }
 
 interface IDuplicatesByFileModule {
@@ -95,7 +97,7 @@ export class DuplicatesPlugin {
     const stats = compilation.getStats().toJson();
 
     const msgs: string[] = [];
-    const log = (msg: string) => msgs.push(msg);
+    const addMsg = (msg: string) => msgs.push(msg);
 
     return Promise.all([
       actions("duplicates", { stats }).then((a) => a.getData() as Promise<IDuplicatesData>),
@@ -105,16 +107,18 @@ export class DuplicatesPlugin {
         const [dupData, pkgData] = datas;
         const header = chalk`{bold.underline Duplicate Sources / Packages}`;
 
-        // No duplicates
+        // No duplicates.
         if (dupData.meta.extraFiles.num === 0) {
           log(chalk`\n${header} - {green No duplicates found. 🚀}\n`);
           return;
         }
 
+        // Choose output format.
+        const fmt = this.opts.emitErrors ? error : warning;
+
         // Have duplicates. Report summary.
-        // TODO(RYAN): Re-color based on "green" vs "warning" vs "error"?
         // tslint:disable max-line-length
-        log(chalk`${header} - ${warning("Duplicates found! ⚠️")}
+        addMsg(chalk`${header} - ${fmt("Duplicates found! ⚠️")}
 
 * {yellow.bold.underline Duplicates}: Found a total of ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similiar) accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
 * {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.skewedPackages.num)} packages with ${numF(pkgData.meta.skewedVersions.num)} {underline resolved}, ${numF(pkgData.meta.installedPackages.num)} {underline installed}, and ${numF(pkgData.meta.dependedPackages.num)} {underline depended} versions.
@@ -124,7 +128,7 @@ export class DuplicatesPlugin {
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
           // TODO(RYAN): Don't output asset if only 1 asset. (???)
-          log(chalk`{gray ##} {yellow ${dupAssetName}}`);
+          addMsg(chalk`{gray ##} {yellow ${dupAssetName}}`);
 
           let dupsByFile: IDuplicatesByFile = {};
           if (dupData.assets[dupAssetName] &&
@@ -134,7 +138,7 @@ export class DuplicatesPlugin {
 
           const { packages } = pkgAsset;
           Object.keys(packages).forEach((pkgName) => {
-            log(chalk`{cyan ${pkgName}}:`);
+            addMsg(chalk`{cyan ${pkgName}}:`);
 
             Object.keys(packages[pkgName]).forEach((version) => {
               const installs = Object.keys(packages[pkgName][version]).map((installed) => {
@@ -166,8 +170,8 @@ export class DuplicatesPlugin {
 
               // Delay output to gather aggregates.
               // TODO(RYAN): Add aggregates conditionally for verbose: false???
-              log(chalk`  {green ${version}}`);
-              installs.forEach((val) => log(val));
+              addMsg(chalk`  {green ${version}}`);
+              installs.forEach(addMsg);
             });
           });
         });
