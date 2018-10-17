@@ -206,30 +206,35 @@ So now, with this verbose report we can see:
 * Whether they have any _identical_  matches elsewhere in the bundle.
 * The byte size (and hence the impact) of each source.
 
-
-
-
-
-
-
-
 ### Fixing bundle duplicates
 
-TODO
+Alright! The plugin has analyzed your `webpack` compilation and dumped out a lot of information about all the duplicate sources and packages. ... so what do we do about it?
 
+The real-world answer is **it's complicated**.
 
+Some things are relatively easy to fix. Others will not.
 
-<!--
-- [ ] Write up README for PLUGIN.
-    - [ ] Document options
-        - [ ] `verbose` - give examples of each
-        - [ ] `emitErrors` - fails in new webpack
-    - [ ] Duplicates naming? Add description of `files` vs `sources`.
-    - [ ] Explain problems
-    - [ ] Section on potential solutions
-    - [ ] Abbreviate `node_modules` with `~`
-    - [ ] Note that `I`dentical doesn't indicate _to which other file_, just "any". Use the CLI to digg deeper to see with `--action=duplicates`.
--->
+#### Focus first on identical code sources
+
+For starters, if you're serious about fixing pre-existing duplicates in your bundle, run with the `verbose: true` option. What that gives you a list of the identical sources used in the bundle. These pieces of code are completely equivalent and so are very low-risk for attempting to collapse.
+
+#### Change dependencies in your root `package.json`
+
+For a few issues, you may be able to change a dependency you control, usually in your root `package.json` (or any other dependency you control). In our example above, if the root `package.json` downgraded it's dependency to a semver range that resolved to `lodash@3.1.0` likely _all_ the duplicates for that mini-scenario would be solved.
+
+#### Set `resolve.alias` in your `webpack` configuration
+
+If you cannot resolve the dependencies in `package.json`s you control, you can have `webpack` do manual resolutions to a single package for you using the [`resolve.alias`](https://webpack.js.org/configuration/resolve/#resolve-alias) option in your `webpack.config.js` file.
+
+A slight warning here in that you are probably creating a bundle wherein some code sources may end up using a dependency version that is **out** of their specified semantic version range.
+
+#### Set the `resolutions` field with `yarn`
+
+In parallel to `webpack` collapsing package references in the _bundle_, if you use the `yarn` package manager to install your dependencies, you can analogous collapse to single packages in your installed `node_modules` directory before `webpack` even enters the picture.
+
+Specifying a [`resolutions`](https://yarnpkg.com/lang/en/docs/selective-version-resolutions/) field in your `package.json` allows fine-grain control over how packages with the same package dependency resolve to one or more actual version numbers.
+
+Similar to `resolve.alias`, because you can get outside the guarantees of semantic versioning with this tool, be sure to check that your overall application supports the finalized code in the bundle.
 
 ## Command line tool
 
