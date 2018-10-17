@@ -1,9 +1,22 @@
 History
 =======
 
-## Unreleased
+## Unreleased MAJOR
 
-* Add `range` information to dependency items.
+### Breaking changes
+
+* `--action=versions`: The `tsv` and `text` reports have now changed to reflect
+  dependencies hierarchies as _installed_ (e.g., `scoped@1.2.3 ->
+  flattened-foo@1.1.1 -> @scope/foo@1.1.1`) to a semever range meaning something
+  like as _depended_ (e.g., `scoped@1.2.3 -> flattened-foo@^1.1.0 ->
+  @scope/foo@^1.1.1`). We expect that this change will provide much more useful
+  information as to how and why your dependency graph impacts what is installed
+  on disk in `node_modules` and ultimately what ends up in your webpack bundle.
+
+### Features
+
+* Add `range` information to all dependency items returned internally for
+  dependencies utilities and ultimately all the way to `versions` data.
 * Add `DuplicatesPlugin` webpack plugin.
 
 ## 3.0.0

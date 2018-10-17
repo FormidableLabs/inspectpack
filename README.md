@@ -208,11 +208,12 @@ Digging in to this report, we see:
   (e.g., `1.1.1` for `~/@scope/foo` and `2.2.2` for `~/uses-foo/~/@scope/foo`).
   These different versions are **actually installed** on disk within
   `node_modules` and not flattened.
-* Within a version number (e.g. for `1.1.1`:`~/@scope/foo` we have
-  `duplicates-cjs@1.2.3 -> @scope/foo@1.1.1` and `duplicates-cjs@1.2.3 ->
-  flattened-foo@1.1.1 -> @scope/foo@1.1.1`) we have listed the "logical"
-  dependency hierarchy path of the full tree, that **is** flattened by `npm`
-  to just one actual installed path.
+* Within a version number (e.g. for `1.1.1`:`~/@scope/foo` we have `scoped@1.2.3
+  -> @scope/foo@^1.0.9` and `scoped@1.2.3 -> flattened-foo@^1.1.0 ->
+  @scope/foo@^1.1.1`) we have listed the "logical" dependency hierarchy path of
+  the full tree noted by semver _ranges_ from `package.json:dependencies`
+  (`^1.0.9` and `^1.1.1`), that **are** flattened by `npm` to just one actual
+  installed path (`node_modules/@scope/foo`).
 
 The versions report thus gives us a functional view of how the dependencies in a
 project correspond to what's actually installed on disk in `node_modules`,
