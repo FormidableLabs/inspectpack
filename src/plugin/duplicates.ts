@@ -196,7 +196,8 @@ export class DuplicatesPlugin {
         if (callback) { return void callback(); }
       })
       .catch((err) => {
-        if (callback) { return void callback(err); }
+        // Ignore error from old webpack.
+        if (callback) { return void callback(); }
         throw err;
       });
   }
