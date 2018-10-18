@@ -117,8 +117,6 @@ export class DuplicatesPlugin {
           return;
         }
 
-
-
         // Choose output format.
         const fmt = emitErrors ? error : warning;
 
