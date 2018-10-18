@@ -16,6 +16,15 @@
   "homepage": "https://github.com/FormidableLabs/inspectpack",
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "license": "MIT",
+  "keywords": [
+    "webpack",
+    "webpack-plugin",
+    "plugin",
+    "bundle",
+    "size",
+    "duplicates",
+    "packages"
+  ],
   "engines": {
     "node": ">=6.0.0"
   },
