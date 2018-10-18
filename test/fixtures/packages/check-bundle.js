@@ -9,7 +9,7 @@ const pify = require("pify");
 /**
  * Check that bundle was actually built
  */
-const { log, error } = console;
+const { log } = console;
 const statP = pify(stat);
 
 const exists = (filePath) => statP(filePath)
@@ -32,13 +32,13 @@ const main = () => {
   return exists(fixturePath)
     .then((fixtureExists) => {
       if (!fixtureExists) { // eslint-disable-line promise/always-return
-        error(chalk `\n[{red.bold Missing fixture}] ${fixturePath}\n`);
-        throw new Error(`Fixture ${fixturePath} was not built.`);
+        throw new Error(`${fixturePath} was not built.`);
       }
     });
 };
 
 main()
-  .catch(() => {
+  .catch((err) => {
+    log(chalk `\n[{red.bold Missing fixture}] ${err.message}\n`);
     process.exit(1);
   });
