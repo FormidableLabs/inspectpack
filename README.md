@@ -112,6 +112,7 @@ of the report.
 
 * The `Duplicates` summary looks at **what is in the `webpack` bundle**. It tells us there are 2 files that are not identical, but the same package file path (e.g `3.1.0` vs `4.2.3` for `lodash/index.js`) and that there are 3 code sources that end up in our final bundle (which includes _two_ for `4.2.3`). We also get a byte count for all the files at issue (`703` bytes), which presumably could roughly be cut by 2/3 if we could collapse to just **one** file to do the same thing.
 * The `Packages` summary looks at **what `npm` installed to `node_modules`**. This is the other "view" into our problems. Notably, we see that we have one package (`lodash`) that has 2 resolved versions (`3.1.0` and `4.2.3`), 3 installed version (since we place the package on disk three times), and is depended on 3 times (from root application, `one`, and `two).
+    * `~` Note: The `~` shorthand represents the `node_modules` folder, which is a common abbreviation for webpack tools. E.g., `~/two/~/lodash` really means `node_modules/two/node_modules/lodash`.
 
 After the plugin runs, we get a duplicates/package report for asset (e.g. outputted "bundle" files) with duplicate packages that produce duplicate sources in our bundles in the form of:
 
