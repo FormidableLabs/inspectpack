@@ -117,6 +117,8 @@ export class DuplicatesPlugin {
           return;
         }
 
+
+
         // Choose output format.
         const fmt = emitErrors ? error : warning;
 
@@ -190,9 +192,14 @@ export class DuplicatesPlugin {
         // Drain messages into warnings or Errors.
         const output = emitErrors ? errors : warnings;
         output.push(new Error(msgs.join("\n")));
-
-        // Handle old plugin API callback.
+      })
+      // Handle old plugin API callback.
+      .then(() => {
         if (callback) { return void callback(); }
+      })
+      .catch((err) => {
+        if (callback) { return void callback(err); }
+        throw err;
       });
   }
 }
