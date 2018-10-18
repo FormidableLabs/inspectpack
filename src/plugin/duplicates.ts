@@ -141,45 +141,57 @@ export class DuplicatesPlugin {
 
           const { packages } = pkgAsset;
           Object.keys(packages).forEach((pkgName) => {
-            addMsg(chalk`{cyan ${pkgName}}:`);
+            // Calculate stats / info during maps.
+            let latestVersion;
+            let numResolved = Object.keys(packages[pkgName]).length;
+            let numInstalls = 0;
 
-            Object.keys(packages[pkgName]).forEach((version) => {
-              const installs = Object.keys(packages[pkgName][version]).map((installed) => {
-                const skews = packages[pkgName][version][installed].skews
-                  .map((pkgParts) => pkgParts.map((part, i) => ({
-                    ...part,
-                    name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
-                  })))
-                  .map(pkgNamePath)
-                  .sort(sort);
+            const versions = Object.keys(packages[pkgName])
+              .map((version) => {
+                // Capture
+                latestVersion = version;
+                numInstalls += Object.keys(packages[pkgName][version]).length;
 
-                if (!verbose) {
-                  return chalk`  {green ${version}} {gray ${shortPath(installed)}}
+                let installs = Object.keys(packages[pkgName][version]).map((installed) => {
+                  const skews = packages[pkgName][version][installed].skews
+                    .map((pkgParts) => pkgParts.map((part, i) => ({
+                      ...part,
+                      name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
+                    })))
+                    .map(pkgNamePath)
+                    .sort(sort);
+
+                  if (!verbose) {
+                    return chalk`  {green ${version}} {gray ${shortPath(installed)}}
     ${skews.join("\n    ")}`;
-                }
+                  }
 
-                const duplicates = packages[pkgName][version][installed].modules
-                  .map((mod) => dupsByFile[mod.fileName])
-                  .filter(Boolean)
-                  .map((mod) => {
-                    const note = mod.isIdentical ? identical("I") : similar("S");
-                    return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
-                  });
+                  const duplicates = packages[pkgName][version][installed].modules
+                    .map((mod) => dupsByFile[mod.fileName])
+                    .filter(Boolean)
+                    .map((mod) => {
+                      const note = mod.isIdentical ? identical("I") : similar("S");
+                      return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
+                    });
 
-                return chalk`    {gray ${shortPath(installed)}}
+                  return chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
         ${skews.join("\n        ")}
       {white * Duplicates}
         ${duplicates.join("\n        ")}
-`;
-              });
+  `;
+                });
 
-              // Delay output to gather aggregates.
-              if (verbose) {
-                addMsg(chalk`  {green ${version}}`);
-              }
-              installs.forEach(addMsg);
-            });
+                if (verbose) {
+                  installs = [chalk`  {green ${version}}`].concat(installs);
+                }
+
+                return installs;
+              })
+              .reduce((m, a) => m.concat(a)); // flatten.
+
+            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numResolved)} resolved, ${numF(numInstalls)} installed. Latest version {green ${latestVersion || "NONE"}}.)`);
+            versions.forEach(addMsg);
 
             if (!verbose) {
               addMsg(""); // extra newline in terse mode.
