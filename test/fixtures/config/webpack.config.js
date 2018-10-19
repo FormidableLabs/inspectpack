@@ -74,7 +74,7 @@ const webpack4 = {
       fields: ["assets", "modules"]
     }),
     DuplicatesPlugin ? new DuplicatesPlugin({
-      verbose: false,
+      verbose: true,
       emitErrors: false
     }) : null
   ].filter(Boolean)

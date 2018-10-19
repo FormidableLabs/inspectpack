@@ -177,7 +177,7 @@ export class DuplicatesPlugin {
                   return chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
         ${skews.join("\n        ")}
-      {white * Duplicates}
+      {white * Duplicated files in }{gray ${dupAssetName}}
         ${duplicates.join("\n        ")}
   `;
                 });

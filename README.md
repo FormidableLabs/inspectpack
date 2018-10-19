@@ -98,7 +98,7 @@ WARNING in Duplicate Sources / Packages - Duplicates found! ⚠️
 * Packages: Found a total of 1 packages with 2 resolved, 3 installed, and 3 depended versions.
 
 ## bundle.js
-lodash:
+lodash (Found 2 resolved, 3 installed. Latest version 4.2.3.)
   3.1.0 ~/one/~/lodash
     scenario-new-webpack-new-npm-unflattened@* -> one@1.2.3 -> lodash@^3.0.0
   3.1.0 ~/two/~/lodash
@@ -111,14 +111,19 @@ Breaking down this report, we get a `webpack` "warning" emitted by default with 
 of the report.
 
 * The `Duplicates` summary looks at **what is in the `webpack` bundle**. It tells us there are 2 files that are not identical, but the same package file path (e.g `3.1.0` vs `4.2.3` for `lodash/index.js`) and that there are 3 code sources that end up in our final bundle (which includes _two_ for `4.2.3`). We also get a byte count for all the files at issue (`703` bytes), which presumably could roughly be cut by 2/3 if we could collapse to just **one** file to do the same thing.
-* The `Packages` summary looks at **what `npm` installed to `node_modules`**. This is the other "view" into our problems. Notably, we see that we have one package (`lodash`) that has 2 resolved versions (`3.1.0` and `4.2.3`), 3 installed version (since we place the package on disk three times), and is depended on 3 times (from root application, `one`, and `two).
-    * `~` Note: The `~` shorthand represents the `node_modules` folder, which is a common abbreviation for webpack tools. E.g., `~/two/~/lodash` really means `node_modules/two/node_modules/lodash`.
+* The `Packages` summary looks at **what `npm` installed to `node_modules`**. This is the other "view" into our problems.
+    * _Terminology_: Let's dig in to what things mean here.
+        * **Resolved**: We have one package (`lodash`) that has 2 resolved versions (`3.1.0` and `4.2.3`). A "resolution" means that upon inspecting the dependency tree and what's in a registry source, these specific versions "match". The results may differ at a different point in time
+        * **Installed**: These are actual packages installed to the local disk. In our case, we have **three** installs for 2 resolutions because we place an identical version twice.
+        * **Depended**: These are the number of upstream packages that create a dependency from a unique path in the graph to a package. Put more concretely, in our case, three unique `package.json` files have an entry for `lodash`.
+            * _Note_: This is a bit of complicated assessment, since aside from the root `package.json` is, all of the rest of the dependency graph depends on what is resolved at the next level to give a dependent `package.json` and so on recusively.
+    * _`~` Note_: The `~` shorthand represents the `node_modules` folder, which is a common abbreviation for webpack tools. E.g., `~/two/~/lodash` really means `node_modules/two/node_modules/lodash`.
 
 After the plugin runs, we get a duplicates/package report for asset (e.g. outputted "bundle" files) with duplicate packages that produce duplicate sources in our bundles in the form of:
 
 ```
 ## {ASSET_NAME}
-{PACKAGE_NAME}
+{PACKAGE_NAME} (Found {NUM_RESOLVED} resolved, {NUM_INSTALLED} installed. Latest version {VERSION}.)
   {INSTALLED_PACKAGE_VERSION NO 1} {INSTALLED_PACKAGE_PATH NO 1}
     {DEPENDENCY PATH NO 1}
     {DEPENDENCY PATH NO 2}
@@ -131,10 +136,11 @@ After the plugin runs, we get a duplicates/package report for asset (e.g. output
 
 Looking to our specific report for `lodash`, we see that we have:
 
-* Two installed paths (`~/one/~/lodash`, `~/two/~/lodash`) for one version (`3.1.0`). These are part of the dependency tree because of the graphs:
+* Two **installed** paths (`~/one/~/lodash`, `~/two/~/lodash`) for one **resolved** version (`3.1.0`). These are part of the dependency tree because of the graphs:
     * `ROOT -> one@1.2.3 -> lodash@^3.0.0`
     * `ROOT -> two@2.3.4 -> lodash@^3.0.0`
-* One installed path (`~/lodash`) for another version (`4.2.3`). This is part of the dependency tree because of a root dependency (`ROOT -> lodash@^4.1.0`).
+* One **installed** path (`~/lodash`) for another **resolved** version (`4.2.3`). This is part of the dependency tree because of a root dependency (`ROOT -> lodash@^4.1.0`).
+* Take these numbers together and you get our summary of `2 resolved` and `3 installed` packages from our summary besides the package name.
 
 Thus for actionable information, there is a naive "quick out" that if we could switch the root dependency _also_ to `^3.0.0` or something that resolves to `lodash@3.1.0` all three packages would collapse to one using modern `npm` or `yarn`!
 
@@ -157,25 +163,25 @@ WARNING in Duplicate Sources / Packages - Duplicates found! ⚠️
 * Packages: Found a total of 1 packages with 2 resolved, 3 installed, and 3 depended versions.
 
 ## bundle.js
-lodash:
+lodash (Found 2 resolved, 3 installed. Latest version 4.2.3.)
   3.1.0
     ~/one/~/lodash
       * Dependency graph
         scenario-new-webpack-new-npm-unflattened@* -> one@1.2.3 -> lodash@^3.0.0
-      * Duplicates
+      * Duplicated files in bundle.js
         lodash/index.js (I, 249)
 
     ~/two/~/lodash
       * Dependency graph
         scenario-new-webpack-new-npm-unflattened@* -> two@2.3.4 -> lodash@^3.0.0
-      * Duplicates
+      * Duplicated files in bundle.js
         lodash/index.js (I, 249)
 
   4.2.3
     ~/lodash
       * Dependency graph
         scenario-new-webpack-new-npm-unflattened@* -> lodash@^4.1.0
-      * Duplicates
+      * Duplicated files in bundle.js
         lodash/index.js (S, 205)
 ```
 
