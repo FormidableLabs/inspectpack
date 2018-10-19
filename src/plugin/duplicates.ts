@@ -142,6 +142,7 @@ export class DuplicatesPlugin {
           const { packages } = pkgAsset;
           Object.keys(packages).forEach((pkgName) => {
             // Calculate stats / info during maps.
+            // TODO(RYAN): Need a semver compatible sort!!!
             let latestVersion;
             let numInstalls = 0;
             const numResolved = Object.keys(packages[pkgName]).length;
@@ -179,7 +180,13 @@ export class DuplicatesPlugin {
         ${skews.join("\n        ")}
       {white * Duplicated files in }{gray ${dupAssetName}}
         ${duplicates.join("\n        ")}
-  `;
+`;
+
+// TODO_DEBUG_REMOVE: ORIGINAL MODULES:
+// ${JSON.stringify({
+//   modules: packages[pkgName][version][installed].modules,
+//   dups: dupData.assets[dupAssetName]
+// }, null, 2)}
                 });
 
                 if (verbose) {
@@ -211,6 +218,13 @@ export class DuplicatesPlugin {
         // Drain messages into warnings or Errors.
         const output = emitErrors ? errors : warnings;
         output.push(new Error(msgs.join("\n")));
+
+        // TODO_DEBUG_REMOVE
+        // console.log(msgs.join("\n"));
+        // console.log("TODO HERE REMOVE", JSON.stringify({
+        //   dupData,
+        //   pkgData,
+        // }, null, 2)
       })
       // Handle old plugin API callback.
       .then(() => {
