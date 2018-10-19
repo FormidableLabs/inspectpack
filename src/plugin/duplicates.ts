@@ -143,8 +143,8 @@ export class DuplicatesPlugin {
           Object.keys(packages).forEach((pkgName) => {
             // Calculate stats / info during maps.
             let latestVersion;
-            let numResolved = Object.keys(packages[pkgName]).length;
             let numInstalls = 0;
+            const numResolved = Object.keys(packages[pkgName]).length;
 
             const versions = Object.keys(packages[pkgName])
               .map((version) => {
@@ -190,6 +190,7 @@ export class DuplicatesPlugin {
               })
               .reduce((m, a) => m.concat(a)); // flatten.
 
+            // tslint:disable-next-line max-line-length
             addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numResolved)} resolved, ${numF(numInstalls)} installed. Latest version {green ${latestVersion || "NONE"}}.)`);
             versions.forEach(addMsg);
 
