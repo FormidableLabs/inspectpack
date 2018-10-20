@@ -119,10 +119,24 @@ const _traverseFixtureDir = (dirPath) => Promise.resolve()
           parts.reduce((partsMemo, extraPart, i) => {
             // Ensure path.
             partsMemo[extraPart] = partsMemo[extraPart] || {};
+
+
+            // TODO_HERE: THIS IS WRONG!!!!
+
             // Add object to last part.
             if (i === parts.length - 1) {
               partsMemo[extraPart] = pkgInfo[i];
             }
+
+
+            console.log("TODO HERE EXTRA", JSON.stringify({
+              i,
+              extraDir,
+              extraPart,
+              partsMemo,
+              pkgInfo
+            }, null, 2));
+
             // Memo.
             return partsMemo[extraPart];
           }, memo);

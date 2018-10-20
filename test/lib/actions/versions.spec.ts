@@ -712,10 +712,12 @@ inspectpack --action=versions
         });
     });
 
-    it("displays versions skews correctly for multiple roots packages", () => {
+    it.only("displays versions skews correctly for multiple roots packages", () => {
       mock({
         "test/fixtures/multiple-roots": fixtureDirs["test/fixtures/multiple-roots"],
       });
+
+      //console.log("TODO HERE", JSON.stringify(fixtureDirs["test/fixtures/multiple-roots"], null, 2))
 
       return multipleRootsInstance.template.text()
         .then((textStr) => {
@@ -734,7 +736,8 @@ inspectpack --action=versions
 * foo
   * 1.1.1
     * ~/foo
-      * Num deps: 1, files: 2
+      * Num deps: 2, files: 2
+      * package1@1.1.1 -> foo@^1.0.0
       * package2@2.2.2 -> foo@^1.0.0
   * 3.3.3
     * ~/different-foo/~/foo
