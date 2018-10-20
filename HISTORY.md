@@ -20,6 +20,11 @@ History
 * Add `installedPackages` aggregate statistic to `versions` metadata.
 * Add `DuplicatesPlugin` webpack plugin.
 
+### Fixes
+
+* BUG: Multiple package roots incorrectly collapse / don't prefix.
+  [#90](https://github.com/FormidableLabs/inspectpack/issues/90)
+
 ## 3.0.0
 
 ### Breaking changes

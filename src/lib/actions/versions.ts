@@ -284,7 +284,7 @@ const getAssetData = (
           data.packages[name] = data.packages[name] || {};
           const dataVers = data.packages[name][version] = data.packages[name][version] || {};
           const dataObj = dataVers[relPath] = dataVers[relPath] || {};
-          dataObj.skews = (dataObj.skews || []).concat(depsForPkgVers[filePath].skews); // TODO TEST.
+          dataObj.skews = (dataObj.skews || []).concat(depsForPkgVers[filePath].skews);
           dataObj.modules = (dataObj.modules || []).concat(modules);
         });
       });

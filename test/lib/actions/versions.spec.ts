@@ -712,12 +712,10 @@ inspectpack --action=versions
         });
     });
 
-    it.only("displays versions skews correctly for multiple roots packages", () => {
+    it("displays versions skews correctly for multiple roots packages", () => {
       mock({
         "test/fixtures/multiple-roots": fixtureDirs["test/fixtures/multiple-roots"],
       });
-
-      //console.log("TODO HERE", JSON.stringify(fixtureDirs["test/fixtures/multiple-roots"], null, 2))
 
       return multipleRootsInstance.template.text()
         .then((textStr) => {
@@ -729,7 +727,7 @@ inspectpack --action=versions
 * Packages w/ Skews:        1
 * Total skewed versions:    2
 * Total installed packages: 2
-* Total depended packages:  2
+* Total depended packages:  3
 * Total bundled files:      4
 
 ## \`bundle.js\`

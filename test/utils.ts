@@ -114,28 +114,17 @@ const _traverseFixtureDir = (dirPath) => Promise.resolve()
 
     const extraProm = Promise
         .all(extraDirs.map((extraDir) => _traverseFixtureDir(join(dirPath, extraDir))))
-        .then((pkgInfo) => extraDirs.reduce((memo, extraDir) => {
+        .then((pkgInfos) => extraDirs.reduce((memo, extraDir, i) => {
+          const pkgInfo = pkgInfos[i];
           const parts = extraDir.split("/");
-          parts.reduce((partsMemo, extraPart, i) => {
+          parts.reduce((partsMemo, extraPart, j) => {
             // Ensure path.
             partsMemo[extraPart] = partsMemo[extraPart] || {};
 
-
-            // TODO_HERE: THIS IS WRONG!!!!
-
             // Add object to last part.
-            if (i === parts.length - 1) {
-              partsMemo[extraPart] = pkgInfo[i];
+            if (j === parts.length - 1) {
+              partsMemo[extraPart] = pkgInfo;
             }
-
-
-            console.log("TODO HERE EXTRA", JSON.stringify({
-              i,
-              extraDir,
-              extraPart,
-              partsMemo,
-              pkgInfo
-            }, null, 2));
 
             // Memo.
             return partsMemo[extraPart];
