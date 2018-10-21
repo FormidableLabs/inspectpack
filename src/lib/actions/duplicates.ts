@@ -108,7 +108,7 @@ const createEmptySummary = (): IDuplicatesSummary => ({
 });
 
 interface IPackageNames {
-  [asset: string]: string[];
+  [asset: string]: Set<string>;
 }
 
 /**
@@ -124,7 +124,7 @@ export const getPackageNames = (data: IDuplicatesData): IPackageNames => {
     const pkgNames = Object.keys(data.assets[assetName].files).map(_packageName);
 
     // Unique names.
-    const uniqPkgNames = Array.from(new Set(pkgNames));
+    const uniqPkgNames = new Set(pkgNames);
 
     names[assetName] = uniqPkgNames;
   });

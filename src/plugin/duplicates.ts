@@ -113,7 +113,14 @@ export class DuplicatesPlugin {
 
         // Get packages that _have_ duplicates.
         const pkgsWithDups = getPackageNames(dupData);
-        console.log("TODO HERE pkgsWithDups", JSON.stringify(pkgsWithDups, null, 2));
+
+        // Filter/mutate the versions meta stats to reflect _only_ duplicates.
+        const numVersTotal = pkgData.meta.skewedPackages.num;
+        const numVersResolved = pkgData.meta.skewedVersions.num
+        const numVersInstalled = pkgData.meta.installedPackages.num;
+        const numVersDepended = pkgData.meta.dependedPackages.num;
+
+        // TODO_HERE: Filter to only pkgs with duplicates and readjust meta numbers.
 
         // No duplicates.
         if (dupData.meta.extraFiles.num === 0) {
@@ -129,7 +136,7 @@ export class DuplicatesPlugin {
         addMsg(chalk`${header} - ${fmt("Duplicates found! ⚠️")}
 
 * {yellow.bold.underline Duplicates}: Found a total of ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similiar) accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
-* {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.skewedPackages.num)} packages with ${numF(pkgData.meta.skewedVersions.num)} {underline resolved}, ${numF(pkgData.meta.installedPackages.num)} {underline installed}, and ${numF(pkgData.meta.dependedPackages.num)} {underline depended} versions.
+* {yellow.bold.underline Packages}: Found a total of ${numF(numVersTotal)} packages with ${numF(numVersResolved)} {underline resolved}, ${numF(numVersInstalled)} {underline installed}, and ${numF(numVersDepended)} {underline depended} versions.
 `);
         // tslint:enable max-line-length
 
@@ -148,15 +155,15 @@ export class DuplicatesPlugin {
             // Calculate stats / info during maps.
             // TODO(RYAN): Need a semver compatible sort!!!
             let latestVersion;
-            let numInstalls = 0;
-            const numResolved = Object.keys(packages[pkgName]).length;
-            let numDepended = 0;
+            let numPkgInstalled = 0;
+            const numPkgResolved = Object.keys(packages[pkgName]).length;
+            let numPkgDepended = 0;
 
             const versions = Object.keys(packages[pkgName])
               .map((version) => {
                 // Capture
                 latestVersion = version;
-                numInstalls += Object.keys(packages[pkgName][version]).length;
+                numPkgInstalled += Object.keys(packages[pkgName][version]).length;
 
                 let installs = Object.keys(packages[pkgName][version]).map((installed) => {
                   const skews = packages[pkgName][version][installed].skews
@@ -167,7 +174,7 @@ export class DuplicatesPlugin {
                     .map(pkgNamePath)
                     .sort(sort);
 
-                  numDepended += skews.length;
+                  numPkgDepended += skews.length;
 
                   if (!verbose) {
                     return chalk`  {green ${version}} {gray ${shortPath(installed)}}
@@ -212,7 +219,7 @@ export class DuplicatesPlugin {
               .reduce((m, a) => m.concat(a)); // flatten.
 
             // tslint:disable-next-line max-line-length
-            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numResolved)} resolved, ${numF(numInstalls)} installed, ${numF(numDepended)} depended. Latest {green ${latestVersion || "NONE"}}.)`);
+            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numPkgResolved)} resolved, ${numF(numPkgInstalled)} installed, ${numF(numPkgDepended)} depended. Latest {green ${latestVersion || "NONE"}}.)`);
             versions.forEach(addMsg);
 
             if (!verbose) {
