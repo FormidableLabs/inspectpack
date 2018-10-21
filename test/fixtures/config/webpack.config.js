@@ -20,7 +20,7 @@ const { StatsWriterPlugin } = require("webpack-stats-plugin");
 // We have to _build_ the plugin, so just skip if not available.
 let DuplicatesPlugin;
 try {
-  // eslint-disable-next-line global-require
+  // eslint-disable-next-line global-require,import/no-unresolved
   DuplicatesPlugin = require("../../../plugin").DuplicatesPlugin;
 } catch (err) {
   if (err.code !== "MODULE_NOT_FOUND") {

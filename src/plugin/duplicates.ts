@@ -146,6 +146,7 @@ export class DuplicatesPlugin {
             let latestVersion;
             let numInstalls = 0;
             const numResolved = Object.keys(packages[pkgName]).length;
+            let numDepended = 0;
 
             const versions = Object.keys(packages[pkgName])
               .map((version) => {
@@ -162,6 +163,8 @@ export class DuplicatesPlugin {
                     .map(pkgNamePath)
                     .sort(sort);
 
+                  numDepended += skews.length;
+
                   if (!verbose) {
                     return chalk`  {green ${version}} {gray ${shortPath(installed)}}
     ${skews.join("\n    ")}`;
@@ -174,6 +177,13 @@ export class DuplicatesPlugin {
                       const note = mod.isIdentical ? identical("I") : similar("S");
                       return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
                     });
+
+                  // TODO_DEBUG_REMOVE: No duplicates
+                  // if (!duplicates.length) {
+                  //   console.log("TODO HERE NO DUPS", {
+                  //     modules: packages[pkgName][version][installed].modules
+                  //   }, null, 2);
+                  // }
 
                   return chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
@@ -198,7 +208,7 @@ export class DuplicatesPlugin {
               .reduce((m, a) => m.concat(a)); // flatten.
 
             // tslint:disable-next-line max-line-length
-            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numResolved)} resolved, ${numF(numInstalls)} installed. Latest version {green ${latestVersion || "NONE"}}.)`);
+            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numResolved)} resolved, ${numF(numInstalls)} installed, ${numF(numDepended)} depended. Latest {green ${latestVersion || "NONE"}}.)`);
             versions.forEach(addMsg);
 
             if (!verbose) {
