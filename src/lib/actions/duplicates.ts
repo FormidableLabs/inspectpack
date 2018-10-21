@@ -9,6 +9,7 @@ import {
   ITemplate,
   Template,
 } from "./base";
+import { _packageName } from "./versions";
 
 interface IDuplicatesSummary {
   // Unique file paths that have 2+ sources.
@@ -105,6 +106,31 @@ const createEmptySummary = (): IDuplicatesSummary => ({
     num: 0,
   },
 });
+
+interface IPackageNames {
+  [asset: string]: string[];
+}
+
+/**
+ * Return list of unique package names from duplicates.
+ *
+ * @returns {Object} list of names
+ */
+export const getPackageNames = (data: IDuplicatesData): IPackageNames => {
+  const names: IPackageNames = {};
+
+  Object.keys(data.assets).forEach((assetName) => {
+    // Convert to package names.
+    const pkgNames = Object.keys(data.assets[assetName].files).map(_packageName);
+
+    // Unique names.
+    const uniqPkgNames = Array.from(new Set(pkgNames));
+
+    names[assetName] = uniqPkgNames;
+  });
+
+  return names;
+};
 
 class Duplicates extends Action {
   protected _getData(): Promise<IDuplicatesData> {

@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { actions } from "../lib";
-import { IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
+import { getPackageNames, IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
 import { IVersionsData } from "../lib/actions/versions";
 import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { INpmPackageBase } from "../lib/util/dependencies";
@@ -110,6 +110,10 @@ export class DuplicatesPlugin {
       .then((datas) => {
         const [dupData, pkgData] = datas;
         const header = chalk`{bold.underline Duplicate Sources / Packages}`;
+
+        // Get packages that _have_ duplicates.
+        const pkgsWithDups = getPackageNames(dupData);
+        console.log("TODO HERE pkgsWithDups", JSON.stringify(pkgsWithDups, null, 2));
 
         // No duplicates.
         if (dupData.meta.extraFiles.num === 0) {
