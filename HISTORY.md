@@ -22,6 +22,7 @@ History
 
 ### Fixes
 
+* BUG: Per-asset `meta` stats were never set (all `0`) before in data.
 * BUG: Multiple package roots incorrectly collapse / don't prefix.
   [#90](https://github.com/FormidableLabs/inspectpack/issues/90)
 

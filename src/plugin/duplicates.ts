@@ -1,17 +1,14 @@
 import chalk from "chalk";
 import { actions } from "../lib";
-import { getPackageNames, IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
-import { IVersionsData } from "../lib/actions/versions";
+import { IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
+import { _packageName, IVersionsData } from "../lib/actions/versions";
 import { IWebpackStats } from "../lib/interfaces/webpack-stats";
 import { INpmPackageBase } from "../lib/util/dependencies";
 import { numF, sort } from "../lib/util/strings";
 
-const { log } = console;
-
-const identical = (val: string) => chalk`{bold.magenta ${val}}`;
-const similar = (val: string) => chalk`{bold.blue ${val}}`;
-const warning = (val: string) => chalk`{bold.yellow ${val}}`;
-const error = (val: string) => chalk`{bold.red ${val}}`;
+// ----------------------------------------------------------------------------
+// Interfaces
+// ----------------------------------------------------------------------------
 
 // Simple interfaces for webpack work.
 // See, e.g. https://github.com/TypeStrong/ts-loader/blob/master/src/interfaces.ts
@@ -37,6 +34,25 @@ interface IDuplicatesByFileModule {
 interface IDuplicatesByFile {
   [fileName: string]: IDuplicatesByFileModule;
 }
+
+interface IDuplicatesPluginConstructor {
+  verbose?: boolean;
+  emitErrors?: boolean;
+}
+
+interface IPackageNames {
+  [asset: string]: Set<string>;
+}
+
+// ----------------------------------------------------------------------------
+// Helpers
+// ----------------------------------------------------------------------------
+const { log } = console;
+
+const identical = (val: string) => chalk`{bold.magenta ${val}}`;
+const similar = (val: string) => chalk`{bold.blue ${val}}`;
+const warning = (val: string) => chalk`{bold.yellow ${val}}`;
+const error = (val: string) => chalk`{bold.red ${val}}`;
 
 // `~/different-foo/~/foo`
 const shortPath = (filePath: string) => filePath.replace(/node_modules/g, "~");
@@ -66,11 +82,54 @@ const getDuplicatesByFile = (files: IDuplicatesFiles) => {
   return dupsByFile;
 };
 
-interface IDuplicatesPluginConstructor {
-  verbose?: boolean;
-  emitErrors?: boolean;
-}
+// Return object of asset names keyed to sets of package names with duplicates.
+const getDuplicatesPackageNames = (data: IDuplicatesData): IPackageNames => {
+  const names: IPackageNames = {};
 
+  Object.keys(data.assets).forEach((assetName) => {
+    // Convert to package names.
+    const pkgNames = Object.keys(data.assets[assetName].files).map(_packageName);
+
+    // Unique names.
+    const uniqPkgNames = new Set(pkgNames);
+
+    names[assetName] = uniqPkgNames;
+  });
+
+  return names;
+};
+
+// Return a new versions object with _only_ duplicates packages included.
+const getDuplicatesVersionsData = (
+  dupData: IDuplicatesData,
+  pkgDataOrig: IVersionsData,
+): IVersionsData => {
+  // Start with a clone of the data.
+  const pkgData: IVersionsData = JSON.parse(JSON.stringify(pkgDataOrig));
+  const assetsToDupPkgs = getDuplicatesPackageNames(dupData);
+
+  // Iterate the data and mutate meta _and_ resultant entries.
+  Object.keys(pkgData.assets).forEach((assetName) => {
+    const dupPkgs = assetsToDupPkgs[assetName] || new Set();
+    const asset = pkgData.assets[assetName];
+    console.log("TODO HERE YO", JSON.stringify(asset, null, 2));
+
+    Object.keys(asset.packages).forEach((pkgName) => {
+      // console.log("TODO HERE", {
+      //   assetName,
+      //   meta: asset.meta,
+      //   pkgName,
+      //   isDup: dupPkgs.has(pkgName)
+      // });
+    });
+  });
+
+  return pkgData;
+};
+
+// ----------------------------------------------------------------------------
+// Plugin
+// ----------------------------------------------------------------------------
 export class DuplicatesPlugin {
   private opts: IDuplicatesPluginConstructor;
 
@@ -108,26 +167,17 @@ export class DuplicatesPlugin {
       actions("versions", { stats }).then((a) => a.getData() as Promise<IVersionsData>),
     ])
       .then((datas) => {
-        const [dupData, pkgData] = datas;
+        const [dupData, pkgDataOrig] = datas;
         const header = chalk`{bold.underline Duplicate Sources / Packages}`;
-
-        // TODO: Move this function into this file and out of actions/duplicates.
-        // Get packages that _have_ duplicates.
-        const pkgsWithDups = getPackageNames(dupData);
-
-        // Filter/mutate the versions meta stats to reflect _only_ duplicates.
-        const numVersTotal = pkgData.meta.skewedPackages.num;
-        const numVersResolved = pkgData.meta.skewedVersions.num
-        const numVersInstalled = pkgData.meta.installedPackages.num;
-        const numVersDepended = pkgData.meta.dependedPackages.num;
-
-        // TODO_HERE: Filter to only pkgs with duplicates and readjust meta numbers.
 
         // No duplicates.
         if (dupData.meta.extraFiles.num === 0) {
           log(chalk`\n${header} - {green No duplicates found. 🚀}\n`);
           return;
         }
+
+        // Filter versions/packages data to _just_ duplicates.
+        const pkgData = getDuplicatesVersionsData(dupData, pkgDataOrig);
 
         // Choose output format.
         const fmt = emitErrors ? error : warning;
@@ -137,7 +187,7 @@ export class DuplicatesPlugin {
         addMsg(chalk`${header} - ${fmt("Duplicates found! ⚠️")}
 
 * {yellow.bold.underline Duplicates}: Found a total of ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similiar) accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
-* {yellow.bold.underline Packages}: Found a total of ${numF(numVersTotal)} packages with ${numF(numVersResolved)} {underline resolved}, ${numF(numVersInstalled)} {underline installed}, and ${numF(numVersDepended)} {underline depended} versions.
+* {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.skewedPackages.num)} packages with ${numF(pkgData.meta.skewedVersions.num)} {underline resolved}, ${numF(pkgData.meta.installedPackages.num)} {underline installed}, and ${numF(pkgData.meta.dependedPackages.num)} {underline depended} versions.
 `);
         // tslint:enable max-line-length
 
@@ -220,7 +270,7 @@ export class DuplicatesPlugin {
               .reduce((m, a) => m.concat(a)); // flatten.
 
             // tslint:disable-next-line max-line-length
-            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numPkgResolved)} resolved, ${numF(numPkgInstalled)} installed, ${numF(numPkgDepended)} depended. Latest {green ${latestVersion || "NONE"}}.)`);
+            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numPkgResolved)} {underline resolved}, ${numF(numPkgInstalled)} {underline installed}, ${numF(numPkgDepended)} {underline depended}. Latest {green ${latestVersion || "NONE"}}.)`);
             versions.forEach(addMsg);
 
             if (!verbose) {
@@ -242,7 +292,7 @@ export class DuplicatesPlugin {
         output.push(new Error(msgs.join("\n")));
 
         // TODO_DEBUG_REMOVE
-        // console.log(msgs.join("\n"));
+        console.log(msgs.join("\n"));
         // console.log("TODO HERE REMOVE", JSON.stringify({
         //   dupData,
         //   pkgData,

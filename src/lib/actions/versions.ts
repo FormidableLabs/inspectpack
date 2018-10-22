@@ -359,16 +359,24 @@ class Versions extends Action {
         // Attach root-level meta.
         data.meta.packageRoots = pkgRoots;
         assetNames.forEach((assetName) => {
-          const { packages } = data.assets[assetName];
+          const { packages, meta } = data.assets[assetName];
 
           Object.keys(packages).forEach((pkgName) => {
             const pkgVersions = Object.keys(packages[pkgName]);
 
+            meta.skewedPackages.num += 1;
+            meta.skewedVersions.num += pkgVersions.length;
+
             data.meta.skewedPackages.num += 1;
             data.meta.skewedVersions.num += pkgVersions.length;
+
             pkgVersions.forEach((version) => {
               const pkgVers = packages[pkgName][version];
               Object.keys(pkgVers).forEach((filePath) => {
+                meta.files.num += pkgVers[filePath].modules.length;
+                meta.dependedPackages.num += pkgVers[filePath].skews.length;
+                meta.installedPackages.num += 1;
+
                 data.meta.files.num += pkgVers[filePath].modules.length;
                 data.meta.dependedPackages.num += pkgVers[filePath].skews.length;
                 data.meta.installedPackages.num += 1;
