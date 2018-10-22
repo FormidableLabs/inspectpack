@@ -18,7 +18,7 @@ import * as merge from "deepmerge";
 import * as mock from "mock-fs";
 import { toPosixPath } from "../../../src/lib/util/files";
 
-const EMPTY_VERSIONS_META: IVersionsMeta = {
+export const EMPTY_VERSIONS_META: IVersionsMeta = {
   dependedPackages: {
     num: 0,
   },
@@ -36,7 +36,7 @@ const EMPTY_VERSIONS_META: IVersionsMeta = {
   },
 };
 
-const EMPTY_VERSIONS_DATA: IVersionsData = {
+export const EMPTY_VERSIONS_DATA: IVersionsData = {
   assets: {},
   meta: {
     ...EMPTY_VERSIONS_META,

@@ -114,14 +114,37 @@ export const _getDuplicatesVersionsData = (
     const dupPkgs = assetsToDupPkgs[assetName] || new Set();
     const { meta, packages } = pkgData.assets[assetName];
 
-    Object.keys(packages).forEach((pkgName) => {
-      console.log("TODO HERE", {
-        assetName,
-        meta,
-        pkgName,
-        isDup: dupPkgs.has(pkgName),
+    Object.keys(packages)
+      // Identify the packages that are not duplicates.
+      .filter((pkgName) => !dupPkgs.has(pkgName))
+      // Mutate packages and meta.
+      // Basically, unwind exactly everything from `versions.ts`.
+      .forEach((pkgName) => {
+        const pkgVersions = Object.keys(packages[pkgName]);
+
+        // Unwind stats.
+        meta.skewedPackages.num -= 1;
+        meta.skewedVersions.num -= pkgVersions.length;
+
+        pkgData.meta.skewedPackages.num -= 1;
+        pkgData.meta.skewedVersions.num -= pkgVersions.length;
+
+        pkgVersions.forEach((version) => {
+          const pkgVers = packages[pkgName][version];
+          Object.keys(pkgVers).forEach((filePath) => {
+            meta.files.num -= pkgVers[filePath].modules.length;
+            meta.dependedPackages.num -= pkgVers[filePath].skews.length;
+            meta.installedPackages.num -= 1;
+
+            pkgData.meta.files.num -= pkgVers[filePath].modules.length;
+            pkgData.meta.dependedPackages.num -= pkgVers[filePath].skews.length;
+            pkgData.meta.installedPackages.num -= 1;
+          });
+        });
+
+        // Remove package.
+        delete packages[pkgName];
       });
-    });
   });
 
   return pkgData;
