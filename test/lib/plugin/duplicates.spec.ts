@@ -86,9 +86,10 @@ describe("plugin/duplicates", () => {
     describe(`handles ${MULTI_SCENARIO}`, () => {
       VERSIONS.forEach((vers) => {
         it(`v${vers}`, () => {
+          const origVersionsData = multiDataVersions[vers - 1];
           const noDupsVersions = _getDuplicatesVersionsData(
             multiDataDuplicates[vers - 1],
-            multiDataVersions[vers - 1],
+            origVersionsData,
           );
 
           // Should remove all of the no-duplicates bundle.
@@ -96,8 +97,21 @@ describe("plugin/duplicates", () => {
             .to.have.nested.property("assets.bundle-no-duplicates\\.js")
             .that.eql(EMPTY_VERSIONS_DATA_ASSET);
 
+          // Take the original versions bundle and "subtract" the "no-duplicates" part.
+          const expectedBundle = JSON.parse(JSON.stringify(origVersionsData.assets["bundle.js"]));
+          delete expectedBundle.packages["no-duplicates"];
+
+          const expectedNoDuplicatesAsset = origVersionsData.assets["bundle-no-duplicates.js"].meta;
+          expectedBundle.meta.dependedPackages.num -= expectedNoDuplicatesAsset.dependedPackages.num;
+          expectedBundle.meta.files.num -= expectedNoDuplicatesAsset.files.num;
+          expectedBundle.meta.installedPackages.num -= expectedNoDuplicatesAsset.installedPackages.num;
+          expectedBundle.meta.skewedPackages.num -= expectedNoDuplicatesAsset.skewedPackages.num;
+          expectedBundle.meta.skewedVersions.num -= expectedNoDuplicatesAsset.skewedVersions.num;
+
           // Should adjust for the index bundle (just foo).
-          // TODO_INSERT_TEST
+          expect(noDupsVersions)
+            .to.have.nested.property("assets.bundle\\.js")
+            .that.eql(expectedBundle);
         });
       })
     })
