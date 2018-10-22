@@ -118,6 +118,7 @@ of the report.
         * **Depended**: These are the number of upstream packages that create a dependency from a unique path in the graph to a package. Put more concretely, in our case, three unique `package.json` files have an entry for `lodash`.
             * _Note_: This is a bit of complicated assessment, since aside from the root `package.json` is, all of the rest of the dependency graph depends on what is resolved at the next level to give a dependent `package.json` and so on recusively.
     * _`~` Note_: The `~` shorthand represents the `node_modules` folder, which is a common abbreviation for webpack tools. E.g., `~/two/~/lodash` really means `node_modules/two/node_modules/lodash`.
+    * _Note - Duplicates Only_: Unlike the CLI `--action=versions` report, the `DuplicatesPlugin` only reports package version skews when there are **actual duplicated files** (either similar or identical). This means there may be multiple versions of a package with _different_ files as part of your bundle. If you'd like to see these, use the CLI reporting tool!
 
 After the plugin runs, we get a duplicates/package report for asset (e.g. outputted "bundle" files) with duplicate packages that produce duplicate sources in our bundles in the form of:
 
@@ -349,6 +350,8 @@ A positive report for duplicates means that your identical sources are completel
 #### `versions`
 
 The versions action is a bit more high-level and abstract than duplicates. Versions reports on multiple versions of packages installed in your `node_modules` tree that have version skews **and** have 2+ files included in your bundle under inspection. In this manner, `inspectpack` ignores all the multitudes of package versions skews of things that don't matter to your ultimate application or library.
+
+* _Note - Duplicates_: The versions report includes any packages that result in 2+ files from different installs of a package in your bundle. However, that doesn't mean that they're necessarily _duplicate files_, like you would find in the `--action=duplicates` report. For example, if your bundle includes `lodash@3.0.0/get.js` and `lodash@4.0.0/has.js`, you _will_ get a versions report for the `lodash` versions, but would _not_ see these files listed in a duplicates report.
 
 **Requirements**: In order to get an accurate report, you must run `inspectpack` from the project root where the base installed `node_modules` directory is located. You also need to have _installed_ all your `node_modules` there.
 
