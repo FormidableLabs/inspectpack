@@ -111,6 +111,7 @@ export class DuplicatesPlugin {
         const [dupData, pkgData] = datas;
         const header = chalk`{bold.underline Duplicate Sources / Packages}`;
 
+        // TODO: Move this function into this file and out of actions/duplicates.
         // Get packages that _have_ duplicates.
         const pkgsWithDups = getPackageNames(dupData);
 
