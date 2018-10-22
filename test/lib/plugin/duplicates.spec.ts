@@ -8,10 +8,9 @@ import * as actionsVersions from "../../../src/lib/actions/versions";
 
 import { _getDuplicatesVersionsData } from "../../../src/plugin/duplicates";
 
-import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
 import { toPosixPath } from "../../../src/lib/util/files";
 import { loadFixtures, VERSIONS } from "../../utils";
-import { isExportDeclaration } from "typescript";
+import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
 
 const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
 
@@ -39,7 +38,7 @@ const EMPTY_DUPLICATES_DATA = {
 
 const EMPTY_VERSIONS_DATA_ASSET = {
   meta: EMPTY_VERSIONS_META,
-  packages: {}
+  packages: {},
 };
 
 describe("plugin/duplicates", () => {
@@ -113,7 +112,7 @@ describe("plugin/duplicates", () => {
             .to.have.nested.property("assets.bundle\\.js")
             .that.eql(expectedBundle);
         });
-      })
-    })
+      });
+    });
   });
 });

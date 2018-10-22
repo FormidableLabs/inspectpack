@@ -316,7 +316,7 @@ export class DuplicatesPlugin {
         output.push(new Error(msgs.join("\n")));
 
         // TODO_DEBUG_REMOVE
-        console.log(msgs.join("\n"));
+        // console.log(msgs.join("\n"));
         // console.log("TODO HERE REMOVE", JSON.stringify({
         //   dupData,
         //   pkgData,
