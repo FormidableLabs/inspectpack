@@ -100,7 +100,7 @@ const getDuplicatesPackageNames = (data: IDuplicatesData): IPackageNames => {
 };
 
 // Return a new versions object with _only_ duplicates packages included.
-const getDuplicatesVersionsData = (
+export const _getDuplicatesVersionsData = (
   dupData: IDuplicatesData,
   pkgDataOrig: IVersionsData,
 ): IVersionsData => {
@@ -111,16 +111,15 @@ const getDuplicatesVersionsData = (
   // Iterate the data and mutate meta _and_ resultant entries.
   Object.keys(pkgData.assets).forEach((assetName) => {
     const dupPkgs = assetsToDupPkgs[assetName] || new Set();
-    const asset = pkgData.assets[assetName];
-    console.log("TODO HERE YO", JSON.stringify(asset, null, 2));
+    const { meta, packages } = pkgData.assets[assetName];
 
-    Object.keys(asset.packages).forEach((pkgName) => {
-      // console.log("TODO HERE", {
-      //   assetName,
-      //   meta: asset.meta,
-      //   pkgName,
-      //   isDup: dupPkgs.has(pkgName)
-      // });
+    Object.keys(packages).forEach((pkgName) => {
+      console.log("TODO HERE", {
+        assetName,
+        meta,
+        pkgName,
+        isDup: dupPkgs.has(pkgName),
+      });
     });
   });
 
@@ -177,7 +176,7 @@ export class DuplicatesPlugin {
         }
 
         // Filter versions/packages data to _just_ duplicates.
-        const pkgData = getDuplicatesVersionsData(dupData, pkgDataOrig);
+        const pkgData = _getDuplicatesVersionsData(dupData, pkgDataOrig);
 
         // Choose output format.
         const fmt = emitErrors ? error : warning;
@@ -193,6 +192,7 @@ export class DuplicatesPlugin {
 
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
+          // TODO(RYAN): Don't output if no duplicates/versions?
           addMsg(chalk`{gray ## ${dupAssetName}}`);
 
           let dupsByFile: IDuplicatesByFile = {};
