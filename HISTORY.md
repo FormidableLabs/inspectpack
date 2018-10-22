@@ -26,6 +26,11 @@ History
 * BUG: Multiple package roots incorrectly collapse / don't prefix.
   [#90](https://github.com/FormidableLabs/inspectpack/issues/90)
 
+### Miscellaneous
+
+- Updated README.md with note that `--action=versions` is not filtered to only
+  packages that would have files show up in the `--action=duplicates` report.
+
 ## 3.0.0
 
 ### Breaking changes
