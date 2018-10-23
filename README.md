@@ -258,7 +258,7 @@ Similar to `resolve.alias`, because you can get outside the guarantees of semant
 First, install (usually globally);
 
 ```sh
-$ npm install -g inspetpack
+$ npm install -g inspectpack
 ```
 
 From there, you can run the `inspectpack` command line tool from anywhere!
