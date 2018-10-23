@@ -17,20 +17,20 @@ const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
 const EMPTY_DUPLICATES_DATA = {
   assets: {},
   meta: {
-    dependedPackages: {
+    depended: {
       num: 0,
     },
     files: {
       num: 0,
     },
-    installedPackages: {
+    installed: {
       num: 0,
     },
     packageRoots: [],
-    skewedPackages: {
+    packages: {
       num: 0,
     },
-    skewedVersions: {
+    resolved: {
       num: 0,
     },
   },
@@ -101,11 +101,11 @@ describe("plugin/duplicates", () => {
           delete expectedBundle.packages["no-duplicates"];
 
           const expectedNoDuplicatesAsset = origVersionsData.assets["bundle-no-duplicates.js"].meta;
-          expectedBundle.meta.dependedPackages.num -= expectedNoDuplicatesAsset.dependedPackages.num;
+          expectedBundle.meta.depended.num -= expectedNoDuplicatesAsset.depended.num;
           expectedBundle.meta.files.num -= expectedNoDuplicatesAsset.files.num;
-          expectedBundle.meta.installedPackages.num -= expectedNoDuplicatesAsset.installedPackages.num;
-          expectedBundle.meta.skewedPackages.num -= expectedNoDuplicatesAsset.skewedPackages.num;
-          expectedBundle.meta.skewedVersions.num -= expectedNoDuplicatesAsset.skewedVersions.num;
+          expectedBundle.meta.installed.num -= expectedNoDuplicatesAsset.installed.num;
+          expectedBundle.meta.packages.num -= expectedNoDuplicatesAsset.packages.num;
+          expectedBundle.meta.resolved.num -= expectedNoDuplicatesAsset.resolved.num;
 
           // Should adjust for the index bundle (just foo).
           expect(noDupsVersions)

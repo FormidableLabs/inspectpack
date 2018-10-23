@@ -19,19 +19,19 @@ import * as mock from "mock-fs";
 import { toPosixPath } from "../../../src/lib/util/files";
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
-  dependedPackages: {
+  depended: {
     num: 0,
   },
   files: {
     num: 0,
   },
-  installedPackages: {
+  installed: {
     num: 0,
   },
-  skewedPackages: {
+  packages: {
     num: 0,
   },
-  skewedVersions: {
+  resolved: {
     num: 0,
   },
 };
@@ -329,19 +329,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_DUPS_CJS_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 1,
               },
               files: {
                 num: 2,
               },
-              installedPackages: {
+              installed: {
                 num: 1,
               },
-              skewedPackages: {
+              packages: {
                 num: 1,
               },
-              skewedVersions: {
+              resolved: {
                 num: 1,
               },
             }));
@@ -456,19 +456,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_DUPS_CJS_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 2,
               },
               files: {
                 num: 4,
               },
-              installedPackages: {
+              installed: {
                 num: 2,
               },
-              skewedPackages: {
+              packages: {
                 num: 1,
               },
-              skewedVersions: {
+              resolved: {
                 num: 2,
               },
             }));
@@ -500,19 +500,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_DUPS_CJS_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 4,
               },
               files: {
                 num: 5,
               },
-              installedPackages: {
+              installed: {
                 num: 3,
               },
-              skewedPackages: {
+              packages: {
                 num: 1,
               },
-              skewedVersions: {
+              resolved: {
                 num: 3,
               },
             }));
@@ -548,19 +548,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_SCOPED_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 5,
               },
               files: {
                 num: 7,
               },
-              installedPackages: {
+              installed: {
                 num: 4,
               },
-              skewedPackages: {
+              packages: {
                 num: 2,
               },
-              skewedVersions: {
+              resolved: {
                 num: 4,
               },
             }));
@@ -610,19 +610,19 @@ describe("lib/actions/versions", () => {
 
           expect(data).to.have.keys("meta", "assets");
           expect(data).to.have.property("meta").that.eql(merge(BASE_SCOPED_DATA.meta, {
-            dependedPackages: {
+            depended: {
               num: 5,
             },
             files: {
               num: 7,
             },
-            installedPackages: {
+            installed: {
               num: 4,
             },
-            skewedPackages: {
+            packages: {
               num: 2,
             },
-            skewedVersions: {
+            resolved: {
               num: 4,
             },
           }));
@@ -683,7 +683,7 @@ inspectpack --action=versions
 
 ## Summary
 * Packages w/ Skews:        2
-* Total skewed versions:    4
+* Total resolved versions:  4
 * Total installed packages: 4
 * Total depended packages:  5
 * Total bundled files:      7
@@ -725,7 +725,7 @@ inspectpack --action=versions
 
 ## Summary
 * Packages w/ Skews:        1
-* Total skewed versions:    2
+* Total resolved versions:  2
 * Total installed packages: 2
 * Total depended packages:  3
 * Total bundled files:      4

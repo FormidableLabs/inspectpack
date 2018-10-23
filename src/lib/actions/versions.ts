@@ -159,7 +159,7 @@ const modulesByPackageNameByPackagePath = (
 
 export interface IVersionsMeta {
   // Number of all unique depended packages (for any name, version).
-  dependedPackages: {
+  depended: {
     num: number,
   };
   // Total number of bundled files across all packages.
@@ -167,15 +167,15 @@ export interface IVersionsMeta {
     num: number,
   };
   // Total number of _on-disk_ packages installed for implicated versions.
-  installedPackages: {
+  installed: {
     num: number,
   };
   // Unique package names with skews.
-  skewedPackages: {
+  packages: {
     num: number,
   };
-  // Total number of skewed packages.
-  skewedVersions: {
+  // Total number of resolved packages.
+  resolved: {
     num: number,
   };
 }
@@ -209,19 +209,19 @@ export interface IVersionsData {
 }
 
 const createEmptyMeta = (): IVersionsMeta => ({
-  dependedPackages: {
+  depended: {
     num: 0,
   },
   files: {
     num: 0,
   },
-  installedPackages: {
+  installed: {
     num: 0,
   },
-  skewedPackages: {
+  packages: {
     num: 0,
   },
-  skewedVersions: {
+  resolved: {
     num: 0,
   },
 });
@@ -365,22 +365,22 @@ class Versions extends Action {
           Object.keys(packages).forEach((pkgName) => {
             const pkgVersions = Object.keys(packages[pkgName]);
 
-            meta.skewedPackages.num += 1;
-            meta.skewedVersions.num += pkgVersions.length;
+            meta.packages.num += 1;
+            meta.resolved.num += pkgVersions.length;
 
-            data.meta.skewedPackages.num += 1;
-            data.meta.skewedVersions.num += pkgVersions.length;
+            data.meta.packages.num += 1;
+            data.meta.resolved.num += pkgVersions.length;
 
             pkgVersions.forEach((version) => {
               const pkgVers = packages[pkgName][version];
               Object.keys(pkgVers).forEach((filePath) => {
                 meta.files.num += pkgVers[filePath].modules.length;
-                meta.dependedPackages.num += pkgVers[filePath].skews.length;
-                meta.installedPackages.num += 1;
+                meta.depended.num += pkgVers[filePath].skews.length;
+                meta.installed.num += 1;
 
                 data.meta.files.num += pkgVers[filePath].modules.length;
-                data.meta.dependedPackages.num += pkgVers[filePath].skews.length;
-                data.meta.installedPackages.num += 1;
+                data.meta.depended.num += pkgVers[filePath].skews.length;
+                data.meta.installed.num += 1;
               });
             });
           });
@@ -457,10 +457,10 @@ class VersionsTemplate extends Template {
           {gray =============================}
 
           {gray ## Summary}
-          * Packages w/ Skews:        ${numF(meta.skewedPackages.num)}
-          * Total skewed versions:    ${numF(meta.skewedVersions.num)}
-          * Total installed packages: ${numF(meta.installedPackages.num)}
-          * Total depended packages:  ${numF(meta.dependedPackages.num)}
+          * Packages w/ Skews:        ${numF(meta.packages.num)}
+          * Total resolved versions:  ${numF(meta.resolved.num)}
+          * Total installed packages: ${numF(meta.installed.num)}
+          * Total depended packages:  ${numF(meta.depended.num)}
           * Total bundled files:      ${numF(meta.files.num)}
 
           ${Object.keys(assets)

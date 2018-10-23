@@ -124,22 +124,22 @@ export const _getDuplicatesVersionsData = (
         const pkgVersions = Object.keys(packages[pkgName]);
 
         // Unwind stats.
-        meta.skewedPackages.num -= 1;
-        meta.skewedVersions.num -= pkgVersions.length;
+        meta.packages.num -= 1;
+        meta.resolved.num -= pkgVersions.length;
 
-        pkgData.meta.skewedPackages.num -= 1;
-        pkgData.meta.skewedVersions.num -= pkgVersions.length;
+        pkgData.meta.packages.num -= 1;
+        pkgData.meta.resolved.num -= pkgVersions.length;
 
         pkgVersions.forEach((version) => {
           const pkgVers = packages[pkgName][version];
           Object.keys(pkgVers).forEach((filePath) => {
             meta.files.num -= pkgVers[filePath].modules.length;
-            meta.dependedPackages.num -= pkgVers[filePath].skews.length;
-            meta.installedPackages.num -= 1;
+            meta.depended.num -= pkgVers[filePath].skews.length;
+            meta.installed.num -= 1;
 
             pkgData.meta.files.num -= pkgVers[filePath].modules.length;
-            pkgData.meta.dependedPackages.num -= pkgVers[filePath].skews.length;
-            pkgData.meta.installedPackages.num -= 1;
+            pkgData.meta.depended.num -= pkgVers[filePath].skews.length;
+            pkgData.meta.installed.num -= 1;
           });
         });
 
@@ -211,7 +211,7 @@ export class DuplicatesPlugin {
         addMsg(chalk`${header} - ${fmt("Duplicates found! ⚠️")}
 
 * {yellow.bold.underline Duplicates}: Found a total of ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similiar) accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
-* {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.skewedPackages.num)} packages with ${numF(pkgData.meta.skewedVersions.num)} {underline resolved}, ${numF(pkgData.meta.installedPackages.num)} {underline installed}, and ${numF(pkgData.meta.dependedPackages.num)} {underline depended} versions.
+* {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.packages.num)} packages with ${numF(pkgData.meta.resolved.num)} {underline resolved}, ${numF(pkgData.meta.installed.num)} {underline installed}, and ${numF(pkgData.meta.depended.num)} {underline depended} versions.
 `);
         // tslint:enable max-line-length
 
