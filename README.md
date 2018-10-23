@@ -155,7 +155,7 @@ Thus for actionable information, there is a naive "quick out" that if we could s
 
 #### Verbose report
 
-But, let's say we want a little more information of not just what the dependency tree is that ends up with these packages on disk, but also includes the bundled files that webpack is bringing in. For this, we want to enable verbose output with:
+But, let's say we want a little more information on the dependency tree besides the packages that end up on disk. For this, we can enable verbose output, which will include information on the bundled files that webpack is bringing in.
 
 ```js
 new DuplicatesPlugin({
@@ -229,15 +229,15 @@ Alright! The plugin has analyzed your `webpack` compilation and dumped out a lot
 
 The real-world answer is **it's complicated**.
 
-Some things are relatively easy to fix. Others will not.
+Some things are relatively easy to fix. Others are not.
 
 #### Focus first on identical code sources
 
-For starters, if you're serious about fixing pre-existing duplicates in your bundle, run with the `verbose: true` option. What that gives you a list of the identical sources used in the bundle. These pieces of code are completely equivalent and so are very low-risk for attempting to collapse.
+For starters, if you're serious about fixing pre-existing duplicates in your bundle, run with the `verbose: true` option. What that gives you is a list of the identical sources used in the bundle. These pieces of code are completely equivalent, so attempting to collapse them is relatively low risk.
 
 #### Change dependencies in your root `package.json`
 
-For a few issues, you may be able to change a dependency you control, usually in your root `package.json` (or any other dependency you control). In our example above, if the root `package.json` downgraded it's dependency to a semver range that resolved to `lodash@3.1.0` likely _all_ the duplicates for that mini-scenario would be solved.
+For a few issues, you may be able to change a dependency you control, usually in your root `package.json` (or any other dependency you control). In our example above, if the root `package.json` downgraded its dependency to a semver range that resolved to `lodash@3.1.0` likely _all_ the duplicates for that mini-scenario would be solved.
 
 #### Set `resolve.alias` in your `webpack` configuration
 
