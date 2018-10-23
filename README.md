@@ -148,7 +148,7 @@ Thus for actionable information, there is a naive "quick out" that if we could s
 
 #### Verbose report
 
-But, let's say we want a little more information of not just what the dependency tree is that ends up with these packages on disk, but also includes the bundled files that webpack is bringing in. For this, we want to enable verbose output with:
+But, let's say we want a little more information on the dependency tree besides the packages that end up on disk. For this, we can enable verbose output, which will include information on the bundled files that webpack is bringing in.
 
 ```js
 new DuplicatesPlugin({
