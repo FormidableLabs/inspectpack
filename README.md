@@ -15,7 +15,7 @@ It is also the engine for the handy [`webpack-dashboard`](https://github.com/For
 
 The `DuplicatesPlugin` identifies unnecessarily duplicated code in your webpack bundles with an actionable report to help you trim down wasted bytes.
 
-To get started, installed the plugin:
+To get started, install the plugin:
 
 ```sh
 $ npm install --dev inspectpack
