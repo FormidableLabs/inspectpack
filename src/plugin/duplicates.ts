@@ -296,10 +296,10 @@ export class DuplicatesPlugin {
         });
         // tslint:disable max-line-length
         addMsg(chalk`
-* {yellow.bold.underline Understanding the report}: Need help with the details? See:
+* {gray.bold.underline Understanding the report}: Need help with the details? See:
   https://github.com/FormidableLabs/inspectpack/blob/master/README.md#diagnosing-duplicates
-* {yellow.bold.underline Fixing build duplicates}: An introductory guide:
-  https://github.com/FormidableLabs/inspectpack/blob/naster/README.md#fixing-bundle-duplicates
+* {gray.bold.underline Fixing build duplicates}: An introductory guide:
+  https://github.com/FormidableLabs/inspectpack/blob/master/README.md#fixing-bundle-duplicates
 `.trimLeft());
         // tslint:enable max-line-length
 
