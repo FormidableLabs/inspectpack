@@ -11,6 +11,13 @@ An inspection tool for Webpack frontend JavaScript bundles.
 
 It is also the engine for the handy [`webpack-dashboard`](https://github.com/FormidableLabs/webpack-dashboard) plugin.
 
+- [Plugin](#plugin)
+- [Command line tool](#command-line-tool)
+  - [`duplicates`](#duplicates)
+  - [`versions`](#versions)
+  - [`sizes`](#sizes)
+- [Other useful tools](#other-useful-tools)
+
 ## Plugin
 
 The `DuplicatesPlugin` identifies unnecessarily duplicated code in your webpack bundles with an actionable report to help you trim down wasted bytes.
@@ -466,6 +473,6 @@ Other tools that inspect Webpack bundles:
 [trav_site]: https://travis-ci.org/FormidableLabs/inspectpack
 [appveyor_img]: https://ci.appveyor.com/api/projects/status/github/formidablelabs/inspectpack?branch=master&svg=true
 [appveyor_site]: https://ci.appveyor.com/project/FormidableLabs/inspectpack
-[cov]: (https://codecov.io
+[cov]: https://codecov.io
 [cov_img]: https://codecov.io/gh/FormidableLabs/inspectpack/branch/master/graph/badge.svg
 [cov_site]: https://codecov.io/gh/FormidableLabs/inspectpack
