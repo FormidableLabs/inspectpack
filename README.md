@@ -230,7 +230,7 @@ For starters, if you're serious about fixing pre-existing duplicates in your bun
 
 #### Change dependencies in your root `package.json`
 
-For a few issues, you may be able to change a dependency you control, usually in your root `package.json` (or any other dependency you control). In our example above, if the root `package.json` downgraded it's dependency to a semver range that resolved to `lodash@3.1.0` likely _all_ the duplicates for that mini-scenario would be solved.
+For a few issues, you may be able to change a dependency you control, usually in your root `package.json` (or any other dependency you control). In our example above, if the root `package.json` downgraded its dependency to a semver range that resolved to `lodash@3.1.0` likely _all_ the duplicates for that mini-scenario would be solved.
 
 #### Set `resolve.alias` in your `webpack` configuration
 
