@@ -101,7 +101,6 @@ const getDuplicatesPackageNames = (data: IDuplicatesData): IPackageNames => {
 };
 
 // Return a new versions object with _only_ duplicates packages included.
-// TODO: HERE TEST
 export const _getDuplicatesVersionsData = (
   dupData: IDuplicatesData,
   pkgDataOrig: IVersionsData,
@@ -217,8 +216,6 @@ export class DuplicatesPlugin {
 
         Object.keys(pkgData.assets).forEach((dupAssetName) => {
           const pkgAsset = pkgData.assets[dupAssetName];
-          // TODO(RYAN): Don't output if no duplicates/versions?
-          addMsg(chalk`{gray ## ${dupAssetName}}`);
 
           let dupsByFile: IDuplicatesByFile = {};
           if (dupData.assets[dupAssetName] &&
@@ -227,9 +224,15 @@ export class DuplicatesPlugin {
           }
 
           const { packages } = pkgAsset;
-          Object.keys(packages).forEach((pkgName) => {
+          const pkgNames = Object.keys(packages);
+
+          // Only add asset name when duplicates.
+          if (pkgNames.length) {
+            addMsg(chalk`{gray ## ${dupAssetName}}`);
+          }
+
+          pkgNames.forEach((pkgName) => {
             // Calculate stats / info during maps.
-            // TODO(RYAN): Need a semver compatible sort!!!
             let latestVersion;
             let numPkgInstalled = 0;
             const numPkgResolved = Object.keys(packages[pkgName]).length;
@@ -266,25 +269,12 @@ export class DuplicatesPlugin {
                       return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
                     });
 
-                  // TODO_DEBUG_REMOVE: No duplicates
-                  // if (!duplicates.length) {
-                  //   console.log("TODO HERE NO DUPS", {
-                  //     modules: packages[pkgName][version][installed].modules
-                  //   }, null, 2);
-                  // }
-
                   return chalk`    {gray ${shortPath(installed)}}
       {white * Dependency graph}
         ${skews.join("\n        ")}
       {white * Duplicated files in }{gray ${dupAssetName}}
         ${duplicates.join("\n        ")}
 `;
-
-// TODO_DEBUG_REMOVE: ORIGINAL MODULES:
-// ${JSON.stringify({
-//   modules: packages[pkgName][version][installed].modules,
-//   dups: dupData.assets[dupAssetName]
-// }, null, 2)}
                 });
 
                 if (verbose) {
@@ -316,13 +306,6 @@ export class DuplicatesPlugin {
         // Drain messages into warnings or Errors.
         const output = emitErrors ? errors : warnings;
         output.push(new Error(msgs.join("\n")));
-
-        // TODO_DEBUG_REMOVE
-        // console.log(msgs.join("\n"));
-        // console.log("TODO HERE REMOVE", JSON.stringify({
-        //   dupData,
-        //   pkgData,
-        // }, null, 2)
       })
       // Handle old plugin API callback.
       .then(() => {
