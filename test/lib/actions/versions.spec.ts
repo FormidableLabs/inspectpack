@@ -682,7 +682,7 @@ inspectpack --action=versions
 =============================
 
 ## Summary
-* Packages w/ Skews:        2
+* Packages with skews:      2
 * Total resolved versions:  4
 * Total installed packages: 4
 * Total depended packages:  5
@@ -724,7 +724,7 @@ inspectpack --action=versions
 =============================
 
 ## Summary
-* Packages w/ Skews:        1
+* Packages with skews:      1
 * Total resolved versions:  2
 * Total installed packages: 2
 * Total depended packages:  3

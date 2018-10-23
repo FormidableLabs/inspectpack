@@ -457,7 +457,7 @@ class VersionsTemplate extends Template {
           {gray =============================}
 
           {gray ## Summary}
-          * Packages w/ Skews:        ${numF(meta.packages.num)}
+          * Packages with skews:      ${numF(meta.packages.num)}
           * Total resolved versions:  ${numF(meta.resolved.num)}
           * Total installed packages: ${numF(meta.installed.num)}
           * Total depended packages:  ${numF(meta.depended.num)}

@@ -363,8 +363,8 @@ inspectpack --action=versions
 =============================
 
 ## Summary
-* Packages w/ Skews:        2
-* Total skewed versions:    4
+* Packages with skews:      2
+* Total resolved versions:  4
 * Total installed packages: 4
 * Total depended packages:  5
 * Total bundled files:      7
