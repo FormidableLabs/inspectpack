@@ -127,6 +127,11 @@
   resolved "https://registry.yarnpkg.com/@types/pify/-/pify-3.0.1.tgz#6c45127d0279a9518b0ef48971ec95b91dcb5f47"
   integrity sha512-YinwZzicw0EexL6vRwRmELXkkzHdEePXejx7rbVMTMfAqtlT+/9lhRfcXEsuU+Jnl5Vdp0znzxKifPZUC6duFw==
 
+"@types/semver-compare@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/semver-compare/-/semver-compare-1.0.0.tgz#b6e39ec7d0d3f03e5e74ec654bfbbfbc3bbe1b19"
+  integrity sha512-zEVoxKekBLngwvsGP85ct5U3NWgoOWf614Cgjtm1KjFfyyWyb9/RakDK8+Sf3UDBkoWqDjvvBDhqQ5565UjDKQ==
+
 "@types/yargs@^11.0.0":
   version "11.0.0"
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-11.0.0.tgz#124b9ed9c65b7091cc36da59ae12cbd47d8745ea"
@@ -6425,6 +6430,11 @@ scoped-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/scoped-regex/-/scoped-regex-1.0.0.tgz#a346bb1acd4207ae70bd7c0c7ca9e566b6baddb8"
   integrity sha1-o0a7Gs1CB65wvXwMfKnlZra63bg=
+
+semver-compare@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/semver-compare/-/semver-compare-1.0.0.tgz#0dee216a1c941ab37e9efb1788f6afc5ff5537fc"
+  integrity sha1-De4hahyUGrN+nvsXiPavxf9VN/w=
 
 "semver@2 || 3 || 4 || 5", semver@^5.3.0, semver@^5.5.0:
   version "5.5.0"

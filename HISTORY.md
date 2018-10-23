@@ -30,6 +30,8 @@ History
 
 - Updated README.md with note that `--action=versions` is not filtered to only
   packages that would have files show up in the `--action=duplicates` report.
+- Update `--action=versions` logic to explicitly use `semver-compare` for sort
+  order.
 
 ## 3.0.0
 

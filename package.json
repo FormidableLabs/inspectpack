@@ -55,6 +55,7 @@
     "io-ts": "^1.0.5",
     "io-ts-reporters": "^0.0.20",
     "pify": "^3.0.0",
+    "semver-compare": "^1.0.0",
     "yargs": "^11.0.0"
   },
   "devDependencies": {
@@ -62,6 +63,7 @@
     "@types/mocha": "^5.0.0",
     "@types/node": "^9.6.5",
     "@types/pify": "^3.0.1",
+    "@types/semver-compare": "^1.0.0",
     "@types/yargs": "^11.0.0",
     "babel-eslint": "^8.2.3",
     "builder": "^4.0.0",

@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import semverCompare = require("semver-compare");
 import { actions } from "../lib";
 import { IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
 import { _packageName, IVersionsData } from "../lib/actions/versions";
@@ -235,9 +236,10 @@ export class DuplicatesPlugin {
             let numPkgDepended = 0;
 
             const versions = Object.keys(packages[pkgName])
+              .sort(semverCompare)
               .map((version) => {
                 // Capture
-                latestVersion = version;
+                latestVersion = version; // Latest should be correct bc of `semverCompare`
                 numPkgInstalled += Object.keys(packages[pkgName][version]).length;
 
                 let installs = Object.keys(packages[pkgName][version]).map((installed) => {

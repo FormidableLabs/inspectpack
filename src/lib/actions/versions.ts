@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { join, relative, sep } from "path";
+import semverCompare = require("semver-compare");
 
 import { IActionModule, IModule } from "../interfaces/modules";
 import {
@@ -260,7 +261,7 @@ const getAssetData = (
       // Use the modules as an "is present" lookup table.
       const modsToFilePath = modsMap[name] || {};
 
-      Object.keys(depsToPackageName[name] || {}).sort(sort).forEach((version) => {
+      Object.keys(depsToPackageName[name] || {}).sort(semverCompare).forEach((version) => {
         // Have potential `filePath` match across mods and deps.
         // Filter to just these file paths.
         const depsForPkgVers = depsToPackageName[name][version] || {};
@@ -414,7 +415,7 @@ class VersionsTemplate extends Template {
           .map((pkgName) => this.trim(chalk`
             * {cyan ${pkgName}}
               ${Object.keys(assets[name].packages[pkgName])
-                .sort(sort)
+                .sort(semverCompare)
                 .map((version) => this.trim(chalk`
                   * {gray ${version}}
                     ${Object.keys(assets[name].packages[pkgName][version])
@@ -481,7 +482,7 @@ class VersionsTemplate extends Template {
           .map((name) => Object.keys(assets[name].packages)
             .sort(sort)
             .map((pkgName) => Object.keys(assets[name].packages[pkgName])
-              .sort(sort)
+              .sort(semverCompare)
               .map((version) => Object.keys(assets[name].packages[pkgName][version])
                 .sort(sort)
                 .map((filePath) => assets[name].packages[pkgName][version][filePath].skews
