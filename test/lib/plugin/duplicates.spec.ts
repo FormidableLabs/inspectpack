@@ -6,8 +6,9 @@ import * as sinon from "sinon";
 import * as actionsDups from "../../../src/lib/actions/duplicates";
 import * as actionsVersions from "../../../src/lib/actions/versions";
 
-import { _getDuplicatesVersionsData } from "../../../src/plugin/duplicates";
+import { _getDuplicatesVersionsData, DuplicatesPlugin } from "../../../src/plugin/duplicates";
 
+import chalk from "chalk";
 import { toPosixPath } from "../../../src/lib/util/files";
 import { loadFixtures, VERSIONS } from "../../utils";
 import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
@@ -112,6 +113,148 @@ describe("plugin/duplicates", () => {
             .to.have.nested.property("assets.bundle\\.js")
             .that.eql(expectedBundle);
         });
+      });
+    });
+  });
+
+  describe("DuplicatesPlugin", () => {
+    // Manually apply the analysis function with mocks.
+    describe(`analyzes ${MULTI_SCENARIO}`, () => {
+      VERSIONS.forEach((vers) => {
+        // Mock compilation:
+        let compilation: ICompilation;
+        let toJson;
+
+        // Report outputs
+        // tslint:disable max-line-length
+        const defaultReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
+
+* Duplicates: Found a total of 1 similar files across 2 code sources (both identical + similar) accounting for 108 bundled bytes.
+* Packages: Found a total of 1 packages with 1 resolved, 2 installed, and 2 depended versions.
+
+## bundle.js
+foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
+  1.1.1 ~/foo
+    multiple-resolved-no-duplicates@1.2.3 -> foo@^1.0.0
+  1.1.1 ~/uses-foo/~/foo
+    multiple-resolved-no-duplicates@1.2.3 -> uses-foo@^1.0.9 -> foo@^1.0.1
+
+* Understanding the report: Need help with the details? See:
+  https://github.com/FormidableLabs/inspectpack/blob/master/README.md#diagnosing-duplicates
+* Fixing build duplicates: An introductory guide:
+  https://github.com/FormidableLabs/inspectpack/blob/master/README.md#fixing-bundle-duplicates
+`;
+
+        const verboseReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
+
+* Duplicates: Found a total of 1 similar files across 2 code sources (both identical + similar) accounting for 108 bundled bytes.
+* Packages: Found a total of 1 packages with 1 resolved, 2 installed, and 2 depended versions.
+
+## bundle.js
+foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
+  1.1.1
+    ~/foo
+      * Dependency graph
+        multiple-resolved-no-duplicates@1.2.3 -> foo@^1.0.0
+      * Duplicated files in bundle.js
+        foo/index.js (I, 54)
+
+    ~/uses-foo/~/foo
+      * Dependency graph
+        multiple-resolved-no-duplicates@1.2.3 -> uses-foo@^1.0.9 -> foo@^1.0.1
+      * Duplicated files in bundle.js
+        foo/index.js (I, 54)
+
+* Understanding the report: Need help with the details? See:
+  https://github.com/FormidableLabs/inspectpack/blob/master/README.md#diagnosing-duplicates
+* Fixing build duplicates: An introductory guide:
+  https://github.com/FormidableLabs/inspectpack/blob/master/README.md#fixing-bundle-duplicates
+`;
+        // tslint:enable max-line-length
+
+        beforeEach(() => {
+          const stats = fixtures[toPosixPath(join(MULTI_SCENARIO, `dist-development-${vers}`))];
+          toJson = sinon.stub().returns(stats);
+          compilation = {
+            errors: [],
+            getStats: () => ({ toJson }),
+            warnings: [],
+          };
+        });
+
+        describe(`v${vers}`, () => {
+          let origChalkEnabled;
+
+          beforeEach(() => {
+            // Stash and disable chalk for tests.
+            origChalkEnabled = chalk.enabled;
+            chalk.enabled = false;
+          });
+
+          afterEach(() => {
+            chalk.enabled = origChalkEnabled;
+          });
+
+          it(`produces a default report`, () => {
+            const plugin = new DuplicatesPlugin();
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.errors).to.eql([]);
+              expect(compilation.warnings)
+                .to.have.lengthOf(1).and
+                .to.have.property("0").that
+                  .is.an("Error").and
+                  .has.property("message", defaultReport);
+            });
+          });
+
+          it(`produces a verbose report`, () => {
+            const plugin = new DuplicatesPlugin({
+              verbose: true,
+            });
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.errors).to.eql([]);
+              expect(compilation.warnings)
+                .to.have.lengthOf(1).and
+                .to.have.property("0").that
+                  .is.an("Error").and
+                  .has.property("message", verboseReport);
+            });
+          });
+
+          it(`emits errors to default report`, () => {
+            const plugin = new DuplicatesPlugin({
+              emitErrors: true,
+            });
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.warnings).to.eql([]);
+              expect(compilation.errors)
+                .to.have.lengthOf(1).and
+                .to.have.property("0").that
+                  .is.an("Error").and
+                  .has.property("message", defaultReport);
+            });
+          });
+
+          it(`emits errors to verbose report`, () => {
+            const plugin = new DuplicatesPlugin({
+              emitErrors: true,
+              verbose: true,
+            });
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.warnings).to.eql([]);
+              expect(compilation.errors)
+                .to.have.lengthOf(1).and
+                .to.have.property("0").that
+                  .is.an("Error").and
+                  .has.property("message", verboseReport);
+            });
+          });
+        });
+
       });
     });
   });

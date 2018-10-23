@@ -94,7 +94,7 @@ we get a summary report of the duplicates upon running the `webpack` command:
 ```
 WARNING in Duplicate Sources / Packages - Duplicates found! ⚠️
 
-* Duplicates: Found a total of 2 similar files across 3 code sources (both identical + similiar) accounting for 703 bundled bytes.
+* Duplicates: Found a total of 2 similar files across 3 code sources (both identical + similar) accounting for 703 bundled bytes.
 * Packages: Found a total of 1 packages with 2 resolved, 3 installed, and 3 depended versions.
 
 ## bundle.js
@@ -160,7 +160,7 @@ Our resulting report is:
 ```
 WARNING in Duplicate Sources / Packages - Duplicates found! ⚠️
 
-* Duplicates: Found a total of 2 similar files across 3 code sources (both identical + similiar) accounting for 703 bundled bytes.
+* Duplicates: Found a total of 2 similar files across 3 code sources (both identical + similar) accounting for 703 bundled bytes.
 * Packages: Found a total of 1 packages with 2 resolved, 3 installed, and 3 depended versions.
 
 ## bundle.js
