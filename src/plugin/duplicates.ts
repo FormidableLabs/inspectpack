@@ -209,8 +209,9 @@ export class DuplicatesPlugin {
         // tslint:disable max-line-length
         addMsg(chalk`${header} - ${fmt("Duplicates found! ⚠️")}
 
-* {yellow.bold.underline Duplicates}: Found a total of ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similar) accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
-* {yellow.bold.underline Packages}: Found a total of ${numF(pkgData.meta.packages.num)} packages with ${numF(pkgData.meta.resolved.num)} {underline resolved}, ${numF(pkgData.meta.installed.num)} {underline installed}, and ${numF(pkgData.meta.depended.num)} {underline depended} versions.
+* {yellow.bold.underline Duplicates}: Found ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similar)
+  accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
+* {yellow.bold.underline Packages}: Found ${numF(pkgData.meta.packages.num)} packages with ${numF(pkgData.meta.resolved.num)} {underline resolved}, ${numF(pkgData.meta.installed.num)} {underline installed}, and ${numF(pkgData.meta.depended.num)} {underline depended} versions.
 `);
         // tslint:enable max-line-length
 

@@ -129,8 +129,9 @@ describe("plugin/duplicates", () => {
         // tslint:disable max-line-length
         const defaultReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
 
-* Duplicates: Found a total of 1 similar files across 2 code sources (both identical + similar) accounting for 108 bundled bytes.
-* Packages: Found a total of 1 packages with 1 resolved, 2 installed, and 2 depended versions.
+* Duplicates: Found 1 similar files across 2 code sources (both identical + similar)
+  accounting for 108 bundled bytes.
+* Packages: Found 1 packages with 1 resolved, 2 installed, and 2 depended versions.
 
 ## bundle.js
 foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
@@ -147,8 +148,9 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
 
         const verboseReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
 
-* Duplicates: Found a total of 1 similar files across 2 code sources (both identical + similar) accounting for 108 bundled bytes.
-* Packages: Found a total of 1 packages with 1 resolved, 2 installed, and 2 depended versions.
+* Duplicates: Found 1 similar files across 2 code sources (both identical + similar)
+  accounting for 108 bundled bytes.
+* Packages: Found 1 packages with 1 resolved, 2 installed, and 2 depended versions.
 
 ## bundle.js
 foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
