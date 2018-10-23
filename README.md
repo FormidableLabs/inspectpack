@@ -222,7 +222,7 @@ Alright! The plugin has analyzed your `webpack` compilation and dumped out a lot
 
 The real-world answer is **it's complicated**.
 
-Some things are relatively easy to fix. Others will not.
+Some things are relatively easy to fix. Others are not.
 
 #### Focus first on identical code sources
 
