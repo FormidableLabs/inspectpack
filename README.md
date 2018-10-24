@@ -25,7 +25,8 @@ The `DuplicatesPlugin` identifies unnecessarily duplicated code in your webpack 
 To get started, install the plugin:
 
 ```sh
-$ npm install --dev inspectpack
+$ npm install --save-dev inspectpack # OR
+$ yarn add --dev inspectpack
 ```
 
 Then, add the plugin to your `webpack.config.js` file:
