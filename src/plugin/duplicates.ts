@@ -55,8 +55,18 @@ const similar = (val: string) => chalk`{bold.blue ${val}}`;
 const warning = (val: string) => chalk`{bold.yellow ${val}}`;
 const error = (val: string) => chalk`{bold.red ${val}}`;
 
-// `~/different-foo/~/foo`
-const shortPath = (filePath: string) => filePath.replace(/node_modules/g, "~");
+// `~/different-foo/~/foo` + highlight last component.
+const shortPath = (filePath: string, pkgName: string) => {
+  let short = filePath.replace(/node_modules/g, "~");
+
+  // Color last part of package name.
+  const lastPkgIdx = short.lastIndexOf(pkgName);
+  if (lastPkgIdx > -1) {
+    short = chalk`${short.substring(0, lastPkgIdx)}{cyan ${pkgName}}`;
+  }
+
+  return short;
+};
 
 // `duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3`
 const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
@@ -258,7 +268,7 @@ export class DuplicatesPlugin {
                   numPkgDepended += skews.length;
 
                   if (!verbose) {
-                    return chalk`  {green ${version}} {gray ${shortPath(installed)}}
+                    return chalk`  {green ${version}} {gray ${shortPath(installed, pkgName)}}
     ${skews.join("\n    ")}`;
                   }
 
@@ -270,7 +280,7 @@ export class DuplicatesPlugin {
                       return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
                     });
 
-                  return chalk`    {gray ${shortPath(installed)}}
+                  return chalk`    {gray ${shortPath(installed, pkgName)}}
       {white * Dependency graph}
         ${skews.join("\n        ")}
       {white * Duplicated files in }{gray ${dupAssetName}}
