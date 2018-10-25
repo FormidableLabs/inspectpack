@@ -142,7 +142,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
 
 * Understanding the report: Need help with the details? See:
   https://github.com/FormidableLabs/inspectpack/#diagnosing-duplicates
-* Fixing build duplicates: An introductory guide:
+* Fixing bundle duplicates: An introductory guide:
   https://github.com/FormidableLabs/inspectpack/#fixing-bundle-duplicates
 `;
 
@@ -169,7 +169,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
 
 * Understanding the report: Need help with the details? See:
   https://github.com/FormidableLabs/inspectpack/#diagnosing-duplicates
-* Fixing build duplicates: An introductory guide:
+* Fixing bundle duplicates: An introductory guide:
   https://github.com/FormidableLabs/inspectpack/#fixing-bundle-duplicates
 `;
         // tslint:enable max-line-length

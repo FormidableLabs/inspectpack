@@ -309,7 +309,7 @@ export class DuplicatesPlugin {
         addMsg(chalk`
 * {gray.bold.underline Understanding the report}: Need help with the details? See:
   https://github.com/FormidableLabs/inspectpack/#diagnosing-duplicates
-* {gray.bold.underline Fixing build duplicates}: An introductory guide:
+* {gray.bold.underline Fixing bundle duplicates}: An introductory guide:
   https://github.com/FormidableLabs/inspectpack/#fixing-bundle-duplicates
 `.trimLeft());
         // tslint:enable max-line-length
