@@ -39,8 +39,10 @@ module.exports = {
   plugins: [
     // ...
     new DuplicatesPlugin({
-      emitErrors: false,  // Emit compilation warning or error? (Default: `false`)
-      verbose: false      // Display full duplicates information? (Default: `false`)
+      // Emit compilation warning or error? (Default: `false`)
+      emitErrors: false,
+      // Display full duplicates information? (Default: `false`)
+      verbose: false
     })
   ]
 };
