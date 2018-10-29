@@ -3,6 +3,7 @@ import { readDir, readJson, toPosixPath } from "./files";
 
 export interface INpmPackageBase {
   name: string;
+  range: string; // the range from upstream (default to `version` if unset)
   version: string;
 }
 
@@ -188,6 +189,9 @@ const _findPackage = ({
   return { isFlattened, pkgPath: null, pkgObj: null };
 };
 
+// - Populates `pkgMap` with installed `package.json`s
+// - Creates a recursive `IDependencies[]` object that later needs to be
+//   flattened and ranges fixed.
 const _recurseDependencies = ({
   filePath,
   foundMap,
@@ -229,6 +233,7 @@ const _recurseDependencies = ({
         dependencies: [],
         filePath: pkgPath,
         name: pkgObj.name,
+        range: pkgObj.version || "*", // Temporary value. Correct in post-processing.
         version: pkgObj.version,
       } as IDependencies;
 
@@ -338,6 +343,7 @@ const _resolveRefsOrNull = (
       .filter(Boolean),
     filePath: pkg.filePath,
     name: pkg.name,
+    range: pkg.range,
     version: pkg.version,
   } as IDependencies;
 
@@ -351,6 +357,48 @@ const _resolveRefsOrNull = (
 const _resolveRefs = (
   pkg: IDependencies,
 ): IDependencies => _resolveRefsOrNull(pkg) as IDependencies;
+
+// TS: null-allowing-intermediate function.
+const _resolveRangesOrNull = (
+  pkg: IDependencies,
+  pkgMap: INpmPackageMap,
+  lastFilePath?: string,
+): IDependencies | null => {
+  // Try a lookup pkgMap with lastFilePath to switch range from dependencies directly.
+  let range;
+  if (lastFilePath) {
+    const item = pkgMap[join(lastFilePath, "package.json")];
+    if (item && item.dependencies) {
+      range = item.dependencies[pkg.name];
+    }
+    if (!range && item && item.devDependencies) {
+      range = item.devDependencies[pkg.name];
+    }
+  }
+
+  // Mutate the object.
+  const resolvedPkg: IDependencies = {
+    ...pkg,
+    // Recurse.
+    dependencies: pkg.dependencies
+      .map((dep) => _resolveRangesOrNull(
+        dep,
+        pkgMap,
+        pkg.filePath,
+      ))
+      .filter(Boolean),
+    // Patch ranges
+    range: range || pkg.range,
+  } as IDependencies;
+
+  return resolvedPkg;
+};
+
+// Correct ranges from package map.
+const _resolveRanges = (
+  pkg: IDependencies,
+  pkgMap: INpmPackageMap,
+): IDependencies => _resolveRangesOrNull(pkg, pkgMap) as IDependencies;
 
 /**
  * Create a dependency graph as **depended**, irrespective of tree flattening.
@@ -402,11 +450,22 @@ export const dependencies = (
         }),
         filePath,
         name: rootPkg.name || "ROOT",
+        range: rootPkg.version || "*", // Root package doesn't have a range.
         version: rootPkg.version || "*",
       };
 
+      // At this point, we now have a potentially circular object with pointers.
+      // We want to convert it as follows:
+      // 1. Unwind and "flatten" the pointers.
+      // 2. Resolve any circular pointers.
+      // 3. Fix any ranges from last path before flattened package.
+
       // Post process the object and resolve circular references + flatten.
       pkg = _resolveRefs(pkg);
+
+      // Post process to correct ranges. There will likely be some wrong before
+      // we do this.
+      pkg = _resolveRanges(pkg, pkgMap);
 
       return pkg;
     });
@@ -431,6 +490,7 @@ const _mapDepsToPackageName = (
   // Current level, path.
   const curPath = (pkgsPath || []).concat({
     name: deps.name,
+    range: deps.range,
     version: deps.version,
   });
 

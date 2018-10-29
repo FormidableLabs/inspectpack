@@ -1,6 +1,46 @@
 History
 =======
 
+## Unreleased MAJOR
+
+### Breaking changes
+
+* `--action=versions`:
+    * _Reports_: The `tsv` and `text` reports have now changed to reflect
+      dependencies hierarchies as _installed_ (e.g., `scoped@1.2.3 ->
+      flattened-foo@1.1.1 -> @scope/foo@1.1.1`) to a semever range meaning
+      something like as _depended_ (e.g., `scoped@1.2.3 -> flattened-foo@^1.1.0
+      -> @scope/foo@^1.1.1`). We expect that this change will provide much more
+      useful information as to how and why your dependency graph impacts what is
+      installed on disk in `node_modules` and ultimately what ends up in your
+      webpack bundle.
+    * _Metadata_: The following `meta` fields have been renamed to be easier
+      to understand.
+        * `skewedPackages` → `packages`: Number of packages with skews.
+        * `skewedVersions` → `resolved`: Number of unique resolved versions.
+        * `installedPackages` → `installed`: Number of on-disk installs.
+        * `dependedPackages` → `depended`: Number of dependency paths.
+
+### Features
+
+* Add `range` information to all dependency items returned internally for
+  dependencies utilities and ultimately all the way to `versions` data.
+* Add `installed` aggregate statistic to `versions` metadata.
+* Add `DuplicatesPlugin` webpack plugin.
+
+### Fixes
+
+* BUG: Per-asset `meta` stats were never set (all `0`) before in data.
+* BUG: Multiple package roots incorrectly collapse / don't prefix.
+  [#90](https://github.com/FormidableLabs/inspectpack/issues/90)
+
+### Miscellaneous
+
+- Updated README.md with note that `--action=versions` is not filtered to only
+  packages that would have files show up in the `--action=duplicates` report.
+- Update `--action=versions` logic to explicitly use `semver-compare` for sort
+  order.
+
 ## 3.0.0
 
 ### Breaking changes

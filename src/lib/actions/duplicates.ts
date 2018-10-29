@@ -29,7 +29,7 @@ interface IDuplicatesSource {
   modules: IActionModule[];
 }
 
-interface IDuplicatesFiles {
+export interface IDuplicatesFiles {
   // File base name
   [baseName: string]: {
     meta: IDuplicatesSummary,
@@ -39,7 +39,7 @@ interface IDuplicatesFiles {
   };
 }
 
-interface IDuplicatesData {
+export interface IDuplicatesData {
   meta: IDuplicatesSummary;
   assets: {
     [asset: string]: {

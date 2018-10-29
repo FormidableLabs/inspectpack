@@ -2,9 +2,33 @@
 
 /**
  * An "all versions" webpack configuration.
+ *
+ * Example usage (make sure to be in project root):
+ *
+ * ```sh
+ * $ export WEBPACK_VERSION=4; \
+ *   WEBPACK_MODE=development \
+ *   WEBPACK_CWD=../../test/fixtures/duplicates-esm \
+ *   NODE_PATH="${PWD}/node_modules/webpack${WEBPACK_VERSION}/node_modules:${PWD}/node_modules" \
+ *   node test/fixtures/packages/webpack.js \
+ *     --config ../../test/fixtures/config/webpack.config.js
+ * ```
  */
 const { resolve } = require("path");
 const { StatsWriterPlugin } = require("webpack-stats-plugin");
+
+// We have to _build_ the plugin, so just skip if not available.
+let DuplicatesPlugin;
+try {
+  // eslint-disable-next-line global-require,import/no-unresolved
+  DuplicatesPlugin = require("../../../plugin").DuplicatesPlugin;
+} catch (err) {
+  if (err.code !== "MODULE_NOT_FOUND") {
+    throw err;
+  }
+  // eslint-disable-next-line no-console
+  console.log("DuplicatesPlugin not found/built. Skipping");
+}
 
 const mode = process.env.WEBPACK_MODE;
 if (!mode) {
@@ -48,8 +72,12 @@ const webpack4 = {
   plugins: [
     new StatsWriterPlugin({
       fields: ["assets", "modules"]
-    })
-  ]
+    }),
+    DuplicatesPlugin ? new DuplicatesPlugin({
+      verbose: true,
+      emitErrors: false
+    }) : null
+  ].filter(Boolean)
 };
 
 const webpack1Module = {

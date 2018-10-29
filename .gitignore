@@ -11,6 +11,7 @@ package-lock.json
 # Build
 /bin
 /lib
+/plugin
 
 # Test
 dist-*

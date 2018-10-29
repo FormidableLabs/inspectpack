@@ -1,0 +1,13 @@
+{
+  "name": "multiple-resolved-no-duplicates",
+  "version": "1.2.3",
+  "description": "DUMMY APP",
+  "main": "src/index.js",
+  "dependencies": {
+    "foo": "^1.0.0",
+    "uses-foo": "^1.0.9",
+    "no-duplicates": "^1.0.1",
+    "uses-no-duplicates": "^1.0.2",
+    "more-no-duplicates": "^1.0.3"
+  }
+}

@@ -25,7 +25,7 @@
  *   WEBPACK_MODE=development \
  *   WEBPACK_CWD=../../test/fixtures/duplicates-cjs \
  *   WEBPACK_DASHBOARD_PATH="${PWD}/.." \
- *   NODE_PATH="${PWD}/node_modules/webpack${WEBPACK_VERSION}/node_modules:${PWD}/node_modules/" \
+ *   NODE_PATH="${PWD}/node_modules/webpack${WEBPACK_VERSION}/node_modules:${PWD}/node_modules" \
  *   node "${PWD}/../webpack-dashboard/bin/webpack-dashboard.js" -p ${WEBPACK_DASHBOARD_PORT} -- \
  *   node --trace-deprecation test/fixtures/packages/webpack.js \
  *     --config "${PWD}/test/fixtures/config/webpack.config.webpack-dashboard.js" \

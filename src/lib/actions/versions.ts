@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { join, relative, sep } from "path";
+import semverCompare = require("semver-compare");
 
 import { IActionModule, IModule } from "../interfaces/modules";
 import {
@@ -158,19 +159,23 @@ const modulesByPackageNameByPackagePath = (
 
 export interface IVersionsMeta {
   // Number of all unique depended packages (for any name, version).
-  dependedPackages: {
+  depended: {
     num: number,
   };
   // Total number of bundled files across all packages.
   files: {
     num: number,
   };
-  // Unique package names with skews.
-  skewedPackages: {
+  // Total number of _on-disk_ packages installed for implicated versions.
+  installed: {
     num: number,
   };
-  // Total number of skewed packages.
-  skewedVersions: {
+  // Unique package names with skews.
+  packages: {
+    num: number,
+  };
+  // Total number of resolved packages.
+  resolved: {
     num: number,
   };
 }
@@ -204,16 +209,19 @@ export interface IVersionsData {
 }
 
 const createEmptyMeta = (): IVersionsMeta => ({
-  dependedPackages: {
+  depended: {
     num: 0,
   },
   files: {
     num: 0,
   },
-  skewedPackages: {
+  installed: {
     num: 0,
   },
-  skewedVersions: {
+  packages: {
+    num: 0,
+  },
+  resolved: {
     num: 0,
   },
 });
@@ -253,7 +261,7 @@ const getAssetData = (
       // Use the modules as an "is present" lookup table.
       const modsToFilePath = modsMap[name] || {};
 
-      Object.keys(depsToPackageName[name] || {}).sort(sort).forEach((version) => {
+      Object.keys(depsToPackageName[name] || {}).sort(semverCompare).forEach((version) => {
         // Have potential `filePath` match across mods and deps.
         // Filter to just these file paths.
         const depsForPkgVers = depsToPackageName[name][version] || {};
@@ -277,7 +285,7 @@ const getAssetData = (
           data.packages[name] = data.packages[name] || {};
           const dataVers = data.packages[name][version] = data.packages[name][version] || {};
           const dataObj = dataVers[relPath] = dataVers[relPath] || {};
-          dataObj.skews = depsForPkgVers[filePath].skews;
+          dataObj.skews = (dataObj.skews || []).concat(depsForPkgVers[filePath].skews);
           dataObj.modules = (dataObj.modules || []).concat(modules);
         });
       });
@@ -352,18 +360,27 @@ class Versions extends Action {
         // Attach root-level meta.
         data.meta.packageRoots = pkgRoots;
         assetNames.forEach((assetName) => {
-          const { packages } = data.assets[assetName];
+          const { packages, meta } = data.assets[assetName];
 
           Object.keys(packages).forEach((pkgName) => {
             const pkgVersions = Object.keys(packages[pkgName]);
 
-            data.meta.skewedPackages.num += 1;
-            data.meta.skewedVersions.num += pkgVersions.length;
+            meta.packages.num += 1;
+            meta.resolved.num += pkgVersions.length;
+
+            data.meta.packages.num += 1;
+            data.meta.resolved.num += pkgVersions.length;
+
             pkgVersions.forEach((version) => {
               const pkgVers = packages[pkgName][version];
               Object.keys(pkgVers).forEach((filePath) => {
+                meta.files.num += pkgVers[filePath].modules.length;
+                meta.depended.num += pkgVers[filePath].skews.length;
+                meta.installed.num += 1;
+
                 data.meta.files.num += pkgVers[filePath].modules.length;
-                data.meta.dependedPackages.num += pkgVers[filePath].skews.length;
+                data.meta.depended.num += pkgVers[filePath].skews.length;
+                data.meta.installed.num += 1;
               });
             });
           });
@@ -381,9 +398,9 @@ class Versions extends Action {
 
 // `~/different-foo/~/foo`
 const shortPath = (filePath: string) => filePath.replace(/node_modules/g, "~");
-// `duplicates-cjs@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3`
+// `duplicates-cjs@1.2.3 -> different-foo@^1.0.1 -> foo@^2.2.0`
 const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
-  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.version}`,
+  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.range}`,
   "",
 );
 
@@ -398,7 +415,7 @@ class VersionsTemplate extends Template {
           .map((pkgName) => this.trim(chalk`
             * {cyan ${pkgName}}
               ${Object.keys(assets[name].packages[pkgName])
-                .sort(sort)
+                .sort(semverCompare)
                 .map((version) => this.trim(chalk`
                   * {gray ${version}}
                     ${Object.keys(assets[name].packages[pkgName][version])
@@ -413,9 +430,9 @@ class VersionsTemplate extends Template {
                         * {green ${shortPath(filePath)}}
                           * Num deps: ${numF(skews.length)}, files: ${numF(modules.length)}
                           ${skews
-                            .map((pkgParts) => pkgParts.map((part) => ({
+                            .map((pkgParts) => pkgParts.map((part, i) => ({
                               ...part,
-                              name: chalk.gray(part.name),
+                              name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
                             })))
                             .map(pkgNamePath)
                             .sort(sort)
@@ -440,9 +457,10 @@ class VersionsTemplate extends Template {
           {gray =============================}
 
           {gray ## Summary}
-          * Packages w/ Skews:        ${numF(meta.skewedPackages.num)}
-          * Total skewed versions:    ${numF(meta.skewedVersions.num)}
-          * Total depended packages:  ${numF(meta.dependedPackages.num)}
+          * Packages with skews:      ${numF(meta.packages.num)}
+          * Total resolved versions:  ${numF(meta.resolved.num)}
+          * Total installed packages: ${numF(meta.installed.num)}
+          * Total depended packages:  ${numF(meta.depended.num)}
           * Total bundled files:      ${numF(meta.files.num)}
 
           ${Object.keys(assets)
@@ -464,7 +482,7 @@ class VersionsTemplate extends Template {
           .map((name) => Object.keys(assets[name].packages)
             .sort(sort)
             .map((pkgName) => Object.keys(assets[name].packages[pkgName])
-              .sort(sort)
+              .sort(semverCompare)
               .map((version) => Object.keys(assets[name].packages[pkgName][version])
                 .sort(sort)
                 .map((filePath) => assets[name].packages[pkgName][version][filePath].skews

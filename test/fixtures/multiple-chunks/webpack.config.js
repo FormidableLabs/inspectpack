@@ -11,7 +11,8 @@ module.exports = (webpack, config) => {
       // entry point.
       "bundle-multiple": isWebpack1
         ? "./src/index-multiple-webpack1.js"
-        : "./src/index-multiple.js"
+        : "./src/index-multiple.js",
+      "bundle-different": "./src/index-different.js"
     });
 
     // Set a public path so chunks can dynamically load correctly.

@@ -18,22 +18,25 @@ import * as merge from "deepmerge";
 import * as mock from "mock-fs";
 import { toPosixPath } from "../../../src/lib/util/files";
 
-const EMPTY_VERSIONS_META: IVersionsMeta = {
-  dependedPackages: {
+export const EMPTY_VERSIONS_META: IVersionsMeta = {
+  depended: {
     num: 0,
   },
   files: {
     num: 0,
   },
-  skewedPackages: {
+  installed: {
     num: 0,
   },
-  skewedVersions: {
+  packages: {
+    num: 0,
+  },
+  resolved: {
     num: 0,
   },
 };
 
-const EMPTY_VERSIONS_DATA: IVersionsData = {
+export const EMPTY_VERSIONS_DATA: IVersionsData = {
   assets: {},
   meta: {
     ...EMPTY_VERSIONS_META,
@@ -326,16 +329,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_DUPS_CJS_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 1,
               },
               files: {
                 num: 2,
               },
-              skewedPackages: {
+              installed: {
                 num: 1,
               },
-              skewedVersions: {
+              packages: {
+                num: 1,
+              },
+              resolved: {
                 num: 1,
               },
             }));
@@ -347,6 +353,7 @@ describe("lib/actions/versions", () => {
               "assets.bundle\\.js.packages.foo.1\\.1\\.1.node_modules/foo.skews[0][0]",
             ).that.eql({
               name: "ROOT",
+              range: "*",
               version: "*",
             });
           });
@@ -449,16 +456,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_DUPS_CJS_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 2,
               },
               files: {
                 num: 4,
               },
-              skewedPackages: {
+              installed: {
+                num: 2,
+              },
+              packages: {
                 num: 1,
               },
-              skewedVersions: {
+              resolved: {
                 num: 2,
               },
             }));
@@ -490,16 +500,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_DUPS_CJS_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 4,
               },
               files: {
                 num: 5,
               },
-              skewedPackages: {
+              installed: {
+                num: 3,
+              },
+              packages: {
                 num: 1,
               },
-              skewedVersions: {
+              resolved: {
                 num: 3,
               },
             }));
@@ -535,16 +548,19 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(BASE_SCOPED_DATA.meta, {
-              dependedPackages: {
+              depended: {
                 num: 5,
               },
               files: {
                 num: 7,
               },
-              skewedPackages: {
+              installed: {
+                num: 4,
+              },
+              packages: {
                 num: 2,
               },
-              skewedVersions: {
+              resolved: {
                 num: 4,
               },
             }));
@@ -594,16 +610,19 @@ describe("lib/actions/versions", () => {
 
           expect(data).to.have.keys("meta", "assets");
           expect(data).to.have.property("meta").that.eql(merge(BASE_SCOPED_DATA.meta, {
-            dependedPackages: {
+            depended: {
               num: 5,
             },
             files: {
               num: 7,
             },
-            skewedPackages: {
+            installed: {
+              num: 4,
+            },
+            packages: {
               num: 2,
             },
-            skewedVersions: {
+            resolved: {
               num: 4,
             },
           }));
@@ -663,8 +682,9 @@ inspectpack --action=versions
 =============================
 
 ## Summary
-* Packages w/ Skews:        2
-* Total skewed versions:    4
+* Packages with skews:      2
+* Total resolved versions:  4
+* Total installed packages: 4
 * Total depended packages:  5
 * Total bundled files:      7
 
@@ -673,21 +693,21 @@ inspectpack --action=versions
   * 1.1.1
     * ~/@scope/foo
       * Num deps: 2, files: 2
-      * scoped@1.2.3 -> @scope/foo@1.1.1
-      * scoped@1.2.3 -> flattened-foo@1.1.1 -> @scope/foo@1.1.1
+      * scoped@1.2.3 -> @scope/foo@^1.0.9
+      * scoped@1.2.3 -> flattened-foo@^1.1.0 -> @scope/foo@^1.1.1
   * 2.2.2
     * ~/uses-foo/~/@scope/foo
       * Num deps: 1, files: 1
-      * scoped@1.2.3 -> uses-foo@1.1.1 -> @scope/foo@2.2.2
+      * scoped@1.2.3 -> uses-foo@^1.0.9 -> @scope/foo@^2.2.0
 * foo
   * 3.3.3
     * ~/unscoped-foo/~/foo
       * Num deps: 1, files: 2
-      * scoped@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3
+      * scoped@1.2.3 -> unscoped-foo@^1.0.9 -> foo@^3.3.0
   * 4.3.3
     * ~/unscoped-foo/~/deeper-unscoped/~/foo
       * Num deps: 1, files: 2
-      * scoped@1.2.3 -> different-foo@1.1.1 -> deeper-unscoped@1.1.1 -> foo@4.3.3
+      * scoped@1.2.3 -> unscoped-foo@^1.0.9 -> deeper-unscoped@^1.0.0 -> foo@^4.0.0
           `.trim());
         });
     });
@@ -704,21 +724,23 @@ inspectpack --action=versions
 =============================
 
 ## Summary
-* Packages w/ Skews:        1
-* Total skewed versions:    2
-* Total depended packages:  2
+* Packages with skews:      1
+* Total resolved versions:  2
+* Total installed packages: 2
+* Total depended packages:  3
 * Total bundled files:      4
 
 ## \`bundle.js\`
 * foo
   * 1.1.1
     * ~/foo
-      * Num deps: 1, files: 2
-      * package2@2.2.2 -> foo@1.1.1
+      * Num deps: 2, files: 2
+      * package1@1.1.1 -> foo@^1.0.0
+      * package2@2.2.2 -> foo@^1.0.0
   * 3.3.3
     * ~/different-foo/~/foo
       * Num deps: 1, files: 2
-      * multiple-roots@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3
+      * multiple-roots@1.2.3 -> different-foo@^1.0.1 -> foo@^3.0.1
           `.trim());
         });
     });
@@ -735,11 +757,11 @@ inspectpack --action=versions
           /*tslint:disable max-line-length*/
           expect(tsvStr).to.eql(`
 Asset	Package	Version	Installed Path	Dependency Path
-bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> @scope/foo@1.1.1
-bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> flattened-foo@1.1.1 -> @scope/foo@1.1.1
-bundle.js	@scope/foo	2.2.2	~/uses-foo/~/@scope/foo	scoped@1.2.3 -> uses-foo@1.1.1 -> @scope/foo@2.2.2
-bundle.js	foo	3.3.3	~/unscoped-foo/~/foo	scoped@1.2.3 -> different-foo@1.1.1 -> foo@3.3.3
-bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> different-foo@1.1.1 -> deeper-unscoped@1.1.1 -> foo@4.3.3
+bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> @scope/foo@^1.0.9
+bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> flattened-foo@^1.1.0 -> @scope/foo@^1.1.1
+bundle.js	@scope/foo	2.2.2	~/uses-foo/~/@scope/foo	scoped@1.2.3 -> uses-foo@^1.0.9 -> @scope/foo@^2.2.0
+bundle.js	foo	3.3.3	~/unscoped-foo/~/foo	scoped@1.2.3 -> unscoped-foo@^1.0.9 -> foo@^3.3.0
+bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unscoped-foo@^1.0.9 -> deeper-unscoped@^1.0.0 -> foo@^4.0.0
           `.trim());
           /*tslint:enable max-line-length*/
         });

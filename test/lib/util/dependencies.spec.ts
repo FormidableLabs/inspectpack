@@ -254,6 +254,7 @@ describe("lib/util/dependencies", () => {
             dependencies: [],
             filePath,
             name: "hi",
+            range: "*",
             version: "*",
           });
         });
@@ -276,6 +277,7 @@ describe("lib/util/dependencies", () => {
             dependencies: [],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
@@ -327,16 +329,19 @@ describe("lib/util/dependencies", () => {
                     dependencies: [],
                     filePath: join(filePath, "node_modules/foo/node_modules/bar"),
                     name: "bar",
+                    range: "^3.4.5",
                     version: "3.4.7",
                   },
                 ],
                 filePath: join(filePath, "node_modules/foo"),
                 name: "foo",
+                range: "^2.3.4",
                 version: "2.3.5",
               },
             ],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
@@ -400,6 +405,7 @@ describe("lib/util/dependencies", () => {
                 dependencies: [],
                 filePath: join(filePath, "node_modules/baz"),
                 name: "baz",
+                range: "^4.0.0",
                 version: "4.0.0",
               },
               {
@@ -411,21 +417,25 @@ describe("lib/util/dependencies", () => {
                         filePath: join(filePath,
                           "node_modules/foo/node_modules/bar/node_modules/baz"),
                         name: "baz",
+                        range: "^4.0.0",
                         version: "4.0.0",
                       },
                     ],
                     filePath: join(filePath, "node_modules/foo/node_modules/bar"),
                     name: "bar",
+                    range: "^3.4.5",
                     version: "3.4.7",
                   },
                 ],
                 filePath: join(filePath, "node_modules/foo"),
                 name: "foo",
+                range: "^2.3.4",
                 version: "2.3.5",
               },
             ],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
@@ -488,6 +498,7 @@ describe("lib/util/dependencies", () => {
         dependencies: [],
         filePath: join(filePath, "node_modules/baz"),
         name: "baz",
+        range: "^4.0.0",
         version: "4.0.0",
       };
 
@@ -504,6 +515,7 @@ describe("lib/util/dependencies", () => {
                     ],
                     filePath: join(filePath, "node_modules/foo/node_modules/bar"),
                     name: "bar",
+                    range: "^3.4.5",
                     version: "3.4.7",
                   },
                   {
@@ -512,16 +524,19 @@ describe("lib/util/dependencies", () => {
                     ],
                     filePath: join(filePath, "node_modules/catpower"),
                     name: "catpower",
+                    range: "^1.0.0",
                     version: "1.0.0",
                   },
                 ],
                 filePath: join(filePath, "node_modules/foo"),
                 name: "foo",
+                range: "^2.3.4",
                 version: "2.3.5",
               },
             ],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
@@ -588,6 +603,7 @@ describe("lib/util/dependencies", () => {
         dependencies: [],
         filePath: join(filePath, "node_modules/@baz/baz"),
         name: "@baz/baz",
+        range: "^4.0.0",
         version: "4.0.0",
       };
 
@@ -604,6 +620,7 @@ describe("lib/util/dependencies", () => {
                     ],
                     filePath: join(filePath, "node_modules/foo/node_modules/@bar/bar"),
                     name: "@bar/bar",
+                    range: "^3.4.5",
                     version: "3.4.7",
                   },
                   {
@@ -612,16 +629,19 @@ describe("lib/util/dependencies", () => {
                     ],
                     filePath: join(filePath, "node_modules/catpower"),
                     name: "catpower",
+                    range: "^1.0.0",
                     version: "1.0.0",
                   },
                 ],
                 filePath: join(filePath, "node_modules/foo"),
                 name: "foo",
+                range: "^2.3.4",
                 version: "2.3.5",
               },
             ],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
@@ -683,22 +703,26 @@ describe("lib/util/dependencies", () => {
                     dependencies: [],
                     filePath: join(filePath, "node_modules/foo/node_modules/bar"),
                     name: "bar",
+                    range: "^3.4.5",
                     version: "3.4.7",
                   },
                   {
                     dependencies: [],
                     filePath: join(filePath, "node_modules/catpower"),
                     name: "catpower",
+                    range: "^1.0.0",
                     version: "1.0.0",
                   },
                 ],
                 filePath: join(filePath, "node_modules/foo"),
                 name: "foo",
+                range: "^2.3.4",
                 version: "2.3.5",
               },
             ],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
@@ -768,6 +792,7 @@ describe("lib/util/dependencies", () => {
         dependencies: [],
         filePath: join(filePath, "node_modules/@baz/baz"),
         name: "@baz/baz",
+        range: "^4.0.0",
         version: "4.0.0",
       };
 
@@ -777,17 +802,20 @@ describe("lib/util/dependencies", () => {
             dependencies: [],
             filePath: join(filePath, "node_modules/foo/node_modules/@bar/bar"),
             name: "@bar/bar",
+            range: "^3.4.5",
             version: "3.4.7",
           },
           {
             dependencies: [],
             filePath: join(filePath, "node_modules/catpower"),
             name: "catpower",
+            range: "^1.0.0",
             version: "1.0.0",
           },
         ],
         filePath: join(filePath, "node_modules/foo"),
         name: "foo",
+        range: "^2.3.4",
         version: "2.3.5",
       };
 
@@ -810,6 +838,7 @@ describe("lib/util/dependencies", () => {
             ],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
@@ -859,11 +888,13 @@ describe("lib/util/dependencies", () => {
                     dependencies: [],
                     filePath: join(filePath, "node_modules/foo"),
                     name: "foo",
+                    range: "^4.0.0",
                     version: "4.0.0",
                   },
                 ],
                 filePath: join(filePath, "node_modules/baz"),
                 name: "baz",
+                range: "^4.0.0",
                 version: "4.0.0",
               },
               {
@@ -872,16 +903,19 @@ describe("lib/util/dependencies", () => {
                     dependencies: [],
                     filePath: join(filePath, "node_modules/baz"),
                     name: "baz",
+                    range: "^4.0.0",
                     version: "4.0.0",
                   },
                 ],
                 filePath: join(filePath, "node_modules/foo"),
                 name: "foo",
+                range: "^4.0.0",
                 version: "4.0.0",
               },
             ],
             filePath,
             name: "hi",
+            range: "1.2.3",
             version: "1.2.3",
           });
         });
