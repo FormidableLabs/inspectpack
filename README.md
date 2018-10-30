@@ -236,7 +236,9 @@ Some things are relatively easy to fix. Others are not.
 
 #### Focus first on identical code sources
 
-For starters, if you're serious about fixing pre-existing duplicates in your bundle, run with the `verbose: true` option. What that gives you is a list of the identical sources used in the bundle. These pieces of code are completely equivalent, so attempting to collapse them is relatively low risk.
+For starters, if you're serious about fixing pre-existing duplicates in your bundle, run with the `verbose: true` option. What that gives you is a list of the identical sources used in the bundle. These pieces of code are completely equivalent, so there is a better chance that they will be able to be collapsed without any difference in functionality.
+
+Of course, the complexity is that identical pieces of code may `require` or `import` other files that are **not** identical in bytes or even equivalent in functionality. So a replacement analysis might start with identical code sources, but must also include any _other_ depended-on sources. But hey, it's a decent place to start looking.
 
 #### Change dependencies in your root `package.json`
 
