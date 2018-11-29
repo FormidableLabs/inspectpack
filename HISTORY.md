@@ -1,6 +1,11 @@
 History
 =======
 
+## Unreleased PATCH
+
+* BUG: CLI execution fails from command line. (Missing shebang.)
+  [#95](https://github.com/FormidableLabs/inspectpack/issues/95)
+
 ## 4.0.0
 
 ### Breaking changes

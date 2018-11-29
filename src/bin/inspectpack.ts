@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { render } from "../lib";
 import { parse } from "./lib/args";
 
