@@ -47,6 +47,7 @@
     "lint": "builder concurrent eslint tslint --buffer",
     "test": "mocha \"test/**/*.spec.ts\"",
     "test-cov": "nyc mocha \"test/**/*.spec.ts\"",
+    "test-cli": "node bin/inspectpack.js -h",
     "check": "npm run lint && npm run test",
     "check-ci": "npm run lint && npm run test-cov"
   },
