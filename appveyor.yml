@@ -16,6 +16,7 @@ test_script:
   - node --version
   - yarn --version
   - yarn run build
+  - yarn run test-cli
   - yarn run build-test
   - yarn run check
 
