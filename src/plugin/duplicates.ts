@@ -39,6 +39,7 @@ interface IDuplicatesByFile {
 interface IDuplicatesPluginConstructor {
   verbose?: boolean;
   emitErrors?: boolean;
+  emitHandler?: (report: string) => {};
 }
 
 interface IPackageNames {
@@ -172,6 +173,7 @@ export class DuplicatesPlugin {
     this.opts = {};
     this.opts.verbose = opts.verbose === true; // default `false`
     this.opts.emitErrors = opts.emitErrors === true; // default `false`
+    this.opts.emitHandler = typeof opts.emitHandler === "function" ? opts.emitHandler : undefined;
   }
 
   public apply(compiler: ICompiler) {
@@ -188,7 +190,7 @@ export class DuplicatesPlugin {
     const { errors, warnings } = compilation;
     const stats = compilation.getStats().toJson();
 
-    const { emitErrors, verbose } = this.opts;
+    const { emitErrors, emitHandler, verbose } = this.opts;
 
     // Stash messages for output to console (success) or compilation warnings
     // or errors arrays on duplicates found.
@@ -314,9 +316,14 @@ export class DuplicatesPlugin {
 `.trimLeft());
         // tslint:enable max-line-length
 
-        // Drain messages into warnings or Errors.
-        const output = emitErrors ? errors : warnings;
-        output.push(new Error(msgs.join("\n")));
+        // Drain messages into custom handler or warnings/errors.
+        const report = msgs.join("\n");
+        if (emitHandler) {
+          emitHandler(report);
+        } else {
+          const output = emitErrors ? errors : warnings;
+          output.push(new Error(report));
+        }
       })
       // Handle old plugin API callback.
       .then(() => {

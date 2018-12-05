@@ -1,6 +1,10 @@
 History
 =======
 
+## Unreleased
+
+- Add `emitHandler` option to `DuplicatesPlugin` to allow customized output.
+
 ## 4.0.1
 
 * BUG: CLI execution fails from command line. (Missing shebang.)

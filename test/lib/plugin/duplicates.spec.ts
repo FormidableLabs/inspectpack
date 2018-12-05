@@ -255,6 +255,41 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
                   .has.property("message", verboseReport);
             });
           });
+
+          it(`emits to handler to default report`, () => {
+            const emitHandler = sandbox.spy();
+            const plugin = new DuplicatesPlugin({
+              emitHandler,
+            });
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.warnings).to.eql([]);
+              expect(compilation.errors).to.eql([]);
+              expect(emitHandler).to.have.callCount(1);
+
+              // First call, first argument is the report
+              const actualReport = emitHandler.args[0][0];
+              expect(actualReport).to.eql(defaultReport);
+            });
+          });
+
+          it(`emits to handler to verbose report`, () => {
+            const emitHandler = sandbox.spy();
+            const plugin = new DuplicatesPlugin({
+              emitHandler,
+              verbose: true,
+            });
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.warnings).to.eql([]);
+              expect(compilation.errors).to.eql([]);
+              expect(emitHandler).to.have.callCount(1);
+
+              // First call, first argument is the report
+              const actualReport = emitHandler.args[0][0];
+              expect(actualReport).to.eql(verboseReport);
+            });
+          });
         });
 
       });
