@@ -1,7 +1,7 @@
 History
 =======
 
-## Unreleased
+## 4.1.0
 
 - Add `emitHandler` option to `DuplicatesPlugin` to allow customized output.
 
