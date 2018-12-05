@@ -39,7 +39,7 @@ interface IDuplicatesByFile {
 interface IDuplicatesPluginConstructor {
   verbose?: boolean;
   emitErrors?: boolean;
-  emitHandler?: (msgs: string[], compilation?: ICompilation) => {};
+  emitHandler?: (report: string) => {};
 }
 
 interface IPackageNames {
@@ -317,11 +317,12 @@ export class DuplicatesPlugin {
         // tslint:enable max-line-length
 
         // Drain messages into custom handler or warnings/errors.
+        const report = msgs.join("\n");
         if (emitHandler) {
-          emitHandler(msgs, compilation);
+          emitHandler(report);
         } else {
           const output = emitErrors ? errors : warnings;
-          output.push(new Error(msgs.join("\n")));
+          output.push(new Error(report));
         }
       })
       // Handle old plugin API callback.
