@@ -187,6 +187,7 @@ describe("lib/actions/sizes", () => {
   let simpleInstance;
   let dupsCjsInstance;
   let scopedInstance;
+  let loadersInstance;
 
   const getData = (name) => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
@@ -200,6 +201,7 @@ describe("lib/actions/sizes", () => {
     "simple",
     "duplicates-cjs",
     "scoped",
+    "loaders",
   ].map((name) =>
     create({
       stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
@@ -212,6 +214,7 @@ describe("lib/actions/sizes", () => {
         simpleInstance,
         dupsCjsInstance,
         scopedInstance,
+        loadersInstance,
       ] = instances;
     }),
   );
@@ -393,6 +396,82 @@ describe("lib/actions/sizes", () => {
           /*tslint:enable max-line-length*/
         });
     });
+
+    it("displays sizes correctly for prefixed loaders", () => {
+      return loadersInstance.template.json()
+        .then((dataStr) => {
+          const data = JSON.parse(normalizeOutput(JSON_PATH_RE, dataStr));
+
+          /*tslint:disable max-line-length*/
+
+          // TODO HERE -- Need to decide what it's going to look like...
+          expect(data).to.eql({
+            "TODO_DECIDE": "REMOVE LOADERS",
+            "assets": {
+              "bundle.js": {
+                "files": [
+                  {
+                    "baseName": "css-loader/index.js!/Users/rye/scm/fmd/inspectpack/test/fixtures/loaders/src/style.css",
+                    "fileName": "/Users/rye/scm/fmd/inspectpack/node_modules/css-loader/index.js!/Users/rye/scm/fmd/inspectpack/test/fixtures/loaders/src/style.css",
+                    "size": {
+                      "full": "NUM"
+                    }
+                  },
+                  {
+                    "baseName": "css-loader/lib/css-base.js",
+                    "fileName": "/Users/rye/scm/fmd/inspectpack/node_modules/css-loader/lib/css-base.js",
+                    "size": {
+                      "full": "NUM"
+                    }
+                  },
+                  {
+                    "baseName": "loaders/src/bunny.js",
+                    "fileName": "loaders/src/bunny.js",
+                    "size": {
+                      "full": "NUM"
+                    }
+                  },
+                  {
+                    "baseName": "raw-loader/index.js!/Users/rye/scm/fmd/inspectpack/test/fixtures/loaders/src/hello.txt",
+                    "fileName": "/Users/rye/scm/fmd/inspectpack/node_modules/raw-loader/index.js!/Users/rye/scm/fmd/inspectpack/test/fixtures/loaders/src/hello.txt",
+                    "size": {
+                      "full": "NUM"
+                    }
+                  },
+                  {
+                    "baseName": "webpack/buildin/global.js",
+                    "fileName": "/Users/rye/scm/fmd/inspectpack/node_modules/webpack/buildin/global.js",
+                    "size": {
+                      "full": "NUM"
+                    }
+                  },
+                  {
+                    "baseName": null,
+                    "fileName": "loaders/src/bunny.js",
+                    "size": {
+                      "full": "NUM"
+                    }
+                  },
+                  {
+                    "baseName": null,
+                    "fileName": "loaders/src/index.js",
+                    "size": {
+                      "full": "NUM"
+                    }
+                  }
+                ],
+                "meta": {
+                  "full": "NUM"
+                }
+              }
+            },
+            "meta": {
+              "full": "NUM"
+            }
+          });
+          /*tslint:enable max-line-length*/
+        });
+    });
   });
 
   describe("text", () => {
@@ -454,6 +533,8 @@ inspectpack --action=sizes
           /*tslint:enable max-line-length*/
         });
     });
+
+    it("displays sizes correctly for prefixed loaders"); // TODO
   });
 
   describe("tsv", () => {
@@ -481,6 +562,8 @@ bundle.js	scoped/src/index.js	(source)	NUM
           /*tslint:enable max-line-length*/
         });
     });
+
+    it("displays sizes correctly for prefixed loaders"); // TODO
   });
 
 });
