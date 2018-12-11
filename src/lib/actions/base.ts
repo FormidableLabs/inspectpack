@@ -52,6 +52,11 @@ export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).
 // - Switch Windows paths to Mac/Unix style.
 // - Non-`node_modules` sources (e.g. "your" sources) return `null`.
 export const _getBaseName = (name: string): string | null => {
+  // TODO REMOVE
+  // if (/[\?\!]+/.test(name)) {
+  //   console.log("TODO HERE _getBaseName", { name })
+  // }
+
   // Not in `node_modules`.
   if (!_isNodeModules(name)) {
     return null;
@@ -136,7 +141,7 @@ export abstract class Action {
           if (RWebpackStatsModuleSource.decode(mod).isRight()) {
             // Easy case -- a normal source code module.
             const srcMod = mod as IWebpackStatsModuleSource;
-            const { identifier, size, source } = srcMod;
+            const { identifier, name, size, source } = srcMod;
 
             return list.concat([{
               baseName: _getBaseName(identifier),
@@ -144,6 +149,7 @@ export abstract class Action {
               identifier,
               isNodeModules: _isNodeModules(identifier),
               isSynthetic: false,
+              name,
               size,
               source,
             }]);
@@ -155,7 +161,7 @@ export abstract class Action {
           } else if (RWebpackStatsModuleSynthetic.decode(mod).isRight()) {
             // Catch-all case -- a module without modules or source.
             const syntheticMod = mod as IWebpackStatsModuleSynthetic;
-            const { identifier, size } = syntheticMod;
+            const { identifier, name, size } = syntheticMod;
 
             return list.concat([{
               baseName: _getBaseName(identifier),
@@ -163,6 +169,7 @@ export abstract class Action {
               identifier,
               isNodeModules: _isNodeModules(identifier),
               isSynthetic: true,
+              name,
               size,
               source: null,
             }]);

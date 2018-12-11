@@ -48,8 +48,11 @@ export type IWebpackStatsAssets = t.TypeOf<typeof RWebpackStatsAssets>;
 const RWebpackStatsModuleBase = t.type({
   // Chunk identifiers.
   chunks: t.array(RWebpackStatsChunk),
-  // Full path to file on disk (with extra hash stuff if `modules` module).
+  // Full path to file on disk (with extra hash stuff if `modules` module and
+  // loader prefixes, etc.).
   identifier: t.string,
+  // An absolute (webpack v1-3) or relative (webpack v4) name of the module.
+  name: t.string,
   // Estimated byte size of module.
   size: t.number,
 });
