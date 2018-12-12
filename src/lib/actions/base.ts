@@ -50,24 +50,22 @@ export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).
 // Normalizations:
 // - Remove starting path if `./`
 // - Switch Windows paths to Mac/Unix style.
-// - Non-`node_modules` sources (e.g. "your" sources) return `null`.
-export const _getBaseName = (name: string): string | null => {
-  // TODO REMOVE
-  // if (/[\?\!]+/.test(name)) {
-  //   console.log("TODO HERE _getBaseName", { name })
-  // }
+// - Non-`node_modules` sources (e.g. "your" sources) return null;
+export const _getBaseName = (identifier: string): string | null => {
+  let candidate;
 
-  // Not in `node_modules`.
-  if (!_isNodeModules(name)) {
+  // Bail on application source.
+  if (!_isNodeModules(identifier)) {
     return null;
   }
 
+  // For `node_modules`, we can proceed with just the identifier.
   // Slice to just after last occurrence of node_modules.
-  const parts = nodeModulesParts(name);
+  const parts = nodeModulesParts(identifier);
   const lastName = parts[parts.length - 1];
 
   // Normalize out the rest of the string.
-  let candidate = normalize(relative(".", lastName));
+  candidate = toPosixPath(normalize(relative(".", lastName)));
 
   // Short-circuit on empty string / current path.
   if (candidate === ".") {
@@ -79,14 +77,50 @@ export const _getBaseName = (name: string): string | null => {
   //
   // E.g., `/PATH/TO/node_modules/moment/locale sync /es/`
   //
-  // **Note**: The rest of this tranform _should_ be safe for synthetic regexps,
+  // **Note**: The rest of this transform _should_ be safe for synthetic regexps,
   // but we can always revisit.
-  if (name[name.length - 1] === "/") {
+  if (identifier[identifier.length - 1] === "/") {
     candidate += "/";
   }
 
-  return toPosixPath(candidate);
+  return candidate;
 };
+
+const _getFullPath = (identifier: string, name: string): string => {
+  return "TODO_IMPLEMENT";
+
+  // if (TRUE) {
+  //   // For application code, we use the `name` primarily and identifier as
+  //   // a limiting aspect.
+  //   const posixIdentifier = toPosixPath(identifier);
+
+  //   let posixName = toPosixPath(name);
+  //   // Remove dot-slash relative part.
+  //   if (posixName.startsWith("./")) {
+  //     posixName = posixName.slice(2);
+  //   }
+
+  //   // If the name is not the end of the identifier, it probably is webpack v1-2
+  //   // with `~` instead of `node_modules`
+  //   const idxOfName = posixIdentifier.indexOf(posixName);
+  //   if (idxOfName === 0) {
+  //     // Match
+  //     candidate = posixName;
+  //   } else {
+
+  //   }
+  //   if (idxOfName !== posixIdentifier.length - posixName.length) {
+  //     console.log("TODO HERE", JSON.stringify({
+  //       posixIdentifier,
+  //       posixName,
+  //       idxOf: posixIdentifier.indexOf(posixName),
+  //       found: posixIdentifier.indexOf(posixName) === posixIdentifier.length - posixName.length
+  //     }, null, 2));
+  //   }
+
+  //   return "";
+  // }
+}
 
 export abstract class Action {
   public stats: IWebpackStats;
@@ -146,10 +180,11 @@ export abstract class Action {
             return list.concat([{
               baseName: _getBaseName(identifier),
               chunks,
+              fullPath: _getFullPath(identifier, name),
               identifier,
               isNodeModules: _isNodeModules(identifier),
               isSynthetic: false,
-              name,
+              name: "TODO_IMPLEMENT",
               size,
               source,
             }]);
@@ -166,10 +201,11 @@ export abstract class Action {
             return list.concat([{
               baseName: _getBaseName(identifier),
               chunks,
+              fullPath: _getFullPath(identifier, name),
               identifier,
               isNodeModules: _isNodeModules(identifier),
               isSynthetic: true,
-              name,
+              name: "TODO_IMPLEMENT",
               size,
               source: null,
             }]);

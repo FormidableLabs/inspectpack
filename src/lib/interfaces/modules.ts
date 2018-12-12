@@ -6,6 +6,9 @@ export interface IModule extends IWebpackStatsModuleBase {
   // Is `null` if not a `node_modules` package module.
   baseName: string | null;
 
+  // Posix path to file on disk included in the bundle.
+  fullPath: string | null;
+
   // Is a vendor module / is part of a `node_modules` path.
   isNodeModules: boolean;
 
