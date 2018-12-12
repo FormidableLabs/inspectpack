@@ -149,44 +149,48 @@ export abstract class Action {
           // Add in any parent chunks and ensure unique array.
           const chunks = Array.from(new Set(mod.chunks.concat(parentChunks || [])));
 
+          // Fields
+          let isSynthetic = false;
+          let source = null;
+          let identifier;
+          let size;
+
           if (RWebpackStatsModuleSource.decode(mod).isRight()) {
             // Easy case -- a normal source code module.
             const srcMod = mod as IWebpackStatsModuleSource;
-            const { identifier, size, source } = srcMod;
-            const normalizedId = _normalizeIdentifier(identifier);
+            identifier = srcMod.identifier;
+            size = srcMod.size;
+            source = srcMod.source;
 
-            return list.concat([{
-              baseName: _getBaseName(normalizedId),
-              chunks,
-              identifier,
-              isNodeModules: _isNodeModules(normalizedId),
-              isSynthetic: false,
-              size,
-              source,
-            }]);
           } else if (RWebpackStatsModuleModules.decode(mod).isRight()) {
             // Recursive case -- more modules.
             const modsMod = mod as IWebpackStatsModuleModules;
 
             return list.concat(this.getSourceMods(modsMod.modules, chunks));
+
           } else if (RWebpackStatsModuleSynthetic.decode(mod).isRight()) {
             // Catch-all case -- a module without modules or source.
             const syntheticMod = mod as IWebpackStatsModuleSynthetic;
-            const { identifier, size } = syntheticMod;
-            const normalizedId = _normalizeIdentifier(identifier);
+            identifier = syntheticMod.identifier;
+            size = syntheticMod.size;
+            isSynthetic = true;
 
-            return list.concat([{
-              baseName: _getBaseName(normalizedId),
-              chunks,
-              identifier,
-              isNodeModules: _isNodeModules(normalizedId),
-              isSynthetic: true,
-              size,
-              source: null,
-            }]);
+          } else {
+            throw new Error(`Cannot match to known module type: ${JSON.stringify(mod)}`);
           }
 
-          throw new Error(`Cannot match to known module type: ${JSON.stringify(mod)}`);
+          const normalizedId = _normalizeIdentifier(identifier as string);
+          const isNodeModules = _isNodeModules(normalizedId);
+
+          return list.concat([{
+            baseName: _getBaseName(normalizedId),
+            chunks,
+            identifier,
+            isNodeModules,
+            isSynthetic,
+            size,
+            source,
+          }]);
         },
         [],
       )
