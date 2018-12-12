@@ -2,17 +2,6 @@ import { _getBaseName, _isNodeModules } from "../../../src/lib/actions/base";
 
 describe("lib/actions/base", () => {
   describe("_getBaseName", () => {
-    it("handles non-node_modules files", () => {
-      expect(_getBaseName("")).to.equal(null);
-      expect(_getBaseName("foo.js")).to.equal(null);
-      expect(_getBaseName("./foo.js")).to.equal(null);
-      expect(_getBaseName(".\\foo.js")).to.equal(null);
-      expect(_getBaseName("bar/foo.js")).to.equal(null);
-      expect(_getBaseName("bar\\foo.js")).to.equal(null);
-      expect(_getBaseName("node_modulesM/bar/foo.js")).to.equal(null);
-      expect(_getBaseName("node_modulesM\\bar\\foo.js")).to.equal(null);
-    });
-
     it("removes node_modules", () => {
       expect(_getBaseName("./node_modules/foo.js")).to.equal("foo.js");
       expect(_getBaseName(".\\node_modules\\foo.js")).to.equal("foo.js");

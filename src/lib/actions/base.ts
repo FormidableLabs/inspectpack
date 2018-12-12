@@ -63,16 +63,12 @@ export const _normalizeIdentifier = (name: string): string => {
 
 // Convert a `node_modules` name to a base name.
 //
+// **Note**: Assumes only passed `node_modules` values.
+//
 // Normalizations:
 // - Remove starting path if `./`
 // - Switch Windows paths to Mac/Unix style.
-// - Non-`node_modules` sources (e.g. "your" sources) return `null`.
 export const _getBaseName = (name: string): string | null => {
-  // Not in `node_modules`.
-  if (!_isNodeModules(name)) {
-    return null;
-  }
-
   // Slice to just after last occurrence of node_modules.
   const parts = nodeModulesParts(name);
   const lastName = parts[parts.length - 1];
@@ -183,9 +179,10 @@ export abstract class Action {
           // We've now got a single entry to prepare and add.
           const normalizedId = _normalizeIdentifier(identifier as string);
           const isNodeModules = _isNodeModules(normalizedId);
+          const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
           return list.concat([{
-            baseName: _getBaseName(normalizedId),
+            baseName,
             chunks,
             identifier,
             isNodeModules,
