@@ -155,18 +155,19 @@ export abstract class Action {
           let identifier;
           let size;
 
-          if (RWebpackStatsModuleSource.decode(mod).isRight()) {
+          if (RWebpackStatsModuleModules.decode(mod).isRight()) {
+            // Recursive case -- more modules.
+            const modsMod = mod as IWebpackStatsModuleModules;
+
+            // Return and recurse.
+            return list.concat(this.getSourceMods(modsMod.modules, chunks));
+
+          } else if (RWebpackStatsModuleSource.decode(mod).isRight()) {
             // Easy case -- a normal source code module.
             const srcMod = mod as IWebpackStatsModuleSource;
             identifier = srcMod.identifier;
             size = srcMod.size;
             source = srcMod.source;
-
-          } else if (RWebpackStatsModuleModules.decode(mod).isRight()) {
-            // Recursive case -- more modules.
-            const modsMod = mod as IWebpackStatsModuleModules;
-
-            return list.concat(this.getSourceMods(modsMod.modules, chunks));
 
           } else if (RWebpackStatsModuleSynthetic.decode(mod).isRight()) {
             // Catch-all case -- a module without modules or source.
@@ -179,6 +180,7 @@ export abstract class Action {
             throw new Error(`Cannot match to known module type: ${JSON.stringify(mod)}`);
           }
 
+          // We've now got a single entry to prepare and add.
           const normalizedId = _normalizeIdentifier(identifier as string);
           const isNodeModules = _isNodeModules(normalizedId);
 
