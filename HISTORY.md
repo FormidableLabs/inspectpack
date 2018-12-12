@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.1.1
 
 - BUG: A loader in the `identifier` field would incorrectly have all modules inferred "as a `node_modules` file", even if not. Implements a naive loader stripping heuristic to correctly assess if `node_modules` or real application source.
 - Optimizes internal calls to `_isNodeModules()` from 2 to 1 for better performance.
