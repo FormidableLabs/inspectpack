@@ -16,6 +16,7 @@ It is also the engine for the handy [`webpack-dashboard`](https://github.com/For
   - [`duplicates`](#duplicates)
   - [`versions`](#versions)
   - [`sizes`](#sizes)
+- [Notes, tips, tricks](#notes-tips-tricks)
 - [Other useful tools](#other-useful-tools)
 
 ## Plugin
@@ -466,6 +467,14 @@ inspectpack --action=sizes
 ##### _Note_: Source size calculations and the webpack lifecycle
 
 The sizes reported are most likely of the uncompressed source of each module. Because `inspectpack` relies on the `stats` object output, the information reported in the sizes action reflects at what point the `stats` object was generated. For example, using the recommended `webpack-stats-plugin`, the source information would be after all loader processing, but potentially before any webpack plugins. Thus, the resultant, _actual_ size of a given module in your ultimate bundle could be bigger (e.g., in a development bundle with webpack-inserted comments and imports) or smaller (e.g., your bundle is minified and gzipped).
+
+## Notes, tips, tricks
+
+### Special characters in file paths
+
+Webpack loaders use a special syntax for loaders with `?` and `!` characters that will end up in the stats object `identifier` field (e.g., `/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/src/bar/my-style.css"`) for a given module item.
+
+We currently use a very naive solution to determine the "true" asset name by just stripping off everything before the last `?`/`!` character. There are technically some potential use cases (e.g. those characters in real file paths) that might not be correctly handled. We have a [tracking ticket](https://github.com/FormidableLabs/inspectpack/issues/98) for folks to comment on if you're hitting any issues.
 
 ## Other useful tools
 

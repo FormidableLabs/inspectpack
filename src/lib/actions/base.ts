@@ -45,18 +45,30 @@ export const nodeModulesParts = (name: string) => toPosixPath(name).split(NM_RE)
 // True if name is part of a `node_modules` path.
 export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).length > 1;
 
+// Naively remove any prefix portion of an identifier, namely:
+// - `REMOVE?KEEP`
+// - `REMOVE!KEEP`
+export const _normalizeIdentifier = (name: string): string => {
+  const lastBang = name.lastIndexOf("!");
+  const lastQuestion = name.lastIndexOf("?");
+  const prefixEnd = Math.max(lastBang, lastQuestion);
+
+  // Remove prefix here.
+  if (prefixEnd > -1) {
+    return name.substr(prefixEnd + 1);
+  }
+
+  return name;
+};
+
 // Convert a `node_modules` name to a base name.
+//
+// **Note**: Assumes only passed `node_modules` values.
 //
 // Normalizations:
 // - Remove starting path if `./`
 // - Switch Windows paths to Mac/Unix style.
-// - Non-`node_modules` sources (e.g. "your" sources) return `null`.
 export const _getBaseName = (name: string): string | null => {
-  // Not in `node_modules`.
-  if (!_isNodeModules(name)) {
-    return null;
-  }
-
   // Slice to just after last occurrence of node_modules.
   const parts = nodeModulesParts(name);
   const lastName = parts[parts.length - 1];
@@ -133,42 +145,51 @@ export abstract class Action {
           // Add in any parent chunks and ensure unique array.
           const chunks = Array.from(new Set(mod.chunks.concat(parentChunks || [])));
 
-          if (RWebpackStatsModuleSource.decode(mod).isRight()) {
-            // Easy case -- a normal source code module.
-            const srcMod = mod as IWebpackStatsModuleSource;
-            const { identifier, size, source } = srcMod;
+          // Fields
+          let isSynthetic = false;
+          let source = null;
+          let identifier;
+          let size;
 
-            return list.concat([{
-              baseName: _getBaseName(identifier),
-              chunks,
-              identifier,
-              isNodeModules: _isNodeModules(identifier),
-              isSynthetic: false,
-              size,
-              source,
-            }]);
-          } else if (RWebpackStatsModuleModules.decode(mod).isRight()) {
+          if (RWebpackStatsModuleModules.decode(mod).isRight()) {
             // Recursive case -- more modules.
             const modsMod = mod as IWebpackStatsModuleModules;
 
+            // Return and recurse.
             return list.concat(this.getSourceMods(modsMod.modules, chunks));
+
+          } else if (RWebpackStatsModuleSource.decode(mod).isRight()) {
+            // Easy case -- a normal source code module.
+            const srcMod = mod as IWebpackStatsModuleSource;
+            identifier = srcMod.identifier;
+            size = srcMod.size;
+            source = srcMod.source;
+
           } else if (RWebpackStatsModuleSynthetic.decode(mod).isRight()) {
             // Catch-all case -- a module without modules or source.
             const syntheticMod = mod as IWebpackStatsModuleSynthetic;
-            const { identifier, size } = syntheticMod;
+            identifier = syntheticMod.identifier;
+            size = syntheticMod.size;
+            isSynthetic = true;
 
-            return list.concat([{
-              baseName: _getBaseName(identifier),
-              chunks,
-              identifier,
-              isNodeModules: _isNodeModules(identifier),
-              isSynthetic: true,
-              size,
-              source: null,
-            }]);
+          } else {
+            throw new Error(`Cannot match to known module type: ${JSON.stringify(mod)}`);
           }
 
-          throw new Error(`Cannot match to known module type: ${JSON.stringify(mod)}`);
+          // We've now got a single entry to prepare and add.
+          const normalizedId = _normalizeIdentifier(identifier as string);
+          const isNodeModules = _isNodeModules(normalizedId);
+          const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
+
+          return list.concat([{
+            baseName,
+            chunks,
+            identifier,
+            isNodeModules,
+            isSynthetic,
+            size,
+            source,
+          }]);
         },
         [],
       )
