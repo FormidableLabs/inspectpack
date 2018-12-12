@@ -1,6 +1,11 @@
 History
 =======
 
+## UNRELEASED
+
+- BUG: A loader in the `identifier` field would incorrectly have all modules inferred "as a `node_modules` file", even if not. Implements a naive loader stripping heuristic to correctly assess if `node_modules` or real application source.
+- Optimizes internal calls to `_isNodeModules()` from 2 to 1 for better performance.
+
 ## 4.1.0
 
 - Add `emitHandler` option to `DuplicatesPlugin` to allow customized output.
