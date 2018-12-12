@@ -45,6 +45,22 @@ export const nodeModulesParts = (name: string) => toPosixPath(name).split(NM_RE)
 // True if name is part of a `node_modules` path.
 export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).length > 1;
 
+// Naively remove any prefix portion of an identifier, namely:
+// - `REMOVE?KEEP`
+// - `REMOVE!KEEP`
+export const _normalizeIdentifier = (name: string): string => {
+  const lastBang = name.lastIndexOf("!");
+  const lastQuestion = name.lastIndexOf("?");
+  const prefixEnd = Math.max(lastBang, lastQuestion);
+
+  // Remove prefix here.
+  if (prefixEnd > -1) {
+    return name.substr(prefixEnd + 1);
+  }
+
+  return name;
+};
+
 // Convert a `node_modules` name to a base name.
 //
 // Normalizations:
@@ -137,12 +153,13 @@ export abstract class Action {
             // Easy case -- a normal source code module.
             const srcMod = mod as IWebpackStatsModuleSource;
             const { identifier, size, source } = srcMod;
+            const normalizedId = _normalizeIdentifier(identifier);
 
             return list.concat([{
-              baseName: _getBaseName(identifier),
+              baseName: _getBaseName(normalizedId),
               chunks,
               identifier,
-              isNodeModules: _isNodeModules(identifier),
+              isNodeModules: _isNodeModules(normalizedId),
               isSynthetic: false,
               size,
               source,
@@ -156,12 +173,13 @@ export abstract class Action {
             // Catch-all case -- a module without modules or source.
             const syntheticMod = mod as IWebpackStatsModuleSynthetic;
             const { identifier, size } = syntheticMod;
+            const normalizedId = _normalizeIdentifier(identifier);
 
             return list.concat([{
-              baseName: _getBaseName(identifier),
+              baseName: _getBaseName(normalizedId),
               chunks,
               identifier,
-              isNodeModules: _isNodeModules(identifier),
+              isNodeModules: _isNodeModules(normalizedId),
               isSynthetic: true,
               size,
               source: null,
