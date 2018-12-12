@@ -1,5 +1,5 @@
 import { reporter } from "io-ts-reporters";
-import { normalize, relative } from "path";
+import { normalize, relative, isAbsolute } from "path";
 import { IModule } from "../interfaces/modules";
 import {
   IWebpackStats,
@@ -52,9 +52,8 @@ export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).
 // - Switch Windows paths to Mac/Unix style.
 // - Non-`node_modules` sources (e.g. "your" sources) return null;
 export const _getBaseName = (identifier: string): string | null => {
-  let candidate;
-
   // Bail on application source.
+  // TODO_RYAN: Call and stash `isNodeModules` and just pass everywhere.
   if (!_isNodeModules(identifier)) {
     return null;
   }
@@ -65,7 +64,7 @@ export const _getBaseName = (identifier: string): string | null => {
   const lastName = parts[parts.length - 1];
 
   // Normalize out the rest of the string.
-  candidate = toPosixPath(normalize(relative(".", lastName)));
+  let candidate = toPosixPath(normalize(relative(".", lastName)));
 
   // Short-circuit on empty string / current path.
   if (candidate === ".") {
@@ -87,39 +86,37 @@ export const _getBaseName = (identifier: string): string | null => {
 };
 
 const _getFullPath = (identifier: string, name: string): string => {
-  return "TODO_IMPLEMENT";
+  // Start some normalization.
+  const posixIdentifier = toPosixPath(identifier);
 
-  // if (TRUE) {
-  //   // For application code, we use the `name` primarily and identifier as
-  //   // a limiting aspect.
-  //   const posixIdentifier = toPosixPath(identifier);
+  let posixName = toPosixPath(name);
+  if (posixName.startsWith("./")) {
+    // Remove dot-slash relative part.
+    posixName = posixName.slice(2);
+  }
 
-  //   let posixName = toPosixPath(name);
-  //   // Remove dot-slash relative part.
-  //   if (posixName.startsWith("./")) {
-  //     posixName = posixName.slice(2);
-  //   }
+  // If the name is not the end of the identifier, it probably is webpack v1-2
+  // with `~` instead of `node_modules`
+  const idxOfName = posixIdentifier.indexOf(posixName);
+  if (idxOfName === 0) {
+    // Direct match. We're done.
+    return normalize(posixName);
+  } else if (idxOfName === posixIdentifier.length - posixName.length) {
+    // Suffix match.
+    if (isAbsolute(posixName)) {
+      return normalize(posixName);
+    } else {
+      // Work backwards to get full absolute path up until loaders.
 
-  //   // If the name is not the end of the identifier, it probably is webpack v1-2
-  //   // with `~` instead of `node_modules`
-  //   const idxOfName = posixIdentifier.indexOf(posixName);
-  //   if (idxOfName === 0) {
-  //     // Match
-  //     candidate = posixName;
-  //   } else {
+      // TODO: HERE -- SOLVE THIS
+      console.log("TODO HERE RELATIVE", normalize(posixIdentifier), name);
+      return normalize("TODO");
+    }
+  }
 
-  //   }
-  //   if (idxOfName !== posixIdentifier.length - posixName.length) {
-  //     console.log("TODO HERE", JSON.stringify({
-  //       posixIdentifier,
-  //       posixName,
-  //       idxOf: posixIdentifier.indexOf(posixName),
-  //       found: posixIdentifier.indexOf(posixName) === posixIdentifier.length - posixName.length
-  //     }, null, 2));
-  //   }
-
-  //   return "";
-  // }
+  // TODO: HERE -- HANDLE THIS
+  console.log("TODO HERE NO MATCH", normalize(posixIdentifier), name);
+  return normalize("TODO");
 }
 
 export abstract class Action {
