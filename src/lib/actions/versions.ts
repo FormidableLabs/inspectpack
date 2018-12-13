@@ -270,6 +270,7 @@ const getAssetData = (
           const modules = (modsToFilePath[filePath] || []).map((mod) => ({
             baseName: mod.baseName,
             fileName: mod.identifier,
+            fullPath: mod.fullPath,
             size: {
               full: mod.size,
             },

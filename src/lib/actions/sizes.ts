@@ -38,6 +38,7 @@ class Sizes extends Action {
             files: assets[name].mods.map((mod) => ({
               baseName: mod.baseName,
               fileName: mod.identifier,
+              fullPath: mod.fullPath,
               size: {
                 full: mod.size,
               },

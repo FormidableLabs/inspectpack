@@ -95,6 +95,14 @@ export const _getBaseName = (name: string): string => {
   return toPosixPath(candidate);
 };
 
+// Convert an identifier into a full path.
+//
+// Uses the `name` field to assess that the (normalized) identifier is indeed a
+// real file on disk.
+export const _getFullPath = (identifier: string, name: string): string => {
+  return "TODO";
+};
+
 export abstract class Action {
   public stats: IWebpackStats;
   private _data?: object;
@@ -149,6 +157,7 @@ export abstract class Action {
           let isSynthetic = false;
           let source = null;
           let identifier;
+          let name;
           let size;
 
           if (RWebpackStatsModuleModules.decode(mod).isRight()) {
@@ -162,6 +171,7 @@ export abstract class Action {
             // Easy case -- a normal source code module.
             const srcMod = mod as IWebpackStatsModuleSource;
             identifier = srcMod.identifier;
+            name = srcMod.name;
             size = srcMod.size;
             source = srcMod.source;
 
@@ -169,6 +179,7 @@ export abstract class Action {
             // Catch-all case -- a module without modules or source.
             const syntheticMod = mod as IWebpackStatsModuleSynthetic;
             identifier = syntheticMod.identifier;
+            name = syntheticMod.name;
             size = syntheticMod.size;
             isSynthetic = true;
 
@@ -179,11 +190,15 @@ export abstract class Action {
           // We've now got a single entry to prepare and add.
           const normalizedId = _normalizeIdentifier(identifier as string);
           const isNodeModules = _isNodeModules(normalizedId);
+          const fullPath = _getFullPath(normalizedId, name);
+          // TODO(FULL_PATH): if `fullPath` is null, then _also_ do null???
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
           return list.concat([{
             baseName,
             chunks,
+            fullPath,
+            name,
             identifier,
             isNodeModules,
             isSynthetic,
