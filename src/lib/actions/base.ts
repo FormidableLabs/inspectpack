@@ -68,7 +68,7 @@ export const _normalizeIdentifier = (name: string): string => {
 // Normalizations:
 // - Remove starting path if `./`
 // - Switch Windows paths to Mac/Unix style.
-export const _getBaseName = (name: string): string | null => {
+export const _getBaseName = (name: string): string => {
   // Slice to just after last occurrence of node_modules.
   const parts = nodeModulesParts(name);
   const lastName = parts[parts.length - 1];
