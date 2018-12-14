@@ -1,4 +1,4 @@
-import { _getBaseName, _isNodeModules, _normalizeIdentifier } from "../../../src/lib/actions/base";
+import { _getBaseName, _isNodeModules, _normalizeWebpackPath } from "../../../src/lib/actions/base";
 
 describe("lib/actions/base", () => {
   describe("_isNodeModules", () => {
@@ -36,30 +36,30 @@ describe("lib/actions/base", () => {
     });
   });
 
-  describe("_normalizeIdentifier", () => {
+  describe("_normalizeWebpackPath", () => {
     it("handles base cases", () => {
-      expect(_normalizeIdentifier("")).to.equal("");
-      expect(_normalizeIdentifier("foo.js")).to.equal("foo.js");
-      expect(_normalizeIdentifier("/foo.js")).to.equal("/foo.js");
-      expect(_normalizeIdentifier("\\foo.js")).to.equal("\\foo.js");
-      expect(_normalizeIdentifier("bar/foo.js")).to.equal("bar/foo.js");
-      expect(_normalizeIdentifier("bar\\foo.js")).to.equal("bar\\foo.js");
-      expect(_normalizeIdentifier("/bar/foo.js")).to.equal("/bar/foo.js");
-      expect(_normalizeIdentifier("x:\\bar\\foo.js")).to.equal("x:\\bar\\foo.js");
+      expect(_normalizeWebpackPath("")).to.equal("");
+      expect(_normalizeWebpackPath("foo.js")).to.equal("foo.js");
+      expect(_normalizeWebpackPath("/foo.js")).to.equal("/foo.js");
+      expect(_normalizeWebpackPath("\\foo.js")).to.equal("\\foo.js");
+      expect(_normalizeWebpackPath("bar/foo.js")).to.equal("bar/foo.js");
+      expect(_normalizeWebpackPath("bar\\foo.js")).to.equal("bar\\foo.js");
+      expect(_normalizeWebpackPath("/bar/foo.js")).to.equal("/bar/foo.js");
+      expect(_normalizeWebpackPath("x:\\bar\\foo.js")).to.equal("x:\\bar\\foo.js");
     });
 
     // tslint:disable max-line-length
     it("handles loaders", () => {
-      expect(_normalizeIdentifier("/PATH/TO/node_modules/css-loader/lib/css-base.js"))
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/lib/css-base.js"))
         .to.equal("/PATH/TO/node_modules/css-loader/lib/css-base.js");
-      expect(_normalizeIdentifier("/PATH/TO/node_modules/next/dist/build/webpack/loaders/next-babel-loader.js??ref--4!/PATH/TO/node_modules/pkg/foo.js"))
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/next/dist/build/webpack/loaders/next-babel-loader.js??ref--4!/PATH/TO/node_modules/pkg/foo.js"))
         .to.equal("/PATH/TO/node_modules/pkg/foo.js");
-      expect(_normalizeIdentifier("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css"))
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css"))
         .to.equal("/PATH/TO/node_modules/@scope/foo/package.css");
 
-      expect(_normalizeIdentifier("/PATH/TO/node_modules/next/dist/build/webpack/loaders/next-babel-loader.js??ref--4!/PATH/TO/src/modules/debug/foo.js"))
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/next/dist/build/webpack/loaders/next-babel-loader.js??ref--4!/PATH/TO/src/modules/debug/foo.js"))
         .to.equal("/PATH/TO/src/modules/debug/foo.js");
-      expect(_normalizeIdentifier("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/src/bar/my-style.css"))
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/src/bar/my-style.css"))
         .to.equal("/PATH/TO/src/bar/my-style.css");
     });
     // tslint:enable max-line-length

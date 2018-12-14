@@ -45,10 +45,13 @@ export const nodeModulesParts = (name: string) => toPosixPath(name).split(NM_RE)
 // True if name is part of a `node_modules` path.
 export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).length > 1;
 
-// Naively remove any prefix portion of an identifier, namely:
+// Attempt to "unwind" webpack paths in `identifier` and `name` to remove
+// prefixes and produce a normal, usable filepath.
+//
+// First, strip off anything before a `?` and `!`:
 // - `REMOVE?KEEP`
 // - `REMOVE!KEEP`
-export const _normalizeIdentifier = (name: string): string => {
+export const _normalizeWebpackPath = (name: string): string => {
   const lastBang = name.lastIndexOf("!");
   const lastQuestion = name.lastIndexOf("?");
   const prefixEnd = Math.max(lastBang, lastQuestion);
@@ -177,7 +180,7 @@ export abstract class Action {
           }
 
           // We've now got a single entry to prepare and add.
-          const normalizedId = _normalizeIdentifier(identifier as string);
+          const normalizedId = _normalizeWebpackPath(identifier as string);
           const isNodeModules = _isNodeModules(normalizedId);
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
