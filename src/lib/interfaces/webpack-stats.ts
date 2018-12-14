@@ -49,8 +49,17 @@ const RWebpackStatsModuleBase = t.type({
   // Chunk identifiers.
   chunks: t.array(RWebpackStatsChunk),
   // Full path to file on disk (with extra hash stuff if `modules` module).
+   // Full path to file on disk (with extra hash stuff if `modules` module and
+  // loader prefixes, etc.).
   identifier: t.string,
-  // Estimated byte size of module.
+   // An absolute (webpack v1-3) or relative (webpack v4) name of the module.
+  //
+  // Forms:
+  // - v1, v2: "/PATH/TO/ROOT/~/pkg/index.js"
+  // - v3: "/PATH/TO/ROOT/node_modules/pkg/index.js"
+  // - v4: "./node_modules/pkg/index.js"
+  name: t.string,
+   // Estimated byte size of module.
   size: t.number,
 });
 

@@ -56,11 +56,49 @@ describe("lib/actions/base", () => {
         .to.equal("/PATH/TO/node_modules/pkg/foo.js");
       expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css"))
         .to.equal("/PATH/TO/node_modules/@scope/foo/package.css");
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css 0"))
+        .to.equal("/PATH/TO/node_modules/@scope/foo/package.css 0");
 
       expect(_normalizeWebpackPath("/PATH/TO/node_modules/next/dist/build/webpack/loaders/next-babel-loader.js??ref--4!/PATH/TO/src/modules/debug/foo.js"))
         .to.equal("/PATH/TO/src/modules/debug/foo.js");
       expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/src/bar/my-style.css"))
         .to.equal("/PATH/TO/src/bar/my-style.css");
+    });
+
+    it("handles loaders with name param", () => {
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/lib/css-base.js",
+        "/PATH/TO/~/css-loader/lib/css-base.js"))
+        .to.equal("/PATH/TO/node_modules/css-loader/lib/css-base.js");
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/lib/css-base.js",
+        "/PATH/TO/~/css-loader/lib/css-base.js"))
+        .to.equal("/PATH/TO/node_modules/css-loader/lib/css-base.js");
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/lib/css-base.js",
+        "./node_modules/css-loader/lib/css-base.js"))
+        .to.equal("/PATH/TO/node_modules/css-loader/lib/css-base.js");
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css"))
+        .to.equal("/PATH/TO/node_modules/@scope/foo/package.css");
+
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css 0",
+        "/PATH/TO/~/@scope/foo/package.css"))
+        .to.equal("/PATH/TO/node_modules/@scope/foo/package.css");
+      expect(_normalizeWebpackPath("x:\\PATH\\TO\\node_modules\\css-loader\\index.js??ref--7-1!x:\\PATH\\TO\\node_modules\\postcss-loader\\lib\\index.js??ref--7-2!x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css 0",
+        "x:\\PATH\\TO\\~\\@scope\\foo\\package.css"))
+        .to.equal("x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css");
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css 0",
+        "/PATH/TO/node_modules/@scope/foo/package.css"))
+        .to.equal("/PATH/TO/node_modules/@scope/foo/package.css");
+      expect(_normalizeWebpackPath("x:\\PATH\\TO\\node_modules\\css-loader\\index.js??ref--7-1!x:\\PATH\\TO\\node_modules\\postcss-loader\\lib\\index.js??ref--7-2!x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css 0",
+        "x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css"))
+        .to.equal("x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css");
+      expect(_normalizeWebpackPath("/PATH/TO/node_modules/css-loader/index.js??ref--7-1!/PATH/TO/node_modules/postcss-loader/lib/index.js??ref--7-2!/PATH/TO/node_modules/@scope/foo/package.css 0",
+        "./node_modules/@scope/foo/package.css"))
+        .to.equal("/PATH/TO/node_modules/@scope/foo/package.css");
+      expect(_normalizeWebpackPath("x:\\PATH\\TO\\node_modules\\css-loader\\index.js??ref--7-1!x:\\PATH\\TO\\node_modules\\postcss-loader\\lib\\index.js??ref--7-2!x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css 0",
+        "node_modules\\@scope\\foo\\package.css"))
+        .to.equal("x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css");
+      expect(_normalizeWebpackPath("x:\\PATH\\TO\\node_modules\\css-loader\\index.js??ref--7-1!x:\\PATH\\TO\\node_modules\\postcss-loader\\lib\\index.js??ref--7-2!x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css 0",
+        ".\\node_modules\\@scope\\foo\\package.css"))
+        .to.equal("x:\\PATH\\TO\\node_modules\\@scope\\foo\\package.css");
     });
     // tslint:enable max-line-length
   });
