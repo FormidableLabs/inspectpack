@@ -100,9 +100,14 @@ export const _getBaseName = (name: string): string => {
 // Uses the `name` field to assess that the (normalized) identifier is indeed a
 // real file on disk.
 export const _getFullPath = (identifier: string, name: string): string => {
+  // TODO: REMOVE -- Just pass in normalized ID
+  const normalizedId = _normalizeIdentifier(identifier);
+  const posixIdentifier = toPosixPath(normalizedId);
+
   // Start some normalization.
-  const posixIdentifier = toPosixPath(identifier);
-   let posixName = toPosixPath(name);
+  // TODO: REMOVE -- Just pass in normalized name
+  const normalizedName = _normalizeIdentifier(name);
+  let posixName = toPosixPath(normalizedName);
   if (posixName.startsWith("./")) {
     // Remove dot-slash relative part.
     posixName = posixName.slice(2);
@@ -116,19 +121,21 @@ export const _getFullPath = (identifier: string, name: string): string => {
     return normalize(posixName);
   } else if (idxOfName === posixIdentifier.length - posixName.length) {
     // Suffix match.
-    // TODO(FULL_PATH): COMBINE IWTH PREVIOUS
+    // TODO(FULL_PATH): COMBINE WITH PREVIOUS
+    // TODO(FULL_PATH): Combine multiple processing fns
     return normalize(posixName);
   }
 
   if (identifier.lastIndexOf(name) !== identifier.length - name.length) {
     console.log("TODO MISMATCH", JSON.stringify({
+      identifier,
       posixIdentifier,
       posixName,
       normalize: normalize(posixIdentifier)
     }, null, 2));
   }
 
-  // TODO: HERE -- this stuff isn't even remotely done. Above or below :)
+  // TODO: HERE -- this stuff isn't even remotely done. Above or below :).
 
   return "TODO";
 };
@@ -218,9 +225,9 @@ export abstract class Action {
           }
 
           // We've now got a single entry to prepare and add.
-          const normalizedId = _normalizeIdentifier(identifier as string);
+          const normalizedId = _normalizeIdentifier(identifier);
           const isNodeModules = _isNodeModules(normalizedId);
-          const fullPath = _getFullPath(normalizedId, name);
+          const fullPath = _getFullPath(identifier, name);
           // TODO(FULL_PATH): if `fullPath` is null, then _also_ do null???
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
