@@ -100,6 +100,36 @@ export const _getBaseName = (name: string): string => {
 // Uses the `name` field to assess that the (normalized) identifier is indeed a
 // real file on disk.
 export const _getFullPath = (identifier: string, name: string): string => {
+  // Start some normalization.
+  const posixIdentifier = toPosixPath(identifier);
+   let posixName = toPosixPath(name);
+  if (posixName.startsWith("./")) {
+    // Remove dot-slash relative part.
+    posixName = posixName.slice(2);
+  }
+
+  // If the name is not the end of the identifier, it probably is webpack v1-2
+  // with `~` instead of `node_modules`
+  const idxOfName = posixIdentifier.indexOf(posixName);
+  if (idxOfName === 0) {
+    // Direct match. We're done.
+    return normalize(posixName);
+  } else if (idxOfName === posixIdentifier.length - posixName.length) {
+    // Suffix match.
+    // TODO(FULL_PATH): COMBINE IWTH PREVIOUS
+    return normalize(posixName);
+  }
+
+  if (identifier.lastIndexOf(name) !== identifier.length - name.length) {
+    console.log("TODO MISMATCH", JSON.stringify({
+      posixIdentifier,
+      posixName,
+      normalize: normalize(posixIdentifier)
+    }, null, 2));
+  }
+
+  // TODO: HERE -- this stuff isn't even remotely done. Above or below :)
+
   return "TODO";
 };
 
