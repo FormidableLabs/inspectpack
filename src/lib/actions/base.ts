@@ -180,7 +180,7 @@ export abstract class Action {
           }
 
           // We've now got a single entry to prepare and add.
-          const normalizedId = _normalizeWebpackPath(identifier as string);
+          const normalizedId = _normalizeWebpackPath(identifier);
           const isNodeModules = _isNodeModules(normalizedId);
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
