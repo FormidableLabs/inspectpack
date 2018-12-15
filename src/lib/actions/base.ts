@@ -87,7 +87,6 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
     // Now, truncate suffix of the candidate if name has less.
     const nameLastIdx = candidate.lastIndexOf(name);
     if (nameLastIdx > -1 && candidate.length !== nameLastIdx + name.length) {
-      const oldCandidate = candidate;
       candidate = candidate.substr(0, nameLastIdx + name.length);
     }
   }
