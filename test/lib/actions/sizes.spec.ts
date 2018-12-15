@@ -44,12 +44,6 @@ const patchAction = (name) => (instance) => {
   // Patch internal data based on baseName keys.
   // **Note**: Patch modules **first** since memoized, then used by assets.
   instance._modules = instance.modules.map((mod) => {
-    // Remove `name` field, as it can be any of the form:
-    // - v1, v2: "/PATH/TO/ROOT/~/pkg/index.js"
-    // - v3: "/PATH/TO/ROOT/node_modules/pkg/index.js"
-    // - v4: "./node_modules/pkg/index.js"
-    delete mod.name;
-
     const patched = PATCHED_MODS[mod.baseName];
     return patched ? { ...mod, ...patched } : mod;
   });
