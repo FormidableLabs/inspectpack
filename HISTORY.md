@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.1.2
 
 - BUG: Use `name` field to better process `identifier` to remove things like
   `/PATH/TO/node_modules/font-awesome/font-awesome.css 0"`. May result in some
