@@ -43,15 +43,28 @@ const RWebpackStatsAssets = t.array(RWebpackStatsAsset);
 export type IWebpackStatsAssets = t.TypeOf<typeof RWebpackStatsAssets>;
 
 // ----------------------------------------------------------------------------
-// Module: Base type
+// Module: Base types
 // ----------------------------------------------------------------------------
 const RWebpackStatsModuleBase = t.type({
   // Chunk identifiers.
   chunks: t.array(RWebpackStatsChunk),
   // Full path to file on disk (with extra hash stuff if `modules` module).
+   // Full path to file on disk (with extra hash stuff if `modules` module and
+  // loader prefixes, etc.).
   identifier: t.string,
-  // Estimated byte size of module.
+   // Estimated byte size of module.
   size: t.number,
+});
+
+// Added fields for some modules that we _don't_ want in the base fields.
+const RWebpackStatsModuleWithName = t.type({
+  // An absolute (webpack v1-3) or relative (webpack v4) name of the module.
+  //
+  // Forms:
+  // - v1, v2: "/PATH/TO/ROOT/~/pkg/index.js"
+  // - v3: "/PATH/TO/ROOT/node_modules/pkg/index.js"
+  // - v4: "./node_modules/pkg/index.js"
+  name: t.string,
 });
 
 export type IWebpackStatsModuleBase = t.TypeOf<typeof RWebpackStatsModuleBase>;
@@ -61,6 +74,7 @@ export type IWebpackStatsModuleBase = t.TypeOf<typeof RWebpackStatsModuleBase>;
 // ----------------------------------------------------------------------------
 export const RWebpackStatsModuleSource = t.intersection([
   RWebpackStatsModuleBase,
+  RWebpackStatsModuleWithName,
   t.type({
     // Raw source, stringified
     source: t.string,
@@ -99,8 +113,11 @@ export type IWebpackStatsModuleSource = t.TypeOf<typeof RWebpackStatsModuleSourc
 // ```
 // ----------------------------------------------------------------------------
 // Just alias base.
-export const RWebpackStatsModuleSynthetic = RWebpackStatsModuleBase;
-export type IWebpackStatsModuleSynthetic = IWebpackStatsModuleBase;
+export const RWebpackStatsModuleSynthetic = t.intersection([
+  RWebpackStatsModuleBase,
+  RWebpackStatsModuleWithName,
+]);
+export type IWebpackStatsModuleSynthetic = t.TypeOf<typeof RWebpackStatsModuleSynthetic>;
 
 // ----------------------------------------------------------------------------
 // Module: More **modules**

@@ -45,20 +45,53 @@ export const nodeModulesParts = (name: string) => toPosixPath(name).split(NM_RE)
 // True if name is part of a `node_modules` path.
 export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).length > 1;
 
-// Naively remove any prefix portion of an identifier, namely:
+// Attempt to "unwind" webpack paths in `identifier` and `name` to remove
+// prefixes and produce a normal, usable filepath.
+//
+// First, strip off anything before a `?` and `!`:
 // - `REMOVE?KEEP`
 // - `REMOVE!KEEP`
-export const _normalizeIdentifier = (name: string): string => {
-  const lastBang = name.lastIndexOf("!");
-  const lastQuestion = name.lastIndexOf("?");
-  const prefixEnd = Math.max(lastBang, lastQuestion);
+export const _normalizeWebpackPath = (identifier: string, name?: string): string => {
+  const bangLastIdx = identifier.lastIndexOf("!");
+  const questionLastIdx = identifier.lastIndexOf("?");
+  const prefixEnd = Math.max(bangLastIdx, questionLastIdx);
+
+  let candidate = identifier;
 
   // Remove prefix here.
   if (prefixEnd > -1) {
-    return name.substr(prefixEnd + 1);
+    candidate = candidate.substr(prefixEnd + 1);
   }
 
-  return name;
+  // Assume a normalized then truncate to name if applicable.
+  //
+  // E.g.,
+  // - `identifier`: "css /PATH/TO/node_modules/cache-loader/dist/cjs.js!STUFF
+  //   !/PATH/TO/node_modules/font-awesome/css/font-awesome.css 0"
+  // - `name`: "node_modules/font-awesome/css/font-awesome.css"
+  //
+  // Forms of name:
+  // - v1, v2: "/PATH/TO/ROOT/~/pkg/index.js"
+  // - v3: "/PATH/TO/ROOT/node_modules/pkg/index.js"
+  // - v4: "./node_modules/pkg/index.js"
+  if (name) {
+    name = name
+      .replace("/~/", "/node_modules/")
+      .replace("\\~\\", "\\node_modules\\");
+
+    if (name.startsWith("./") || name.startsWith(".\\")) {
+      // Remove dot-slash relative part.
+      name = name.slice(2);
+    }
+
+    // Now, truncate suffix of the candidate if name has less.
+    const nameLastIdx = candidate.lastIndexOf(name);
+    if (nameLastIdx > -1 && candidate.length !== nameLastIdx + name.length) {
+      candidate = candidate.substr(0, nameLastIdx + name.length);
+    }
+  }
+
+  return candidate;
 };
 
 // Convert a `node_modules` name to a base name.
@@ -149,6 +182,7 @@ export abstract class Action {
           let isSynthetic = false;
           let source = null;
           let identifier;
+          let name;
           let size;
 
           if (RWebpackStatsModuleModules.decode(mod).isRight()) {
@@ -162,6 +196,7 @@ export abstract class Action {
             // Easy case -- a normal source code module.
             const srcMod = mod as IWebpackStatsModuleSource;
             identifier = srcMod.identifier;
+            name = srcMod.name;
             size = srcMod.size;
             source = srcMod.source;
 
@@ -169,6 +204,7 @@ export abstract class Action {
             // Catch-all case -- a module without modules or source.
             const syntheticMod = mod as IWebpackStatsModuleSynthetic;
             identifier = syntheticMod.identifier;
+            name = syntheticMod.name;
             size = syntheticMod.size;
             isSynthetic = true;
 
@@ -177,7 +213,8 @@ export abstract class Action {
           }
 
           // We've now got a single entry to prepare and add.
-          const normalizedId = _normalizeIdentifier(identifier as string);
+          const normalizedName = _normalizeWebpackPath(name);
+          const normalizedId = _normalizeWebpackPath(identifier, normalizedName);
           const isNodeModules = _isNodeModules(normalizedId);
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
