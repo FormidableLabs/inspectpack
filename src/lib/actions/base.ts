@@ -128,6 +128,44 @@ export const _getBaseName = (name: string): string => {
   return toPosixPath(candidate);
 };
 
+// Convert an identifier into a full path.
+//
+// Uses the (normalized) `name` field to assess that the (normalized) identifier
+// is indeed a real file on disk.
+export const _getFullPath = (identifier: string, name: string): string => {
+  const posixIdentifier = toPosixPath(identifier);
+
+   // Start some normalization.
+  let posixName = toPosixPath(name);
+  if (posixName.startsWith("./")) {
+    // Remove dot-slash relative part.
+    posixName = posixName.slice(2);
+  }
+
+  // If the name is not the end of the identifier, it probably is webpack v1-2
+  // with `~` instead of `node_modules`
+  const idxOfName = posixIdentifier.indexOf(posixName);
+  if (idxOfName === 0) {
+    // Direct match. We're done.
+    return normalize(posixName);
+  } else if (idxOfName === posixIdentifier.length - posixName.length) {
+    // Suffix match.
+    // TODO(FULL_PATH): COMBINE WITH PREVIOUS
+    // TODO(FULL_PATH): Combine multiple processing fns
+    return normalize(posixName);
+  }
+   if (identifier.lastIndexOf(name) !== identifier.length - name.length) {
+    console.log("TODO MISMATCH", JSON.stringify({
+      posixIdentifier,
+      posixName,
+      normalize: normalize(posixIdentifier)
+    }, null, 2));
+  }
+
+  // TODO: HERE -- this stuff isn't even remotely done. Above or below :).
+  return "TODO";
+};
+
 export abstract class Action {
   public stats: IWebpackStats;
   private _data?: object;
@@ -217,6 +255,9 @@ export abstract class Action {
           const normalizedId = _normalizeWebpackPath(identifier, normalizedName);
           const isNodeModules = _isNodeModules(normalizedId);
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
+
+          // TODO(FULL_PATH): Add into data
+          _getFullPath(normalizedId, normalizedName);
 
           return list.concat([{
             baseName,
