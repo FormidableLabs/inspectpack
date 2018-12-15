@@ -224,7 +224,6 @@ export abstract class Action {
             identifier,
             isNodeModules,
             isSynthetic,
-            name: normalizedName,
             size,
             source,
           }]);

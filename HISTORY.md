@@ -1,6 +1,13 @@
 History
 =======
 
+## UNRELEASED
+
+- BUG: Use `name` field to better process `identifier` to remove things like
+  `/PATH/TO/node_modules/font-awesome/font-awesome.css 0"`. May result in some
+  `baseName`s being identical despite different `identifier`s because of
+  loaders and generated code.
+
 ## 4.1.1
 
 - BUG: A loader in the `identifier` field would incorrectly have all modules inferred "as a `node_modules` file", even if not. Implements a naive loader stripping heuristic to correctly assess if `node_modules` or real application source.
