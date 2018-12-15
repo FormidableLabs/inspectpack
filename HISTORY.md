@@ -1,6 +1,10 @@
 History
 =======
 
+## UNRELEASED
+
+- Add `fullPath` processed module field internally and to output reports.
+
 ## 4.1.2
 
 - BUG: Use `name` field to better process `identifier` to remove things like
