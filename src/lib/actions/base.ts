@@ -45,6 +45,9 @@ export const nodeModulesParts = (name: string) => toPosixPath(name).split(NM_RE)
 // True if name is part of a `node_modules` path.
 export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).length > 1;
 
+// Remove all relative higher-up paths (`./` or `../../../`).
+const _removePrepath = (val) => val.replace(/^(\.+(\/|\\)+)+/g, "");
+
 // Attempt to "unwind" webpack paths in `identifier` and `name` to remove
 // prefixes and produce a normal, usable filepath.
 //
@@ -75,14 +78,10 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
   // - v3: "/PATH/TO/ROOT/node_modules/pkg/index.js"
   // - v4: "./node_modules/pkg/index.js"
   if (name) {
-    name = name
+    // Expand `node_modules`, remove prefix `./`, `../`, etc.
+    name = _removePrepath(name)
       .replace("/~/", "/node_modules/")
       .replace("\\~\\", "\\node_modules\\");
-
-    if (name.startsWith("./") || name.startsWith(".\\")) {
-      // Remove dot-slash relative part.
-      name = name.slice(2);
-    }
 
     // Now, truncate suffix of the candidate if name has less.
     const nameLastIdx = candidate.lastIndexOf(name);
@@ -132,11 +131,11 @@ export const _getBaseName = (name: string): string => {
 //
 // Uses the (normalized) `name` field to assess that the (normalized) identifier
 // is indeed a real file on disk.
-export const _getFullPath = (identifier: string, name: string): string => {
+export const _getFullPath = (identifier: string, name: string, TODO_REMOVE_OBJ: any): string => {
   const posixIdentifier = toPosixPath(identifier);
 
    // Start some normalization.
-  let posixName = toPosixPath(name);
+  let posixName = _removePrepath(toPosixPath(name));
   if (posixName.startsWith("./")) {
     // Remove dot-slash relative part.
     posixName = posixName.slice(2);
@@ -158,7 +157,11 @@ export const _getFullPath = (identifier: string, name: string): string => {
     console.log("TODO MISMATCH", JSON.stringify({
       posixIdentifier,
       posixName,
-      normalize: normalize(posixIdentifier)
+      normalize: normalize(posixIdentifier),
+      TODO_REMOVE_OBJ: {
+        issuer: TODO_REMOVE_OBJ.issuer,
+        source: TODO_REMOVE_OBJ.source || "NO_SOURCE",
+      }
     }, null, 2));
   }
 
@@ -257,7 +260,7 @@ export abstract class Action {
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
           // TODO(FULL_PATH): Add into data
-          _getFullPath(normalizedId, normalizedName);
+          _getFullPath(normalizedId, normalizedName, mod);
 
           return list.concat([{
             baseName,
