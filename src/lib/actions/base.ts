@@ -46,7 +46,7 @@ export const nodeModulesParts = (name: string) => toPosixPath(name).split(NM_RE)
 export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).length > 1;
 
 // Remove all relative higher-up paths (`./` or `../../../`).
-const _removePrepath = (val) => val.replace(/^(\.+(\/|\\)+)+/g, "");
+const _removePrepath = (val: string) => val.replace(/^(\.+(\/|\\)+)+/g, "");
 
 // Attempt to "unwind" webpack paths in `identifier` and `name` to remove
 // prefixes and produce a normal, usable filepath.
@@ -144,16 +144,16 @@ export const _getFullPath = (identifier: string, name: string, TODO_REMOVE_OBJ: 
   // If the name is not the end of the identifier, it probably is webpack v1-2
   // with `~` instead of `node_modules`
   const idxOfName = posixIdentifier.indexOf(posixName);
-  if (idxOfName === 0) {
-    // Direct match. We're done.
-    return normalize(posixName);
-  } else if (idxOfName === posixIdentifier.length - posixName.length) {
+  if (
+    // Direct match.
+    idxOfName === 0 ||
     // Suffix match.
-    // TODO(FULL_PATH): COMBINE WITH PREVIOUS
-    // TODO(FULL_PATH): Combine multiple processing fns
-    return normalize(posixName);
+    idxOfName === posixIdentifier.length - posixName.length
+  ) {
+    return normalize(posixIdentifier);
   }
-   if (identifier.lastIndexOf(name) !== identifier.length - name.length) {
+
+  if (identifier.lastIndexOf(name) !== identifier.length - name.length) {
     console.log("TODO MISMATCH", JSON.stringify({
       posixIdentifier,
       posixName,
@@ -260,11 +260,12 @@ export abstract class Action {
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
           // TODO(FULL_PATH): Add into data
-          _getFullPath(normalizedId, normalizedName, mod);
+          const fullPath = _getFullPath(normalizedId, normalizedName, mod);
 
           return list.concat([{
             baseName,
             chunks,
+            fullPath,
             identifier,
             isNodeModules,
             isSynthetic,

@@ -6,10 +6,15 @@ export interface IModule extends IWebpackStatsModuleBase {
   // Is `null` if not a `node_modules` package module.
   baseName: string | null;
 
+  // Inferred path to a real file on disk (app or `node_modules`).
+  // Is `null` if no real, single base file or in a loader/generated code
+  // context a "better" contender exists as "the original".
+  fullPath: string | null;
+
   // Is a vendor module / is part of a `node_modules` path.
   isNodeModules: boolean;
 
-  // Is a vendor module / is part of a `node_modules` path.
+  // Is a "made up" module without actual source.
   isSynthetic: boolean;
 
   // We **change** `source` to allow `null` for synthetic modules.
@@ -23,6 +28,7 @@ export const SYNTHETIC_SOURCE_TOKEN = "synthetic";
 export interface IActionModule {
   baseName: string | null;
   fileName: string;
+  fullPath: string | null;
   size: {
     full: number,
   };
