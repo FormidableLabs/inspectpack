@@ -90,6 +90,7 @@ describe("lib/actions/versions", () => {
   let dupsCjsInstance;
   let scopedInstance;
   let multipleRootsInstance;
+  let hiddenAppRootsInstance;
 
   const getData = (name) => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
@@ -106,6 +107,7 @@ describe("lib/actions/versions", () => {
     "duplicates-cjs",
     "scoped",
     "multiple-roots",
+    "hidden-app-roots",
   ].map((name) => create({
       stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
     }).validate()))
@@ -115,12 +117,14 @@ describe("lib/actions/versions", () => {
         dupsCjsInstance,
         scopedInstance,
         multipleRootsInstance,
+        hiddenAppRootsInstance,
       ] = instances;
 
       expect(simpleInstance).to.not.be.an("undefined");
       expect(dupsCjsInstance).to.not.be.an("undefined");
       expect(scopedInstance).to.not.be.an("undefined");
       expect(multipleRootsInstance).to.not.be.an("undefined");
+      expect(hiddenAppRootsInstance).to.not.be.an("undefined");
     }),
   );
 
@@ -593,6 +597,37 @@ describe("lib/actions/versions", () => {
             expectProp.to.have.property("modules").that.has.length(2);
           });
       });
+
+      // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+      it.skip("displays versions skews correctly for hidden app roots", () => { // TODO UNSKIP
+        mock({
+          "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+        });
+
+        return scopedInstance.getData()
+          .then((data) => {
+            expect(data).to.have.keys("meta", "assets");
+            expect(data).to.have.property("meta").that.eql(merge(BASE_SCOPED_DATA.meta, {
+              depended: {
+                num: 2,
+              },
+              files: {
+                num: 2,
+              },
+              installed: {
+                num: 2,
+              },
+              packages: {
+                num: 1,
+              },
+              resolved: {
+                num: 2,
+              },
+            }));
+
+            console.log("TODO HERE -- ASSERTS"); // tslint:disable-line no-console
+          });
+      });
     });
   });
 
@@ -744,6 +779,9 @@ inspectpack --action=versions
           `.trim());
         });
     });
+
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    it("displays versions skews correctly for hidden app roots"); // TODO IMPLEMENT
   });
 
   describe("tsv", () => {
@@ -766,6 +804,9 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
           /*tslint:enable max-line-length*/
         });
     });
+
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    it("displays versions skews correctly for hidden app roots"); // TODO IMPLEMENT
   });
 
   describe("_packageName", () => {
