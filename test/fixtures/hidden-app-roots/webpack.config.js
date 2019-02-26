@@ -1,6 +1,3 @@
-/* globals __dirname */
-const { resolve } = require("path");
-
 module.exports = (webpack, config) => {
   if (webpack) {
     config.entry = {
