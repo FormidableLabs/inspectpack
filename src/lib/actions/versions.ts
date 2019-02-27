@@ -301,7 +301,19 @@ class Versions extends Action {
 
     // Infer the absolute paths to the package roots.
     const pkgRoots = packagesRoots(mods);
+    // TODO: REMOVE
+    pkgRoots.push(
+      "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
+    );
     console.log("TODO HERE", { pkgRoots })
+
+    // TODO: NOTE
+    // - `dependencies()` can share a package map cache.
+    // - We can sort the `pkgRoots` to do "more root" first, and less root later.
+    // - Possibly using the cache we can give "more" options to traverse up beyond current root?
+    //
+    // TODO: Also
+    // - [ ] Throw error on not found package?
 
     // If we don't have a package root, then we have no dependencies in the
     // bundle and we can short circuit.

@@ -59,6 +59,7 @@ export const readPackage = (
   _cache[path] = Promise.resolve()
     .then(() => _files.readJson(path))
     .catch((err) => {
+      //console.log("TODO HERE", { path, err })
       // Tolerate non-existent package.json.
       if (err.code === "ENOENT") { return null; }
 
@@ -98,10 +99,14 @@ export const readPackages = (
 ): Promise<INpmPackageMapPromise> => {
   const _cache = cache || {};
   const isIncludedPkg = _isIncludedPkg(pkgsFilter);
+  let _dirs;
+  let _pkg;
 
   return Promise.resolve()
     // Read root package.
     .then(() => readPackage(join(path, "package.json"), _cache))
+    // Stash package.
+    .then((pkg) => { _pkg = pkg })
     // Read next level of directories.
     .then(() => readDir(join(path, "node_modules")))
     // Add extra directories for scoped packages.
@@ -118,6 +123,12 @@ export const readPackages = (
         .concat(extrasFlat),
       ),
     )
+    // TODO: REMOVE
+    .then((dirs) => {
+      _dirs = dirs;
+      //console.log("TODO HERE readPackages", { path, dirs });
+      return dirs;
+    })
     // Recurse into all next levels.
     .then((dirs) => Promise.all(
       dirs
@@ -126,6 +137,10 @@ export const readPackages = (
         // Recurse
         .map((dir) => readPackages(join(path, "node_modules", dir), pkgsFilter, _cache)),
     ))
+    // // Now, detect if we are missing packages and recurse _above_ root
+    // .then(() => {
+    //   console.log("TODO HERE IMPL", { _cache, _dirs, _pkg })
+    // })
     // The cache **is** our return value.
     .then(() => _cache);
 };
@@ -211,6 +226,14 @@ const _recurseDependencies = ({
   const _foundMap = foundMap || {};
 
   const isIncludedPkg = _isIncludedPkg(pkgsFilter);
+  // console.log("TODO HERE _recurseDependencies", {
+  //   filePath,
+  //   foundMap,
+  //   names,
+  //   pkgMap,
+  //   pkgsFilter,
+  //   rootPath
+  // });
 
   return names
     .filter(isIncludedPkg)
@@ -218,6 +241,7 @@ const _recurseDependencies = ({
     .map((name): { pkg: IDependencies, pkgNames: string[] } | null => {
       // Find actual location.
       const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, rootPath, pkgMap });
+      //console.log("TODO HERE", { filePath, name, rootPath, isFlattened, pkgPath, pkgObj });
 
       // Short-circuit on not founds.
       if (pkgPath === null || pkgObj === null) { return null; }
@@ -431,6 +455,7 @@ export const dependencies = (
     .then((pkgMap): IDependencies | null => {
       // Short-circuit empty package.
       const rootPkg = pkgMap[join(filePath, "package.json")];
+      //console.log("TODO HERE dependencies", { filePath, rootPkg })
       if (rootPkg === null || rootPkg === undefined) { return null; }
 
       // Have a real package, start inflating.
