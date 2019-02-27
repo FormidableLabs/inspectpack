@@ -2,6 +2,6 @@
   "name": "hidden-app-roots",
   "version": "1.2.3",
   "description": "DUMMY APP",
-  "main": "packages/hidden-app/index.js",
+  "main": "packages/hidden-app/src/index.js",
   "dependencies": {}
 }
