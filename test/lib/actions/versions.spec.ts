@@ -599,15 +599,15 @@ describe("lib/actions/versions", () => {
       });
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-      it.skip("displays versions skews correctly for hidden app roots", () => { // TODO UNSKIP
+      it.only("displays versions skews correctly for hidden app roots", () => { // TODO UNSKIP
         mock({
           "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
         });
 
-        return scopedInstance.getData()
+        return hiddenAppRootsInstance.getData()
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
-            expect(data).to.have.property("meta").that.eql(merge(BASE_SCOPED_DATA.meta, {
+            expect(data).to.have.property("meta").that.eql(merge(EMPTY_VERSIONS_DATA.meta, {
               depended: {
                 num: 2,
               },
@@ -617,6 +617,10 @@ describe("lib/actions/versions", () => {
               installed: {
                 num: 2,
               },
+              packageRoots: [
+                resolve(__dirname, "../../fixtures/hidden-app-roots"),
+                resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
+              ],
               packages: {
                 num: 1,
               },

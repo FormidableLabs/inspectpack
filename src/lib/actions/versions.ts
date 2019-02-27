@@ -301,6 +301,7 @@ class Versions extends Action {
 
     // Infer the absolute paths to the package roots.
     const pkgRoots = packagesRoots(mods);
+    console.log("TODO HERE", { pkgRoots })
 
     // If we don't have a package root, then we have no dependencies in the
     // bundle and we can short circuit.
