@@ -301,11 +301,11 @@ class Versions extends Action {
 
     // Infer the absolute paths to the package roots.
     const pkgRoots = packagesRoots(mods);
-    // TODO: REMOVE
-    pkgRoots.push(
-      "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
-    );
-    console.log("TODO HERE", { pkgRoots })
+    // // TODO: REMOVE
+    // pkgRoots.push(
+    //   "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
+    // );
+    // console.log("TODO HERE", { pkgRoots })
 
     // TODO: NOTE
     // - `dependencies()` can share a package map cache.
