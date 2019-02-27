@@ -106,7 +106,7 @@ export const readPackages = (
     // Read root package.
     .then(() => readPackage(join(path, "package.json"), _cache))
     // Stash package.
-    .then((pkg) => { _pkg = pkg })
+    .then((pkg) => { _pkg = pkg; })
     // Read next level of directories.
     .then(() => readDir(join(path, "node_modules")))
     // Add extra directories for scoped packages.

@@ -301,7 +301,8 @@ class Versions extends Action {
 
     // Infer the absolute paths to the package roots.
     const pkgRoots = packagesRoots(mods);
-    // // TODO: REMOVE
+    // TODO: REMOVE
+    // TODO: Need to infer this "for realz"
     // pkgRoots.push(
     //   "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
     // );

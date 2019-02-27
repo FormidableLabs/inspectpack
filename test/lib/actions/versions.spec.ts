@@ -632,6 +632,23 @@ describe("lib/actions/versions", () => {
             console.log("TODO HERE -- ASSERTS"); // tslint:disable-line no-console
           });
       });
+
+      // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+      it.skip("displays versions skews correctly for hidden app roots with empty node_modules", () => { // TODO UNSKIP
+        const curFixtures = fixtureDirs["test/fixtures/hidden-app-roots"];
+        // Add empty `node_modules` to hit different code path.
+        curFixtures.packages["hidden-app"].node_modules = {};
+
+        mock({
+          "test/fixtures/hidden-app-roots": curFixtures,
+        });
+
+        return hiddenAppRootsInstance.getData()
+          .then((data) => {
+            expect(data).to.have.keys("meta", "assets");
+            console.log("TODO -- SAME ASSERTS AS ABOVE"); // tslint:disable-line no-console
+          });
+      });
     });
   });
 
