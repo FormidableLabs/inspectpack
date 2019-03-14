@@ -146,19 +146,17 @@ const _findPackage = ({
   filePath,
   name,
   pkgMap,
-  rootPath,
 }: {
   filePath: string,
   name: string,
   pkgMap: INpmPackageMap,
-  rootPath: string,
 }): {
   isFlattened: boolean,
   pkgPath: string | null;
   pkgObj: INpmPackage | null;
 } => {
   // Incoming root.
-  const resolvedRoot = resolve(rootPath);
+  const resolvedRoot = resolve(filePath);
 
   // We now check the existing package map which, if iterating in correct
   // directory order, should already have higher up roots that may contain
@@ -172,8 +170,8 @@ const _findPackage = ({
     .map((k) => resolve(dirname(k)))
     // Limit to those that are a higher up directory from our root, which
     // is fair game by Node.js `require` resolution rules, and not the current
-    // rootPath because that already failed.
-    .filter((p) => p !== resolvedRoot && rootPath.indexOf(p) === 0);
+    // root because that already failed.
+    .filter((p) => p !== resolvedRoot && resolvedRoot.indexOf(p) === 0);
 
   const roots = [resolvedRoot].concat(cachedRoots);
 
@@ -223,14 +221,12 @@ const _recurseDependencies = ({
   names,
   pkgMap,
   pkgsFilter,
-  rootPath,
 }: {
   filePath: string,
   foundMap?: { [filePath: string]: { [name: string]: IDependencies | null } },
   names: string[],
   pkgMap: INpmPackageMap,
   pkgsFilter?: string[],
-  rootPath: string,
 }): IDependencies[] => {
   // Build up cache.
   const _foundMap = foundMap || {};
@@ -242,12 +238,12 @@ const _recurseDependencies = ({
     // Inflated current level.
     .map((name): { pkg: IDependencies, pkgNames: string[] } | null => {
       // Find actual location.
-      const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, rootPath, pkgMap });
+      const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, pkgMap });
 
       // Short-circuit on not founds.
       if (pkgPath === null || pkgObj === null) {
         // TODO: Throw if not found?
-        // console.log("TODO HERE MISS", { filePath, name, rootPath, isFlattened, pkgPath, pkgObj });
+        // console.log("TODO HERE MISS", { filePath, name, isFlattened, pkgPath, pkgObj });
         return null;
       }
 
@@ -296,7 +292,6 @@ const _recurseDependencies = ({
           names: pkgNames,
           pkgMap,
           pkgsFilter,
-          rootPath,
         });
       }
 
@@ -475,7 +470,6 @@ export const dependencies = (
           names,
           pkgMap,
           pkgsFilter,
-          rootPath: filePath,
         }),
         filePath,
         name: rootPkg.name || "ROOT",
