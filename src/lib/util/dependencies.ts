@@ -59,7 +59,6 @@ export const readPackage = (
   _cache[path] = Promise.resolve()
     .then(() => _files.readJson(path))
     .catch((err) => {
-      //console.log("TODO HERE", { path, err })
       // Tolerate non-existent package.json.
       if (err.code === "ENOENT") { return null; }
 
@@ -99,14 +98,10 @@ export const readPackages = (
 ): Promise<INpmPackageMapPromise> => {
   const _cache = cache || {};
   const isIncludedPkg = _isIncludedPkg(pkgsFilter);
-  let _dirs;
-  let _pkg;
 
   return Promise.resolve()
     // Read root package.
     .then(() => readPackage(join(path, "package.json"), _cache))
-    // Stash package.
-    .then((pkg) => { _pkg = pkg; })
     // Read next level of directories.
     .then(() => readDir(join(path, "node_modules")))
     // Add extra directories for scoped packages.
@@ -123,12 +118,6 @@ export const readPackages = (
         .concat(extrasFlat),
       ),
     )
-    // TODO: REMOVE
-    .then((dirs) => {
-      _dirs = dirs;
-      //console.log("TODO HERE readPackages", { path, dirs });
-      return dirs;
-    })
     // Recurse into all next levels.
     .then((dirs) => Promise.all(
       dirs
@@ -137,10 +126,6 @@ export const readPackages = (
         // Recurse
         .map((dir) => readPackages(join(path, "node_modules", dir), pkgsFilter, _cache)),
     ))
-    // // Now, detect if we are missing packages and recurse _above_ root
-    // .then(() => {
-    //   console.log("TODO HERE IMPL", { _cache, _dirs, _pkg })
-    // })
     // The cache **is** our return value.
     .then(() => _cache);
 };
@@ -172,36 +157,9 @@ const _findPackage = ({
   pkgPath: string | null;
   pkgObj: INpmPackage | null;
 } => {
+  // Incoming root.
   const resolvedRoot = resolve(rootPath);
 
-  // Iterate down potential paths.
-  let curFilePath = filePath;
-  let isFlattened = false;
-  while (resolvedRoot.length <= resolve(curFilePath).length) {
-    // Check at this level.
-    const pkgPath = join(curFilePath, "node_modules", name);
-    const pkgJsonPath = join(pkgPath, "package.json");
-    const pkgObj = pkgMap[pkgJsonPath];
-
-    // Found a match.
-    if (pkgObj) {
-      // Validation: These should all be **real** npm packages, so we should
-      // **never** fail here. But, can't hurt to check.
-      if (!pkgObj.name) {
-        throw new Error(`Found package without name: ${JSON.stringify(pkgObj)}`);
-      } else if (!pkgObj.version) {
-        throw new Error(`Found package without version: ${JSON.stringify(pkgObj)}`);
-      }
-
-      return { isFlattened, pkgPath, pkgObj };
-    }
-
-    // Decrement path. If we find it now, it's flattened.
-    curFilePath = dirname(curFilePath);
-    isFlattened = true;
-  }
-
-  // No match.
   // We now check the existing package map which, if iterating in correct
   // directory order, should already have higher up roots that may contain
   // `node_modules` **within** the `require` resolution rules that would
@@ -209,25 +167,49 @@ const _findPackage = ({
   //
   // Fixes https://github.com/FormidableLabs/inspectpack/issues/10
   // TODO(TEST): Add _multiple_ upper roots and make sure we choose the correct one.
-  const otherRequireRoots = Object.keys(pkgMap)
+  const cachedRoots = Object.keys(pkgMap)
     // Get directories.
     .map((k) => resolve(dirname(k)))
     // Limit to those that are a higher up directory from our root, which
     // is fair game by Node.js `require` resolution rules, and not the current
     // rootPath because that already failed.
-    .filter((p) => p !== rootPath && rootPath.indexOf(p) === 0)
+    .filter((p) => p !== resolvedRoot && rootPath.indexOf(p) === 0);
 
-  // TODO: REMOVE THIS? OR THROW ERROR?
-  // TODO HERE: Need to go further past resolvedRoot?
-  // TODO IDEA: The `pkgMap` **has** the actual data. Just need to infer / traverse it.
-  // TODO SIDE NOTE: `isFlattened` is going to be impacted by this though.
-  console.log("TODO HERE _findPackage MISS", {
-    otherRequireRoots,
-    // filePath,
-    // name,
-    // pkgMap,
-    rootPath,
-  });
+  const roots = [resolvedRoot].concat(cachedRoots);
+
+  // Iterate down potential paths.
+  // If we find it as _first_ result, then it hasn't been flattened.
+  let isFlattened = false;
+
+  for (const curRoot of roots) {
+    // Reset to full path. This _will_ end up in some duplicate checks, but
+    // shouldn't be too expensive.
+    let curFilePath = filePath;
+
+    while (curRoot.length <= resolve(curFilePath).length) {
+      // Check at this level.
+      const pkgPath = join(curFilePath, "node_modules", name);
+      const pkgJsonPath = join(pkgPath, "package.json");
+      const pkgObj = pkgMap[pkgJsonPath];
+
+      // Found a match.
+      if (pkgObj) {
+        // Validation: These should all be **real** npm packages, so we should
+        // **never** fail here. But, can't hurt to check.
+        if (!pkgObj.name) {
+          throw new Error(`Found package without name: ${JSON.stringify(pkgObj)}`);
+        } else if (!pkgObj.version) {
+          throw new Error(`Found package without version: ${JSON.stringify(pkgObj)}`);
+        }
+
+        return { isFlattened, pkgPath, pkgObj };
+      }
+
+      // Decrement path. If we find it now, it's flattened.
+      curFilePath = dirname(curFilePath);
+      isFlattened = true;
+    }
+  }
 
   return { isFlattened, pkgPath: null, pkgObj: null };
 };
@@ -254,14 +236,6 @@ const _recurseDependencies = ({
   const _foundMap = foundMap || {};
 
   const isIncludedPkg = _isIncludedPkg(pkgsFilter);
-  // console.log("TODO HERE _recurseDependencies", {
-  //   filePath,
-  //   foundMap,
-  //   names,
-  //   pkgMap,
-  //   pkgsFilter,
-  //   rootPath
-  // });
 
   return names
     .filter(isIncludedPkg)
@@ -269,10 +243,13 @@ const _recurseDependencies = ({
     .map((name): { pkg: IDependencies, pkgNames: string[] } | null => {
       // Find actual location.
       const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, rootPath, pkgMap });
-      //console.log("TODO HERE", { filePath, name, rootPath, isFlattened, pkgPath, pkgObj });
 
       // Short-circuit on not founds.
-      if (pkgPath === null || pkgObj === null) { return null; }
+      if (pkgPath === null || pkgObj === null) {
+        // TODO: Throw if not found?
+        // console.log("TODO HERE MISS", { filePath, name, rootPath, isFlattened, pkgPath, pkgObj });
+        return null;
+      }
 
       // Build and check cache.
       const found = _foundMap[pkgPath] = _foundMap[pkgPath] || {};
@@ -483,7 +460,6 @@ export const dependencies = (
     .then((pkgMap): IDependencies | null => {
       // Short-circuit empty package.
       const rootPkg = pkgMap[join(filePath, "package.json")];
-      //console.log("TODO HERE dependencies", { filePath, rootPkg })
       if (rootPkg === null || rootPkg === undefined) { return null; }
 
       // Have a real package, start inflating.

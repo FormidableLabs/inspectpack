@@ -306,10 +306,10 @@ class Versions extends Action {
     const pkgRoots = packagesRoots(mods);
     // TODO: REMOVE
     // - [ ] TODO: Need to infer this "for realz"
-    // - [ ] TODO: Need to sort these things in order of `require` resolution.
-    pkgRoots.push(
-      "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
-    );
+    // - [ ] TODO: Need to sort these things in order of `require` resolution. (HINT: REVERSE)
+    // pkgRoots.push(
+    //   "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
+    // );
 
     // TODO: NOTE
     // - `dependencies()` can share a package map cache.
@@ -335,23 +335,19 @@ class Versions extends Action {
       // Capture deps.
       .then((all) => { allDeps = all; })
       // Check dependencies and validate.
-      .then(() => Promise.all(allDeps.map((deps, i) => {
-        // TODO: HERE
-        // TODO(ISSUE): **Can** legitimately have missing `node_modules` if
-        //   package and higher up root `node_modules` has it. (HAS TEST)
-        // TODO(ISSUE): Need to also look higher if not getting deps.
-
+      .then(() => Promise.all(allDeps.map((deps) => {
         // We're going to _mostly_ permissively handle uninstalled trees, but
-        // we will error if `node_modules` doesn't exist which means likely that
+        // we will error if no `node_modules` exist which means likely that
         // an `npm install` is needed.
         if (deps !== null && !deps.dependencies.length) {
-          const pkgNodeModules = join(pkgRoots[i], "node_modules");
-          return exists(pkgNodeModules)
-            .then((nmExists) => {
-              if (!nmExists) {
+          return Promise.all(
+            pkgRoots.map((pkgRoot) => exists(join(pkgRoot, "node_modules"))),
+          )
+            .then((pkgRootsExist) => {
+              if (pkgRootsExist.indexOf(true) === -1) {
                 throw new Error(
-                  `Found ${mods.length} bundled files in 'node_modules', but ` +
-                  `'${pkgNodeModules}' doesn't exist. ` +
+                  `Found ${mods.length} bundled files in a project ` +
+                  `'node_modules' directory, but none found on disk. ` +
                   `Do you need to run 'npm install'?`,
                 );
               }
