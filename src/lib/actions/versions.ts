@@ -299,14 +299,17 @@ class Versions extends Action {
   protected _getData(): Promise<IVersionsData> {
     const mods = this.modules;
 
+    // Share a mutable package map cache across all dependency resolution.
+    const pkgMap = {};
+
     // Infer the absolute paths to the package roots.
     const pkgRoots = packagesRoots(mods);
     // TODO: REMOVE
-    // TODO: Need to infer this "for realz"
-    // pkgRoots.push(
-    //   "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
-    // );
-    // console.log("TODO HERE", { pkgRoots })
+    // - [ ] TODO: Need to infer this "for realz"
+    // - [ ] TODO: Need to sort these things in order of `require` resolution.
+    pkgRoots.push(
+      "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
+    );
 
     // TODO: NOTE
     // - `dependencies()` can share a package map cache.
@@ -328,11 +331,16 @@ class Versions extends Action {
 
     // Recursively read in dependencies.
     let allDeps: Array<IDependencies | null>;
-    return Promise.all(pkgRoots.map((pkgRoot) => dependencies(pkgRoot, pkgsFilter)))
+    return Promise.all(pkgRoots.map((pkgRoot) => dependencies(pkgRoot, pkgsFilter, pkgMap)))
       // Capture deps.
       .then((all) => { allDeps = all; })
       // Check dependencies and validate.
       .then(() => Promise.all(allDeps.map((deps, i) => {
+        // TODO: HERE
+        // TODO(ISSUE): **Can** legitimately have missing `node_modules` if
+        //   package and higher up root `node_modules` has it. (HAS TEST)
+        // TODO(ISSUE): Need to also look higher if not getting deps.
+
         // We're going to _mostly_ permissively handle uninstalled trees, but
         // we will error if `node_modules` doesn't exist which means likely that
         // an `npm install` is needed.

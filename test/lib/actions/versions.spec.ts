@@ -599,7 +599,7 @@ describe("lib/actions/versions", () => {
       });
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-      it.skip("displays versions skews correctly for hidden app roots", () => { // TODO UNSKIP
+      it.only("displays versions skews correctly for hidden app roots", () => { // TODO UNSKIP
         mock({
           "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
         });
@@ -619,7 +619,7 @@ describe("lib/actions/versions", () => {
               },
               packageRoots: [
                 resolve(__dirname, "../../fixtures/hidden-app-roots"),
-                //resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
+                // TODO: resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
               ],
               packages: {
                 num: 1,
@@ -634,7 +634,7 @@ describe("lib/actions/versions", () => {
       });
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-      it.skip("displays versions skews correctly for hidden app roots with empty node_modules", () => { // TODO UNSKIP
+      it.only("displays versions skews correctly for hidden app roots with empty node_modules", () => { // TODO UNSKIP
         const curFixtures = fixtureDirs["test/fixtures/hidden-app-roots"];
         // Add empty `node_modules` to hit different code path.
         curFixtures.packages["hidden-app"].node_modules = {};

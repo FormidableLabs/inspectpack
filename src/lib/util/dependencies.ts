@@ -201,6 +201,34 @@ const _findPackage = ({
     isFlattened = true;
   }
 
+  // No match.
+  // We now check the existing package map which, if iterating in correct
+  // directory order, should already have higher up roots that may contain
+  // `node_modules` **within** the `require` resolution rules that would
+  // naturally be the "selected" module.
+  //
+  // Fixes https://github.com/FormidableLabs/inspectpack/issues/10
+  // TODO(TEST): Add _multiple_ upper roots and make sure we choose the correct one.
+  const otherRequireRoots = Object.keys(pkgMap)
+    // Get directories.
+    .map((k) => resolve(dirname(k)))
+    // Limit to those that are a higher up directory from our root, which
+    // is fair game by Node.js `require` resolution rules, and not the current
+    // rootPath because that already failed.
+    .filter((p) => p !== rootPath && rootPath.indexOf(p) === 0)
+
+  // TODO: REMOVE THIS? OR THROW ERROR?
+  // TODO HERE: Need to go further past resolvedRoot?
+  // TODO IDEA: The `pkgMap` **has** the actual data. Just need to infer / traverse it.
+  // TODO SIDE NOTE: `isFlattened` is going to be impacted by this though.
+  console.log("TODO HERE _findPackage MISS", {
+    otherRequireRoots,
+    // filePath,
+    // name,
+    // pkgMap,
+    rootPath,
+  });
+
   return { isFlattened, pkgPath: null, pkgObj: null };
 };
 
