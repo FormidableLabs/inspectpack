@@ -1,4 +1,4 @@
-import { dirname, join, resolve } from "path";
+import { dirname, join } from "path";
 import { readDir, readJson, toPosixPath } from "./files";
 
 export interface INpmPackageBase {
@@ -142,7 +142,7 @@ export const _resolvePackageMap = (
     {},
   ));
 
-const _findPackage = ({
+export const _findPackage = ({
   filePath,
   name,
   pkgMap,
@@ -156,7 +156,7 @@ const _findPackage = ({
   pkgObj: INpmPackage | null;
 } => {
   // Incoming root.
-  const resolvedRoot = resolve(filePath);
+  const resolvedRoot = filePath;
 
   // We now check the existing package map which, if iterating in correct
   // directory order, should already have higher up roots that may contain
@@ -167,7 +167,7 @@ const _findPackage = ({
   // TODO(TEST): Add _multiple_ upper roots and make sure we choose the correct one.
   const cachedRoots = Object.keys(pkgMap)
     // Get directories.
-    .map((k) => resolve(dirname(k)))
+    .map((k) => dirname(k))
     // Limit to those that are a higher up directory from our root, which
     // is fair game by Node.js `require` resolution rules, and not the current
     // root because that already failed.
@@ -184,7 +184,7 @@ const _findPackage = ({
     // shouldn't be too expensive.
     let curFilePath = filePath;
 
-    while (curRoot.length <= resolve(curFilePath).length) {
+    while (curRoot.length <= curFilePath.length) {
       // Check at this level.
       const pkgPath = join(curFilePath, "node_modules", name);
       const pkgJsonPath = join(pkgPath, "package.json");
@@ -209,7 +209,7 @@ const _findPackage = ({
     }
   }
 
-  return { isFlattened, pkgPath: null, pkgObj: null };
+  return { isFlattened: false, pkgPath: null, pkgObj: null };
 };
 
 // - Populates `pkgMap` with installed `package.json`s

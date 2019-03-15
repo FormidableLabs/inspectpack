@@ -1,6 +1,7 @@
 import { join, resolve } from "path";
 import {
   _files,
+  _findPackage,
   _resolvePackageMap,
   dependencies,
   readPackage,
@@ -245,12 +246,12 @@ describe("lib/util/dependencies", () => {
         name: "foo",
         version: "3.0.0",
       };
-      const root = {
+      const base = {
         dependencies: {
           "different-foo": "1.0.0",
           "foo": "^3.0.0",
         },
-        name: "root",
+        name: "base",
         version: "1.0.2",
       };
 
@@ -268,7 +269,7 @@ describe("lib/util/dependencies", () => {
             "package.json": JSON.stringify(foo1),
           },
         },
-        "package.json": JSON.stringify(root),
+        "package.json": JSON.stringify(base),
       });
 
       return readPackages(".")
@@ -279,9 +280,57 @@ describe("lib/util/dependencies", () => {
             "node_modules/different-foo/node_modules/foo/package.json": foo3,
             "node_modules/different-foo/package.json": diffFoo,
             "node_modules/foo/package.json": foo1,
-            "package.json": root,
+            "package.json": base,
           });
         });
+    });
+  });
+
+  describe("_findPackage", () => {
+    const _baseArgs = { filePath: "base", name: "foo", pkgMap: {} };
+    const _emptyResp = { isFlattened: false, pkgObj: null, pkgPath: null };
+
+    it("handles empty cases", () => {
+      const base = {
+        dependencies: {
+          foo: "^3.0.0",
+        },
+        name: "base",
+        version: "1.0.2",
+      };
+
+      expect(_findPackage(_baseArgs)).to.eql(_emptyResp);
+
+      expect(_findPackage({ ..._baseArgs, name: "bar", pkgMap: {
+        "base/node_modules/foo/package.json": {
+          name: "foo",
+          version: "1.0.0",
+        },
+        "base/package.json": base,
+      } })).to.eql(_emptyResp);
+    });
+
+    it("finds unflattened packages", () => {
+      const base = {
+        dependencies: {
+          foo: "^3.0.0",
+        },
+        name: "base",
+        version: "1.0.2",
+      };
+      const foo = {
+        name: "foo",
+        version: "1.0.0",
+      };
+
+      expect(_findPackage({ ..._baseArgs, pkgMap: {
+        "base/node_modules/foo/package.json": foo,
+        "base/package.json": base,
+      } })).to.eql({
+        isFlattened: false,
+        pkgObj: foo,
+        pkgPath: "base/node_modules/foo",
+      });
     });
   });
 
