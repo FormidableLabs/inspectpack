@@ -228,6 +228,61 @@ describe("lib/util/dependencies", () => {
           });
         });
     });
+
+    it("includes multiple deps", () => {
+      const foo1 = {
+        name: "foo",
+        version: "1.0.0",
+      };
+      const diffFoo = {
+        dependencies: {
+          foo: "^3.0.0",
+        },
+        name: "different-foo",
+        version: "1.0.1",
+      };
+      const foo3 = {
+        name: "foo",
+        version: "3.0.0",
+      };
+      const root = {
+        dependencies: {
+          "different-foo": "1.0.0",
+          "foo": "^3.0.0",
+        },
+        name: "root",
+        version: "1.0.2",
+      };
+
+      mock({
+        "node_modules": {
+          "different-foo": {
+            "node_modules": {
+              foo: {
+                "package.json": JSON.stringify(foo3),
+              },
+            },
+            "package.json": JSON.stringify(diffFoo),
+          },
+          "foo": {
+            "package.json": JSON.stringify(foo1),
+          },
+        },
+        "package.json": JSON.stringify(root),
+      });
+
+      return readPackages(".")
+        .then(_resolvePackageMap)
+        .then(posixifyKeys)
+        .then((pkgs) => {
+          expect(pkgs).to.eql({
+            "node_modules/different-foo/node_modules/foo/package.json": foo3,
+            "node_modules/different-foo/package.json": diffFoo,
+            "node_modules/foo/package.json": foo1,
+            "package.json": root,
+          });
+        });
+    });
   });
 
   describe("dependencies", () => {
