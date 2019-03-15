@@ -330,8 +330,14 @@ class Versions extends Action {
     const pkgsFilter = allPackages(mods);
 
     // Recursively read in dependencies.
+    // However, since package roots rely on a properly seeded cache from earlier
+    // runs with a higher-up, valid traversal path, we start bottom up.
+    //
+    // TODO(ROOTS): Test this is the correct order for traversal.
     let allDeps: Array<IDependencies | null>;
-    return Promise.all(pkgRoots.map((pkgRoot) => dependencies(pkgRoot, pkgsFilter, pkgMap)))
+    return Promise.all(
+      pkgRoots.map((pkgRoot) => dependencies(pkgRoot, pkgsFilter, pkgMap)),
+    )
       // Capture deps.
       .then((all) => { allDeps = all; })
       // Check dependencies and validate.

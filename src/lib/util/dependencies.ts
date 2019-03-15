@@ -123,6 +123,14 @@ export const readPackages = (
       dirs
         // Filter to known packages.
         .filter(isIncludedPkg)
+        .map((dir) => {
+          // console.log("TODO HERE NEXT LEVEL", JSON.stringify({
+          //   path,
+          //   dir,
+          // }, null, 2))
+
+          return dir;
+        })
         // Recurse
         .map((dir) => readPackages(join(path, "node_modules", dir), pkgsFilter, _cache)),
     ))
@@ -456,6 +464,11 @@ export const dependencies = (
       // Short-circuit empty package.
       const rootPkg = pkgMap[join(filePath, "package.json")];
       if (rootPkg === null || rootPkg === undefined) { return null; }
+
+      // console.log("TODO HERE deps", JSON.stringify({
+      //   filePath,
+      //   pkgMap,
+      // }, null, 2));
 
       // Have a real package, start inflating.
       // Include devDependencies in root of project because _could_ end up in

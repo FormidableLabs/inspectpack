@@ -332,6 +332,8 @@ describe("lib/util/dependencies", () => {
         pkgPath: "base/node_modules/foo",
       });
     });
+
+    it("finds hidden roots packages outside of file path"); // TODO IMPLEMENT
   });
 
   describe("dependencies", () => {
