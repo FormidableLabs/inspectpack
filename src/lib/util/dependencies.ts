@@ -163,25 +163,24 @@ export const _findPackage = ({
   pkgPath: string | null;
   pkgObj: INpmPackage | null;
 } => {
-  // Incoming root.
-  const resolvedRoot = filePath;
-
   // We now check the existing package map which, if iterating in correct
   // directory order, should already have higher up roots that may contain
   // `node_modules` **within** the `require` resolution rules that would
   // naturally be the "selected" module.
   //
   // Fixes https://github.com/FormidableLabs/inspectpack/issues/10
-  // TODO(TEST): Add _multiple_ upper roots and make sure we choose the correct one.
+  //
+  // - [ ] TODO(TEST): Add _multiple_ upper roots and make sure we choose the correct one.
+  // - [ ] TODO(ROOTS): Need to **sort** correctly according to resolution for iteration
   const cachedRoots = Object.keys(pkgMap)
     // Get directories.
     .map((k) => dirname(k))
     // Limit to those that are a higher up directory from our root, which
     // is fair game by Node.js `require` resolution rules, and not the current
     // root because that already failed.
-    .filter((p) => p !== resolvedRoot && resolvedRoot.indexOf(p) === 0);
+    .filter((p) => p !== filePath && filePath.indexOf(p) === 0);
 
-  const roots = [resolvedRoot].concat(cachedRoots);
+  const roots = [filePath].concat(cachedRoots);
 
   // Iterate down potential paths.
   // If we find it as _first_ result, then it hasn't been flattened.
