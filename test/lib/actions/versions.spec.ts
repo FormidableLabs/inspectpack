@@ -599,7 +599,7 @@ describe("lib/actions/versions", () => {
       });
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-      it.skip("displays versions skews correctly for hidden app roots", () => { // TODO UNSKIP
+      (process.env.TEMP_ROOTS ? it.only : it.skip)("displays versions skews correctly for hidden app roots", () => { // TODO UNSKIP
         mock({
           "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
         });
