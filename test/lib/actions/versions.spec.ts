@@ -612,14 +612,14 @@ describe("lib/actions/versions", () => {
                 num: 2,
               },
               files: {
-                num: 2,
+                num: 3,
               },
               installed: {
                 num: 2,
               },
               packageRoots: [
                 resolve(__dirname, "../../fixtures/hidden-app-roots"),
-                // TODO: resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
+                resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
               ],
               packages: {
                 num: 1,
@@ -629,12 +629,24 @@ describe("lib/actions/versions", () => {
               },
             }));
 
-            console.log("TODO HERE -- ASSERTS"); // tslint:disable-line no-console
+            let expectProp;
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.1\\.1\\.1.\\.\\./\\.\\./node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(1);
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.3\\.3\\.3.\\.\\./\\.\\./node_modules/different-foo/node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(2);
           });
       });
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-      it.skip("displays versions skews correctly for hidden app roots with empty node_modules", () => { // TODO UNSKIP
+      (process.env.TEMP_ROOTS ? it.only : it.skip)("displays versions skews correctly for hidden app roots with empty node_modules", () => { // TODO UNSKIP
         const curFixtures = fixtureDirs["test/fixtures/hidden-app-roots"];
         // Add empty `node_modules` to hit different code path.
         curFixtures.packages["hidden-app"].node_modules = {};
@@ -646,7 +658,41 @@ describe("lib/actions/versions", () => {
         return hiddenAppRootsInstance.getData()
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
-            console.log("TODO -- SAME ASSERTS AS ABOVE"); // tslint:disable-line no-console
+            expect(data).to.have.property("meta").that.eql(merge(EMPTY_VERSIONS_DATA.meta, {
+              depended: {
+                num: 2,
+              },
+              files: {
+                num: 3,
+              },
+              installed: {
+                num: 2,
+              },
+              packageRoots: [
+                resolve(__dirname, "../../fixtures/hidden-app-roots"),
+                resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
+              ],
+              packages: {
+                num: 1,
+              },
+              resolved: {
+                num: 2,
+              },
+            }));
+
+            let expectProp;
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.1\\.1\\.1.\\.\\./\\.\\./node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(1);
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.3\\.3\\.3.\\.\\./\\.\\./node_modules/different-foo/node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(2);
           });
       });
     });
