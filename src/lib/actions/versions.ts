@@ -333,8 +333,10 @@ class Versions extends Action {
     const pkgsFilter = allPackages(mods);
 
     // Recursively read in dependencies.
+    //
     // However, since package roots rely on a properly seeded cache from earlier
-    // runs with a higher-up, valid traversal path, we start bottom up.
+    // runs with a higher-up, valid traversal path, we start bottom up in serial
+    // rather than executing different roots in parallel.
     //
     // TODO(ROOTS): Test this is the correct order for traversal.
     let allDeps: Array<IDependencies | null>;
