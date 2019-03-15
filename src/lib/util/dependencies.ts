@@ -465,11 +465,6 @@ export const dependencies = (
       const rootPkg = pkgMap[join(filePath, "package.json")];
       if (rootPkg === null || rootPkg === undefined) { return null; }
 
-      // console.log("TODO HERE deps", JSON.stringify({
-      //   filePath,
-      //   pkgMap,
-      // }, null, 2));
-
       // Have a real package, start inflating.
       // Include devDependencies in root of project because _could_ end up in
       // real final bundle.

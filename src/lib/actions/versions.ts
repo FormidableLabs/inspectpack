@@ -11,6 +11,7 @@ import {
   mapDepsToPackageName,
 } from "../util/dependencies";
 import { exists, toPosixPath } from "../util/files";
+import { serial } from "../util/promise";
 import { numF, sort } from "../util/strings";
 import {
   Action,
@@ -307,9 +308,11 @@ class Versions extends Action {
     // TODO: REMOVE
     // - [ ] TODO: Need to infer this "for realz"
     // - [ ] TODO: Need to sort these things in order of `require` resolution. (HINT: REVERSE)
-    // pkgRoots.push(
-    //   "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app"
-    // );
+    if (process.env.TEMP_ROOTS) {
+      pkgRoots.push(
+        "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app",
+      );
+    }
 
     // TODO: NOTE
     // - `dependencies()` can share a package map cache.
@@ -335,8 +338,8 @@ class Versions extends Action {
     //
     // TODO(ROOTS): Test this is the correct order for traversal.
     let allDeps: Array<IDependencies | null>;
-    return Promise.all(
-      pkgRoots.map((pkgRoot) => dependencies(pkgRoot, pkgsFilter, pkgMap)),
+    return serial(
+      pkgRoots.map((pkgRoot) => () => dependencies(pkgRoot, pkgsFilter, pkgMap)),
     )
       // Capture deps.
       .then((all) => { allDeps = all; })
@@ -359,6 +362,8 @@ class Versions extends Action {
               }
             });
         }
+
+        return Promise.resolve();
       })))
       // Assemble data.
       .then(() => {
