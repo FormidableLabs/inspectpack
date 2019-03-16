@@ -73,6 +73,8 @@ export const _packageRoots = (mods: IModule[]): string[] => {
       while (curPath = curPath && dirname(curPath)) {
         // At a known root.
         if (depRoots.indexOf(curPath) > -1) {
+          // - [ ] TODO: Revise return logic.
+          // - [ ] TODO: Combine with conditional below.
           curPath = null;
           break;
         }
@@ -81,7 +83,7 @@ export const _packageRoots = (mods: IModule[]): string[] => {
         const haveCommonRoot = !!depRoots.filter((d) => curPath && curPath.indexOf(d) === 0).length;
         if (!haveCommonRoot) {
           curPath = null;
-          return;
+          break;
         }
 
         // Potential root.
