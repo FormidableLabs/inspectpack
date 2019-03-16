@@ -918,6 +918,40 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
       ]);
     });
 
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    // TODO UNSKIP
+    // tslint:disable-next-line max-line-length
+    (process.env.TEMP_ROOTS ? it.only : it.skip)("handles hidden application roots", () => {
+      // TODO: NOT WINDOWS COMPATIBLE
+      const appRoot = resolve("test/fixtures/hidden-app-roots");
+      const mods = [
+        {
+          identifier: `${appRoot}/node_modules/different-foo/index.js`,
+          isNodeModules: true,
+        },
+        {
+          identifier: `${appRoot}/node_modules/different-foo/node_modules/foo/car.js`,
+          isNodeModules: true,
+        },
+        {
+          identifier: `${appRoot}/node_modules/different-foo/node_modules/foo/index.js`,
+          isNodeModules: true,
+        },
+        {
+          identifier: `${appRoot}/node_modules/foo/index.js`,
+          isNodeModules: true,
+        },
+        {
+          identifier: `${appRoot}/packages/hidden-app/src/index.js`,
+          isNodeModules: false,
+        },
+      ];
+
+      expect(_packageRoots(mods)).to.eql([
+        appRoot,
+        `${appRoot}/packages/hidden-app`,
+      ]);
+    });
   });
 
   describe("_packageName", () => {
