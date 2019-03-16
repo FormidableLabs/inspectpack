@@ -1,6 +1,7 @@
 import { join, resolve, sep } from "path";
 import {
   _packageName,
+  _packageRoots,
   create,
   IVersionsData,
   IVersionsMeta,
@@ -878,6 +879,45 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
 
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
     it("displays versions skews correctly for hidden app roots"); // TODO IMPLEMENT
+  });
+
+  describe("_packageRoots", () => {
+    it("handles base cases", () => {
+      expect(_packageRoots([])).to.eql([]);
+    });
+
+    it("handles no node_modules cases", () => {
+      expect(_packageRoots([
+        {
+          identifier: resolve("/my-app/src/baz/index.js"),
+          isNodeModules: false,
+        },
+        {
+          identifier: resolve("/my-app/src/baz/bug.js"),
+          isNodeModules: false,
+        },
+      ])).to.eql([]);
+    });
+
+    it("handles simple cases", () => {
+      expect(_packageRoots([
+        {
+          identifier: resolve("/my-app/src/baz/index.js"),
+          isNodeModules: false,
+        },
+        {
+          identifier: resolve("/my-app/node_modules/foo/index.js"),
+          isNodeModules: true,
+        },
+        {
+          identifier: resolve("/my-app/node_modules/foo/node_modules/bug/bug.js"),
+          isNodeModules: true,
+        },
+      ])).to.eql([
+        resolve("/my-app"),
+      ]);
+    });
+
   });
 
   describe("_packageName", () => {

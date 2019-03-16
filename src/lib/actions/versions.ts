@@ -37,7 +37,7 @@ import {
  * @param mods {IModule[]} list of modules.
  * @returns {string[]} list of package roots.
  */
-const packagesRoots = (mods: IModule[]): string[] => {
+export const _packageRoots = (mods: IModule[]): string[] => {
   const roots: string[] = [];
 
   // Iterate node_modules modules and add to list of roots.
@@ -54,6 +54,7 @@ const packagesRoots = (mods: IModule[]): string[] => {
       }
     });
 
+  // TODO: CHECK NODE REQUIRE ORDER!!!
   return roots.sort();
 };
 
@@ -304,7 +305,7 @@ class Versions extends Action {
     const pkgMap = {};
 
     // Infer the absolute paths to the package roots.
-    const pkgRoots = packagesRoots(mods);
+    const pkgRoots = _packageRoots(mods);
     // TODO: REMOVE
     // - [ ] TODO: Need to infer this "for realz"
     // - [ ] TODO: Need to sort these things in order of `require` resolution. (HINT: REVERSE)
