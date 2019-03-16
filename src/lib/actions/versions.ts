@@ -54,7 +54,20 @@ export const _packageRoots = (mods: IModule[]): string[] => {
       }
     });
 
-  // TODO: CHECK NODE REQUIRE ORDER!!!
+  // Now, the tricky part. Find "hidden roots" that don't have `node_modules`
+  // in the path, but still have a `package.json`. To limit the review of this
+  // we only check up to a pre-existing root above that _is_ a `node_modules`-
+  // based root, because that would have to exist if somewhere deeper in a
+  // project had a `package.json` that got flattened.
+
+  // TODO HERE:
+  // TODO(IDEA): More complete.
+  // 1. Identify `node_modules` roots,
+  // 2. Walk down checking non-NodeMods `package.json` along the way from source files
+  // TODO(IDEA): Hacky. If match "*/packages/*", then do a "packages/*/package.json" check.
+
+  // - [ ] TODO: CHECK NODE REQUIRE ORDER!!!
+  // - [ ] TODO: ADD TESTS FOR NODE REQUIRE ORDER!!!
   return roots.sort();
 };
 
