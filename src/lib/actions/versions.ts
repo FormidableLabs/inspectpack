@@ -61,6 +61,10 @@ export const _packageRoots = (mods: IModule[]): string[] => {
   // project had a `package.json` that got flattened.
 
   // TODO HERE:
+  // - [ ] Maybe rename to `depRoots` above and `appRoots` here? (Then combine)
+  // - [ ] Get potential list of roots to check in order for a `package.json`
+  // - [ ] Convert to async and actually check the potential app roots.
+  //
   // TODO(IDEA): More complete.
   // 1. Identify `node_modules` roots,
   // 2. Walk down checking non-NodeMods `package.json` along the way from source files
