@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { join, relative, sep, dirname } from "path";
+import { dirname, join, relative, sep } from "path";
 import semverCompare = require("semver-compare");
 
 import { IActionModule, IModule } from "../interfaces/modules";
@@ -39,6 +39,7 @@ import {
  */
 export const _packageRoots = (mods: IModule[]): string[] => {
   const depRoots: string[] = [];
+  const appRoots: string[] = [];
 
   // Iterate node_modules modules and add to list of roots.
   mods
@@ -54,8 +55,6 @@ export const _packageRoots = (mods: IModule[]): string[] => {
       }
     });
 
-  let tempPotentialAppRoots: string[] = []; // TODO: REMOVE
-
   // Now, the tricky part. Find "hidden roots" that don't have `node_modules`
   // in the path, but still have a `package.json`. To limit the review of this
   // we only check up to a pre-existing root above that _is_ a `node_modules`-
@@ -70,34 +69,23 @@ export const _packageRoots = (mods: IModule[]): string[] => {
       let curPath: string|null = mod.identifier;
 
       // Iterate parts.
+      // tslint:disable-next-line no-conditional-assignment
       while (curPath = curPath && dirname(curPath)) {
-        // At a known root.
-        if (depRoots.indexOf(curPath) > -1) {
-          // - [ ] TODO: Revise return logic.
-          // - [ ] TODO: Combine with conditional below.
+        // Stop if (1) hit existing dep root, or (2) no longer _end_ at dep root
+        if (
+          depRoots.indexOf(curPath) > -1 ||
+          !depRoots.some((d) => curPath && curPath.indexOf(d) === 0)
+        ) {
           curPath = null;
-          break;
+        } else {
+          // Potential root.
+          appRoots.push(curPath);
         }
-
-        // Must have at least _some_ of a known root.
-        const haveCommonRoot = !!depRoots.filter((d) => curPath && curPath.indexOf(d) === 0).length;
-        if (!haveCommonRoot) {
-          curPath = null;
-          break;
-        }
-
-        // Potential root.
-        tempPotentialAppRoots.push(curPath);
       }
-
-      console.log("TODO HERE OTHER MOD", mod.identifier, JSON.stringify({
-        depRoots,
-        tempPotentialAppRoots,
-      }, null, 2));
     });
 
   // TODO HERE:
-  // - [ ] Maybe rename to `depRoots` above and `appRoots` here? (Then combine)
+  // - [ ] Combine, then sort `depRoots` and `appRoots`.
   // - [ ] Get potential list of roots to check in order for a `package.json`
   // - [ ] Convert to async and actually check the potential app roots.
   // - [ ] TODO(TEST): synthetic mod.
