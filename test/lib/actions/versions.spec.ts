@@ -925,30 +925,32 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
     // TODO UNSKIP
     // tslint:disable-next-line max-line-length
     (process.env.TEMP_ROOTS ? it.only : it.skip)("handles hidden application roots", () => {
-      // TODO: NOT WINDOWS COMPATIBLE
       const appRoot = resolve("test/fixtures/hidden-app-roots");
       const mods = [
         {
-          identifier: `${appRoot}/node_modules/different-foo/index.js`,
+          identifier: "node_modules/different-foo/index.js",
           isNodeModules: true,
         },
         {
-          identifier: `${appRoot}/node_modules/different-foo/node_modules/foo/car.js`,
+          identifier: "node_modules/different-foo/node_modules/foo/car.js",
           isNodeModules: true,
         },
         {
-          identifier: `${appRoot}/node_modules/different-foo/node_modules/foo/index.js`,
+          identifier: "node_modules/different-foo/node_modules/foo/index.js",
           isNodeModules: true,
         },
         {
-          identifier: `${appRoot}/node_modules/foo/index.js`,
+          identifier: "node_modules/foo/index.js",
           isNodeModules: true,
         },
         {
-          identifier: `${appRoot}/packages/hidden-app/src/index.js`,
+          identifier: "packages/hidden-app/src/index.js",
           isNodeModules: false,
         },
-      ];
+      ].map(({ identifier, isNodeModules }) => ({
+        identifier: join(appRoot, identifier),
+        isNodeModules,
+      }));
 
       return _packageRoots(mods).then((pkgRoots) => {
         expect(pkgRoots).to.eql([
