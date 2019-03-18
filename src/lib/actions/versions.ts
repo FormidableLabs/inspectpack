@@ -35,9 +35,9 @@ import {
  * of each `node_modules` installed module in a source bundle.
  *
  * @param mods {IModule[]} list of modules.
- * @returns {string[]} list of package roots.
+ * @returns {Promise<string[]>} list of package roots.
  */
-export const _packageRoots = (mods: IModule[]): string[] => {
+export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   const depRoots: string[] = [];
   const appRoots: string[] = [];
 
@@ -74,7 +74,7 @@ export const _packageRoots = (mods: IModule[]): string[] => {
         // Stop if (1) hit existing dep root, or (2) no longer _end_ at dep root
         if (
           depRoots.indexOf(curPath) > -1 ||
-          !depRoots.some((d) => curPath && curPath.indexOf(d) === 0)
+          !depRoots.some((d) => !!curPath && curPath.indexOf(d) === 0)
         ) {
           curPath = null;
         } else {
@@ -85,9 +85,9 @@ export const _packageRoots = (mods: IModule[]): string[] => {
     });
 
   // TODO HERE:
+  // - [ ] Convert to async and actually check the potential app roots.
   // - [ ] Combine, then sort `depRoots` and `appRoots`.
   // - [ ] Get potential list of roots to check in order for a `package.json`
-  // - [ ] Convert to async and actually check the potential app roots.
   // - [ ] TODO(TEST): synthetic mod.
   //
   // TODO(IDEA): More complete.
@@ -97,7 +97,7 @@ export const _packageRoots = (mods: IModule[]): string[] => {
 
   // - [ ] TODO: CHECK NODE REQUIRE ORDER!!!
   // - [ ] TODO: ADD TESTS FOR NODE REQUIRE ORDER!!!
-  return depRoots.sort();
+  return Promise.resolve(depRoots.sort());
 };
 
 // Simple helper to get package name from a base name.
@@ -347,121 +347,122 @@ class Versions extends Action {
     const pkgMap = {};
 
     // Infer the absolute paths to the package roots.
-    const pkgRoots = _packageRoots(mods);
-    // TODO: REMOVE
-    // - [ ] TODO: Need to infer this "for realz"
-    // - [ ] TODO: Need to sort these things in order of `require` resolution. (HINT: REVERSE)
-    if (process.env.TEMP_ROOTS) {
-      pkgRoots.push(
-        "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app",
-      );
-    }
+    return _packageRoots(mods).then((pkgRoots) => {
+      // TODO: REMOVE
+      // - [ ] TODO: Need to infer this "for realz"
+      // - [ ] TODO: Need to sort these things in order of `require` resolution. (HINT: REVERSE)
+      if (process.env.TEMP_ROOTS) {
+        pkgRoots.push(
+          "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app",
+        );
+      }
 
-    // TODO: NOTE
-    // - `dependencies()` can share a package map cache.
-    // - We can sort the `pkgRoots` to do "more root" first, and less root later.
-    // - Possibly using the cache we can give "more" options to traverse up beyond current root?
-    //
-    // TODO: Also
-    // - [ ] Throw error on not found package?
+      // TODO: NOTE
+      // - `dependencies()` can share a package map cache.
+      // - We can sort the `pkgRoots` to do "more root" first, and less root later.
+      // - Possibly using the cache we can give "more" options to traverse up beyond current root?
+      //
+      // TODO: Also
+      // - [ ] Throw error on not found package?
 
-    // If we don't have a package root, then we have no dependencies in the
-    // bundle and we can short circuit.
-    if (!pkgRoots.length) {
-      return Promise.resolve(createEmptyData());
-    }
+      // If we don't have a package root, then we have no dependencies in the
+      // bundle and we can short circuit.
+      if (!pkgRoots.length) {
+        return Promise.resolve(createEmptyData());
+      }
 
-    // We now have a guaranteed non-empty string. Get modules map and filter to
-    // limit I/O to only potential packages.
-    const pkgsFilter = allPackages(mods);
+      // We now have a guaranteed non-empty string. Get modules map and filter to
+      // limit I/O to only potential packages.
+      const pkgsFilter = allPackages(mods);
 
-    // Recursively read in dependencies.
-    //
-    // However, since package roots rely on a properly seeded cache from earlier
-    // runs with a higher-up, valid traversal path, we start bottom up in serial
-    // rather than executing different roots in parallel.
-    //
-    // TODO(ROOTS): Test this is the correct order for traversal.
-    let allDeps: Array<IDependencies | null>;
-    return serial(
-      pkgRoots.map((pkgRoot) => () => dependencies(pkgRoot, pkgsFilter, pkgMap)),
-    )
-      // Capture deps.
-      .then((all) => { allDeps = all; })
-      // Check dependencies and validate.
-      .then(() => Promise.all(allDeps.map((deps) => {
-        // We're going to _mostly_ permissively handle uninstalled trees, but
-        // we will error if no `node_modules` exist which means likely that
-        // an `npm install` is needed.
-        if (deps !== null && !deps.dependencies.length) {
-          return Promise.all(
-            pkgRoots.map((pkgRoot) => exists(join(pkgRoot, "node_modules"))),
-          )
-            .then((pkgRootsExist) => {
-              if (pkgRootsExist.indexOf(true) === -1) {
-                throw new Error(
-                  `Found ${mods.length} bundled files in a project ` +
-                  `'node_modules' directory, but none found on disk. ` +
-                  `Do you need to run 'npm install'?`,
-                );
-              }
-            });
-        }
+      // Recursively read in dependencies.
+      //
+      // However, since package roots rely on a properly seeded cache from earlier
+      // runs with a higher-up, valid traversal path, we start bottom up in serial
+      // rather than executing different roots in parallel.
+      //
+      // TODO(ROOTS): Test this is the correct order for traversal.
+      let allDeps: Array<IDependencies | null>;
+      return serial(
+        pkgRoots.map((pkgRoot) => () => dependencies(pkgRoot, pkgsFilter, pkgMap)),
+      )
+        // Capture deps.
+        .then((all) => { allDeps = all; })
+        // Check dependencies and validate.
+        .then(() => Promise.all(allDeps.map((deps) => {
+          // We're going to _mostly_ permissively handle uninstalled trees, but
+          // we will error if no `node_modules` exist which means likely that
+          // an `npm install` is needed.
+          if (deps !== null && !deps.dependencies.length) {
+            return Promise.all(
+              pkgRoots.map((pkgRoot) => exists(join(pkgRoot, "node_modules"))),
+            )
+              .then((pkgRootsExist) => {
+                if (pkgRootsExist.indexOf(true) === -1) {
+                  throw new Error(
+                    `Found ${mods.length} bundled files in a project ` +
+                    `'node_modules' directory, but none found on disk. ` +
+                    `Do you need to run 'npm install'?`,
+                  );
+                }
+              });
+          }
 
-        return Promise.resolve();
-      })))
-      // Assemble data.
-      .then(() => {
-        // Short-circuit if all null or empty array.
-        // Really a belt-and-suspenders check, since we've already validated
-        // that package.json exists.
-        if (!allDeps.length || allDeps.every((deps) => deps === null)) {
-          return createEmptyData();
-        }
+          return Promise.resolve();
+        })))
+        // Assemble data.
+        .then(() => {
+          // Short-circuit if all null or empty array.
+          // Really a belt-and-suspenders check, since we've already validated
+          // that package.json exists.
+          if (!allDeps.length || allDeps.every((deps) => deps === null)) {
+            return createEmptyData();
+          }
 
-        const { assets } = this;
-        const assetNames = Object.keys(assets).sort(sort);
+          const { assets } = this;
+          const assetNames = Object.keys(assets).sort(sort);
 
-        // Create root data without meta summary.
-        const data: IVersionsData =  {
-          ...createEmptyData(),
-          assets: assetNames.reduce((memo, assetName) => ({
-            ...memo,
-            [assetName]: getAssetData(pkgRoots, allDeps, assets[assetName].mods),
-          }), {}),
-        };
+          // Create root data without meta summary.
+          const data: IVersionsData =  {
+            ...createEmptyData(),
+            assets: assetNames.reduce((memo, assetName) => ({
+              ...memo,
+              [assetName]: getAssetData(pkgRoots, allDeps, assets[assetName].mods),
+            }), {}),
+          };
 
-        // Attach root-level meta.
-        data.meta.packageRoots = pkgRoots;
-        assetNames.forEach((assetName) => {
-          const { packages, meta } = data.assets[assetName];
+          // Attach root-level meta.
+          data.meta.packageRoots = pkgRoots;
+          assetNames.forEach((assetName) => {
+            const { packages, meta } = data.assets[assetName];
 
-          Object.keys(packages).forEach((pkgName) => {
-            const pkgVersions = Object.keys(packages[pkgName]);
+            Object.keys(packages).forEach((pkgName) => {
+              const pkgVersions = Object.keys(packages[pkgName]);
 
-            meta.packages.num += 1;
-            meta.resolved.num += pkgVersions.length;
+              meta.packages.num += 1;
+              meta.resolved.num += pkgVersions.length;
 
-            data.meta.packages.num += 1;
-            data.meta.resolved.num += pkgVersions.length;
+              data.meta.packages.num += 1;
+              data.meta.resolved.num += pkgVersions.length;
 
-            pkgVersions.forEach((version) => {
-              const pkgVers = packages[pkgName][version];
-              Object.keys(pkgVers).forEach((filePath) => {
-                meta.files.num += pkgVers[filePath].modules.length;
-                meta.depended.num += pkgVers[filePath].skews.length;
-                meta.installed.num += 1;
+              pkgVersions.forEach((version) => {
+                const pkgVers = packages[pkgName][version];
+                Object.keys(pkgVers).forEach((filePath) => {
+                  meta.files.num += pkgVers[filePath].modules.length;
+                  meta.depended.num += pkgVers[filePath].skews.length;
+                  meta.installed.num += 1;
 
-                data.meta.files.num += pkgVers[filePath].modules.length;
-                data.meta.depended.num += pkgVers[filePath].skews.length;
-                data.meta.installed.num += 1;
+                  data.meta.files.num += pkgVers[filePath].modules.length;
+                  data.meta.depended.num += pkgVers[filePath].skews.length;
+                  data.meta.installed.num += 1;
+                });
               });
             });
+
           });
 
+          return data;
         });
-
-        return data;
       });
   }
 

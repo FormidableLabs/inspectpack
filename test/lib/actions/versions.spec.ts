@@ -882,12 +882,11 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
   });
 
   describe("_packageRoots", () => {
-    it("handles base cases", () => {
-      expect(_packageRoots([])).to.eql([]);
-    });
+    it("handles base cases", () => _packageRoots([]).then((pkgRoots) => {
+      expect(pkgRoots).to.eql([]);
+    }));
 
-    it("handles no node_modules cases", () => {
-      expect(_packageRoots([
+    it("handles no node_modules cases", () => _packageRoots([
         {
           identifier: resolve("/my-app/src/baz/index.js"),
           isNodeModules: false,
@@ -896,27 +895,29 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
           identifier: resolve("/my-app/src/baz/bug.js"),
           isNodeModules: false,
         },
-      ])).to.eql([]);
-    });
+      ])
+      .then((pkgRoots) => {
+       expect(pkgRoots).to.eql([]);
+    }));
 
-    it("handles simple cases", () => {
-      expect(_packageRoots([
-        {
-          identifier: resolve("/my-app/src/baz/index.js"),
-          isNodeModules: false,
-        },
-        {
-          identifier: resolve("/my-app/node_modules/foo/index.js"),
-          isNodeModules: true,
-        },
-        {
-          identifier: resolve("/my-app/node_modules/foo/node_modules/bug/bug.js"),
-          isNodeModules: true,
-        },
-      ])).to.eql([
+    it("handles simple cases", () => _packageRoots([
+      {
+        identifier: resolve("/my-app/src/baz/index.js"),
+        isNodeModules: false,
+      },
+      {
+        identifier: resolve("/my-app/node_modules/foo/index.js"),
+        isNodeModules: true,
+      },
+      {
+        identifier: resolve("/my-app/node_modules/foo/node_modules/bug/bug.js"),
+        isNodeModules: true,
+      },
+    ]).then((pkgRoots) => {
+      expect(pkgRoots).to.eql([
         resolve("/my-app"),
       ]);
-    });
+    }));
 
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
     // TODO UNSKIP
@@ -947,10 +948,12 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
         },
       ];
 
-      expect(_packageRoots(mods)).to.eql([
-        appRoot,
-        `${appRoot}/packages/hidden-app`,
-      ]);
+      return _packageRoots(mods).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([
+          appRoot,
+          `${appRoot}/packages/hidden-app`,
+        ]);
+      });
     });
   });
 
