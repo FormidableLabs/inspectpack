@@ -882,44 +882,78 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
   });
 
   describe("_packageRoots", () => {
-    // TODO: HERE MOCK EVERYTHING!!!!
+    beforeEach(() => {
+      mock({});
+    });
 
-    it("handles base cases", () => _packageRoots([]).then((pkgRoots) => {
-      expect(pkgRoots).to.eql([]);
-    }));
+    it("handles base cases", () => {
+      return _packageRoots([]).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([]);
+      });
+    });
 
-    it("handles no node_modules cases", () => _packageRoots([
+    it("handles no node_modules cases", () => {
+      return _packageRoots([
+        {
+          identifier: resolve("src/baz/index.js"),
+          isNodeModules: false,
+        },
+        {
+          identifier: resolve("src/baz/bug.js"),
+          isNodeModules: false,
+        },
+      ])
+      .then((pkgRoots) => {
+        expect(pkgRoots).to.eql([]);
+      });
+    });
+
+    it("handles no node_modules with package.json cases", () => {
+      mock({
+        src: {
+          baz: {
+            "package.json": JSON.stringify({
+              name: "baz"
+            }, null, 2)
+          }
+        }
+      });
+
+      return _packageRoots([
+        {
+          identifier: resolve("src/baz/index.js"),
+          isNodeModules: false,
+        },
+        {
+          identifier: resolve("src/baz/bug.js"),
+          isNodeModules: false,
+        },
+      ])
+      .then((pkgRoots) => {
+        expect(pkgRoots).to.eql([]);
+      });
+    });
+
+    it("handles simple cases", () => {
+      return _packageRoots([
         {
           identifier: resolve("/my-app/src/baz/index.js"),
           isNodeModules: false,
         },
         {
-          identifier: resolve("/my-app/src/baz/bug.js"),
-          isNodeModules: false,
+          identifier: resolve("/my-app/node_modules/foo/index.js"),
+          isNodeModules: true,
         },
-      ])
-      .then((pkgRoots) => {
-       expect(pkgRoots).to.eql([]);
-    }));
-
-    it("handles simple cases", () => _packageRoots([
-      {
-        identifier: resolve("/my-app/src/baz/index.js"),
-        isNodeModules: false,
-      },
-      {
-        identifier: resolve("/my-app/node_modules/foo/index.js"),
-        isNodeModules: true,
-      },
-      {
-        identifier: resolve("/my-app/node_modules/foo/node_modules/bug/bug.js"),
-        isNodeModules: true,
-      },
-    ]).then((pkgRoots) => {
-      expect(pkgRoots).to.eql([
-        resolve("/my-app"),
-      ]);
-    }));
+        {
+          identifier: resolve("/my-app/node_modules/foo/node_modules/bug/bug.js"),
+          isNodeModules: true,
+        },
+      ]).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([
+          resolve("/my-app"),
+        ]);
+      });
+    });
 
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
     // TODO UNSKIP

@@ -40,7 +40,6 @@ import {
 export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   const depRoots: string[] = [];
   const candidateAppRoots: string[] = [];
-
   // Iterate node_modules modules and add to list of roots.
   mods
     .filter((mod) => mod.isNodeModules)
@@ -54,6 +53,12 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
         depRoots.push(candidate);
       }
     });
+
+  // If there are no dependency roots, then we don't care about dependencies
+  // and don't need to find any application roots. Short-ciruit.
+  if (!depRoots.length) {
+    return Promise.resolve(depRoots);
+  }
 
   // Now, the tricky part. Find "hidden roots" that don't have `node_modules`
   // in the path, but still have a `package.json`. To limit the review of this
@@ -94,7 +99,7 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     candidateAppRoots.map((appRoot) => exists(join(appRoot, "package.json")))
   ).then((rootExists) => {
     const appRoots = candidateAppRoots.filter((r, i) => rootExists[i]);
-    console.log("TODO HERE", { rootExists, appRoots });
+    console.log("TODO HERE", { candidateAppRoots, rootExists, appRoots });
 
     // TODO HERE:
     // - [ ] Convert to async and actually check the potential app roots.
