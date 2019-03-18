@@ -39,7 +39,7 @@ import {
  */
 export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   const depRoots: string[] = [];
-  const appRoots: string[] = [];
+  const candidateAppRoots: string[] = [];
 
   // Iterate node_modules modules and add to list of roots.
   mods
@@ -79,7 +79,7 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
           curPath = null;
         } else {
           // Potential root.
-          appRoots.push(curPath);
+          candidateAppRoots.push(curPath);
         }
       }
     });
@@ -91,10 +91,10 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   // We fortunately _don't_ need to check dependencies roots, because anything
   // with a `node_modules` directory in it **must** have a `package.json`.
   return Promise.all(
-    appRoots.map((appRoot) => exists(join(appRoot, "package.json")))
+    candidateAppRoots.map((appRoot) => exists(join(appRoot, "package.json")))
   ).then((rootExists) => {
-    const foundAppRoots = appRoots.filter((r, i) => rootExists[i]);
-    console.log("TODO HERE", { rootExists, foundAppRoots });
+    const appRoots = candidateAppRoots.filter((r, i) => rootExists[i]);
+    console.log("TODO HERE", { rootExists, appRoots });
 
     // TODO HERE:
     // - [ ] Convert to async and actually check the potential app roots.
