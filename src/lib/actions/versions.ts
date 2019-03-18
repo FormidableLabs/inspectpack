@@ -84,20 +84,33 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
       }
     });
 
-  // TODO HERE:
-  // - [ ] Convert to async and actually check the potential app roots.
-  // - [ ] Combine, then sort `depRoots` and `appRoots`.
-  // - [ ] Get potential list of roots to check in order for a `package.json`
-  // - [ ] TODO(TEST): synthetic mod.
+  // Check all the potential application roots for the presence of a
+  // `package.json` file. This is a bit of disk I/O but saves us later I/O and
+  // processing to not have false roots in the list of potential roots.
   //
-  // TODO(IDEA): More complete.
-  // 1. Identify `node_modules` roots,
-  // 2. Walk down checking non-NodeMods `package.json` along the way from source files
-  // TODO(IDEA): Hacky. If match "*/packages/*", then do a "packages/*/package.json" check.
+  // We fortunately _don't_ need to check dependencies roots, because anything
+  // with a `node_modules` directory in it **must** have a `package.json`.
+  return Promise.all(
+    appRoots.map((appRoot) => exists(join(appRoot, "package.json")))
+  ).then((rootExists) => {
+    const foundAppRoots = appRoots.filter((r, i) => rootExists[i]);
+    console.log("TODO HERE", { rootExists, foundAppRoots });
 
-  // - [ ] TODO: CHECK NODE REQUIRE ORDER!!!
-  // - [ ] TODO: ADD TESTS FOR NODE REQUIRE ORDER!!!
-  return Promise.resolve(depRoots.sort());
+    // TODO HERE:
+    // - [ ] Convert to async and actually check the potential app roots.
+    // - [ ] Combine, then sort `depRoots` and `appRoots`.
+    // - [ ] Get potential list of roots to check in order for a `package.json`
+    // - [ ] TODO(TEST): synthetic mod.
+    //
+    // TODO(IDEA): More complete.
+    // 1. Identify `node_modules` roots,
+    // 2. Walk down checking non-NodeMods `package.json` along the way from source files
+    // TODO(IDEA): Hacky. If match "*/packages/*", then do a "packages/*/package.json" check.
+
+    // - [ ] TODO: CHECK NODE REQUIRE ORDER!!!
+    // - [ ] TODO: ADD TESTS FOR NODE REQUIRE ORDER!!!
+    return depRoots.sort();
+  });
 };
 
 // Simple helper to get package name from a base name.
