@@ -910,12 +910,10 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
 
     it("handles no node_modules with package.json cases", () => {
       mock({
-        src: {
-          baz: {
-            "package.json": JSON.stringify({
-              name: "baz"
-            }, null, 2)
-          }
+        "src/baz": {
+          "package.json": JSON.stringify({
+            name: "baz"
+          }, null, 2)
         }
       });
 
@@ -956,9 +954,11 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
     });
 
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-    // TODO UNSKIP
-    // tslint:disable-next-line max-line-length
-    (process.env.TEMP_ROOTS ? it.only : it.skip)("handles hidden application roots", () => {
+    it("handles hidden application roots", () => {
+      mock({
+        "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+      });
+
       const appRoot = resolve("test/fixtures/hidden-app-roots");
       const mods = [
         {
@@ -989,7 +989,7 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
       return _packageRoots(mods).then((pkgRoots) => {
         expect(pkgRoots).to.eql([
           appRoot,
-          `${appRoot}/packages/hidden-app`,
+          join(appRoot, "packages/hidden-app"),
         ]);
       });
     });

@@ -22,6 +22,12 @@ import {
   Template,
 } from "./base";
 
+// Node.js `require`-compliant sorted order.
+// TODO: Lots of tests!!!
+export const _requireSort = (vals: string[]) => {
+  return vals.sort();
+};
+
 /**
  * Webpack projects can have multiple "roots" of `node_modules` that can be
  * the source of installed versions, including things like:
@@ -99,22 +105,12 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     candidateAppRoots.map((appRoot) => exists(join(appRoot, "package.json")))
   ).then((rootExists) => {
     const appRoots = candidateAppRoots.filter((r, i) => rootExists[i]);
-    console.log("TODO HERE", { candidateAppRoots, rootExists, appRoots });
 
-    // TODO HERE:
-    // - [ ] Convert to async and actually check the potential app roots.
-    // - [ ] Combine, then sort `depRoots` and `appRoots`.
-    // - [ ] Get potential list of roots to check in order for a `package.json`
     // - [ ] TODO(TEST): synthetic mod.
-    //
-    // TODO(IDEA): More complete.
-    // 1. Identify `node_modules` roots,
-    // 2. Walk down checking non-NodeMods `package.json` along the way from source files
-    // TODO(IDEA): Hacky. If match "*/packages/*", then do a "packages/*/package.json" check.
-
-    // - [ ] TODO: CHECK NODE REQUIRE ORDER!!!
-    // - [ ] TODO: ADD TESTS FOR NODE REQUIRE ORDER!!!
-    return depRoots.sort();
+    return _requireSort([].concat(
+      depRoots,
+      appRoots,
+    ))
   });
 };
 
