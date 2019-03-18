@@ -882,6 +882,8 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
   });
 
   describe("_packageRoots", () => {
+    // TODO: HERE MOCK EVERYTHING!!!!
+
     it("handles base cases", () => _packageRoots([]).then((pkgRoots) => {
       expect(pkgRoots).to.eql([]);
     }));
