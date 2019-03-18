@@ -102,15 +102,15 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   // We fortunately _don't_ need to check dependencies roots, because anything
   // with a `node_modules` directory in it **must** have a `package.json`.
   return Promise.all(
-    candidateAppRoots.map((appRoot) => exists(join(appRoot, "package.json")))
+    candidateAppRoots.map((appRoot) => exists(join(appRoot, "package.json"))),
   ).then((rootExists) => {
-    const appRoots = candidateAppRoots.filter((r, i) => rootExists[i]);
+    const appRoots = candidateAppRoots.filter((_, i) => rootExists[i]);
 
     // - [ ] TODO(TEST): synthetic mod.
     return _requireSort([].concat(
       depRoots,
       appRoots,
-    ))
+    ));
   });
 };
 
@@ -365,12 +365,7 @@ class Versions extends Action {
       // TODO: REMOVE
       // - [ ] TODO: Need to infer this "for realz"
       // - [ ] TODO: Need to sort these things in order of `require` resolution. (HINT: REVERSE)
-      if (process.env.TEMP_ROOTS) {
-        pkgRoots.push(
-          "/Users/rye/scm/fmd/inspectpack/test/fixtures/hidden-app-roots/packages/hidden-app",
-        );
-      }
-
+      //
       // TODO: NOTE
       // - `dependencies()` can share a package map cache.
       // - We can sort the `pkgRoots` to do "more root" first, and less root later.

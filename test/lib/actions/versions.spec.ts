@@ -600,9 +600,7 @@ describe("lib/actions/versions", () => {
       });
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-      // TODO UNSKIP
-      // tslint:disable-next-line max-line-length
-      (process.env.TEMP_ROOTS ? it.only : it.skip)("displays versions skews correctly for hidden app roots", () => {
+      it("displays versions skews correctly for hidden app roots", () => {
         mock({
           "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
         });
@@ -649,11 +647,10 @@ describe("lib/actions/versions", () => {
       });
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-      // TODO UNSKIP
-      // tslint:disable-next-line max-line-length
-      (process.env.TEMP_ROOTS ? it.only : it.skip)("displays versions skews correctly for hidden app roots with empty node_modules", () => {
+      it("displays versions skews correctly for hidden app roots with empty node_modules", () => {
         const curFixtures = fixtureDirs["test/fixtures/hidden-app-roots"];
         // Add empty `node_modules` to hit different code path.
+        // TODO: Check this doesn't pollute state.
         curFixtures.packages["hidden-app"].node_modules = {};
 
         mock({
@@ -912,9 +909,9 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
       mock({
         "src/baz": {
           "package.json": JSON.stringify({
-            name: "baz"
-          }, null, 2)
-        }
+            name: "baz",
+          }, null, 2),
+        },
       });
 
       return _packageRoots([
