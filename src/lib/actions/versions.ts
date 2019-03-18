@@ -88,8 +88,8 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
           !depRoots.some((d) => !!curPath && curPath.indexOf(d) === 0)
         ) {
           curPath = null;
-        } else {
-          // Potential root.
+        } else if (candidateAppRoots.indexOf(curPath) === -1) {
+          // Add potential unique root.
           candidateAppRoots.push(curPath);
         }
       }
@@ -107,9 +107,13 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     const appRoots = candidateAppRoots.filter((_, i) => rootExists[i]);
 
     // - [ ] TODO(TEST): synthetic mod.
-    // - [ ] TODO(TEST/BUG): Getting **lots** of duplicate packages showing
+    // - [ ] TODO(TEST): Regression test for duplicate packages showing
     //       up in issue reproduction respository.
     //       `$ yarn workspace @haaretz/haaretz.co.il build`
+    // console.log("TODO HERE ROOTS", JSON.stringify({
+    //   depRoots,
+    //   appRoots,
+    // }, null, 2));
     return _requireSort(depRoots.concat(appRoots));
   });
 };
