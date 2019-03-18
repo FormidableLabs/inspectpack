@@ -107,10 +107,7 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     const appRoots = candidateAppRoots.filter((_, i) => rootExists[i]);
 
     // - [ ] TODO(TEST): synthetic mod.
-    return _requireSort([].concat(
-      depRoots,
-      appRoots,
-    ));
+    return _requireSort(depRoots.concat(appRoots));
   });
 };
 
