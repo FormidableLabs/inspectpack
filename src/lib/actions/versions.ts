@@ -107,6 +107,9 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     const appRoots = candidateAppRoots.filter((_, i) => rootExists[i]);
 
     // - [ ] TODO(TEST): synthetic mod.
+    // - [ ] TODO(TEST/BUG): Getting **lots** of duplicate packages showing
+    //       up in issue reproduction respository.
+    //       `$ yarn workspace @haaretz/haaretz.co.il build`
     return _requireSort(depRoots.concat(appRoots));
   });
 };
