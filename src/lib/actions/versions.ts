@@ -107,6 +107,8 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     const appRoots = candidateAppRoots.filter((_, i) => rootExists[i]);
     console.log("TODO HERE", { depRoots, candidateAppRoots, appRoots });
     // TODO: ISSUE: query paths in identifier...
+    // TODO: HERE -- probably best solution: split on ?! and take after. Simple split.
+    // TODO: TICKET -- do more properly with fullPath branch (still have ignored, multi things)
 
     // - [ ] TODO(TEST): synthetic mod.
     // - [ ] TODO(TEST): Loader paths in identifier.
