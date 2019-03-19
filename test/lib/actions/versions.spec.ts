@@ -990,6 +990,79 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
         ]);
       });
     });
+
+    // TODO UNSKIP
+    // TODO IMPLEMENT
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    it.skip("handles complex hidden application roots", () => {
+      mock({
+        "complex-hidden-app-roots": {}
+      });
+
+      const appRoot = resolve("complex-hidden-app-roots");
+      const mods = [
+        {
+          identifier: "node_modules/prop-types/factoryWithThrowingShims.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/fbjs/lib/shallowEqual.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-addons-shallow-compare/node_modules/fbjs/lib/shallowEqual.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/prop-types/factoryWithThrowingShims.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/prop-types/lib/ReactPropTypesSecret.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/prop-types/lib/ReactPropTypesSecret.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/css-in-js-utils/lib/hyphenateProperty.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/inline-style-prefixer/node_modules/css-in-js-utils/lib/hyphenateProperty.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/prop-types/index.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/prop-types/index.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "packages/hidden-app/src/index.js",
+          isNodeModules: false,
+        },
+      ].map(({ identifier, isNodeModules }) => ({
+        identifier: join(appRoot, identifier),
+        isNodeModules,
+      }));
+
+      return _packageRoots(mods).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([
+        ]);
+      });
+    });
   });
 
   describe("_packageName", () => {

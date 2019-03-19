@@ -105,8 +105,11 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     candidateAppRoots.map((appRoot) => exists(join(appRoot, "package.json"))),
   ).then((rootExists) => {
     const appRoots = candidateAppRoots.filter((_, i) => rootExists[i]);
+    console.log("TODO HERE", { depRoots, candidateAppRoots, appRoots });
+    // TODO: ISSUE: query paths in identifier...
 
     // - [ ] TODO(TEST): synthetic mod.
+    // - [ ] TODO(TEST): Loader paths in identifier.
     // - [ ] TODO(TEST): Regression test for duplicate packages showing
     //       up in issue reproduction respository.
     //       `$ yarn workspace @haaretz/haaretz.co.il build`
