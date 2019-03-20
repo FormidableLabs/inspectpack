@@ -14,13 +14,13 @@ import { exists, toPosixPath } from "../util/files";
 import { serial } from "../util/promise";
 import { numF, sort } from "../util/strings";
 import {
+  _normalizeWebpackPath,
   Action,
   IAction,
   IActionConstructor,
   ITemplate,
   nodeModulesParts,
   Template,
-  _normalizeWebpackPath,
 } from "./base";
 
 // Node.js `require`-compliant sorted order.
@@ -79,6 +79,8 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
       // - [ ] TODO: Cannot be shorter than shortest depRoot
 
       // Start at full path.
+      // TODO(106): Revise code and tests for `fullPath`.
+      // https://github.com/FormidableLabs/inspectpack/issues/106
       let curPath: string|null = _normalizeWebpackPath(mod.identifier);
 
       // Iterate parts.
@@ -109,7 +111,6 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
 
     // TODO: ISSUE: query paths in identifier...
     // TODO: HERE -- probably best solution: split on ?! and take after. Simple split.
-    // TODO: TICKET -- do more properly with fullPath branch (still have ignored, multi things)
 
     // - [ ] TODO(TEST): synthetic mod.
     // - [ ] TODO(TEST): Loader paths in identifier.
@@ -202,7 +203,7 @@ const modulesByPackageNameByPackagePath = (
 
     // Insert package path. (All the different installs of package).
     const pkgMap = modsMap[pkgName];
-    const modParts = mod.identifier.split(sep);
+    const modParts = _normalizeWebpackPath(mod.identifier).split(sep);
     const nmIndex = modParts.lastIndexOf("node_modules");
     const pkgPath = modParts
       // Remove base name path suffix.

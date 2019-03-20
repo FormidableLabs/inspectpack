@@ -930,22 +930,30 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
     });
 
     it("handles simple cases", () => {
+      mock({
+        "my-app": {
+          "package.json": JSON.stringify({
+            name: "my-app",
+          }, null, 2),
+        },
+      });
+
       return _packageRoots([
         {
-          identifier: resolve("/my-app/src/baz/index.js"),
+          identifier: resolve("my-app/src/baz/index.js"),
           isNodeModules: false,
         },
         {
-          identifier: resolve("/my-app/node_modules/foo/index.js"),
+          identifier: resolve("my-app/node_modules/foo/index.js"),
           isNodeModules: true,
         },
         {
-          identifier: resolve("/my-app/node_modules/foo/node_modules/bug/bug.js"),
+          identifier: resolve("my-app/node_modules/foo/node_modules/bug/bug.js"),
           isNodeModules: true,
         },
       ]).then((pkgRoots) => {
         expect(pkgRoots).to.eql([
-          resolve("/my-app"),
+          resolve("my-app"),
         ]);
       });
     });
@@ -996,10 +1004,11 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
     it.skip("handles complex hidden application roots", () => {
       mock({
-        "complex-hidden-app-roots": {}
+        "complex-hidden-app-roots": {},
       });
 
       const appRoot = resolve("complex-hidden-app-roots");
+      // tslint:disable max-line-length
       const mods = [
         {
           identifier: "node_modules/prop-types/factoryWithThrowingShims.js",
@@ -1057,6 +1066,7 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
         identifier: join(appRoot, identifier),
         isNodeModules,
       }));
+      // tslint:enable max-line-length
 
       return _packageRoots(mods).then((pkgRoots) => {
         expect(pkgRoots).to.eql([

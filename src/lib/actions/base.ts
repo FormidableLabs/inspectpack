@@ -51,6 +51,9 @@ export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).
 // First, strip off anything before a `?` and `!`:
 // - `REMOVE?KEEP`
 // - `REMOVE!KEEP`
+//
+// TODO(106): Revise code and tests for `fullPath`.
+// https://github.com/FormidableLabs/inspectpack/issues/106
 export const _normalizeWebpackPath = (identifier: string, name?: string): string => {
   const bangLastIdx = identifier.lastIndexOf("!");
   const questionLastIdx = identifier.lastIndexOf("?");
@@ -90,6 +93,9 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
       candidate = candidate.substr(0, nameLastIdx + name.length);
     }
   }
+
+  // Naive heuristic: remove known starting webpack tokens.
+  candidate = candidate.replace(/^(multi |ignored )/, "");
 
   return candidate;
 };
