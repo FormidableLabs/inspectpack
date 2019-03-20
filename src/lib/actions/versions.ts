@@ -20,10 +20,11 @@ import {
   ITemplate,
   nodeModulesParts,
   Template,
+  _normalizeWebpackPath,
 } from "./base";
 
 // Node.js `require`-compliant sorted order.
-// TODO: Lots of tests!!!
+// TODO: TESTS
 export const _requireSort = (vals: string[]) => {
   return vals.sort();
 };
@@ -45,12 +46,13 @@ export const _requireSort = (vals: string[]) => {
  */
 export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   const depRoots: string[] = [];
-  const candidateAppRoots: string[] = [];
+  const appRoots: string[] = [];
+
   // Iterate node_modules modules and add to list of roots.
   mods
     .filter((mod) => mod.isNodeModules)
     .forEach((mod) => {
-      const parts = mod.identifier.split(sep);
+      const parts = _normalizeWebpackPath(mod.identifier).split(sep);
       const nmIndex = parts.indexOf("node_modules");
       const candidate = parts.slice(0, nmIndex).join(sep);
 
@@ -61,7 +63,7 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     });
 
   // If there are no dependency roots, then we don't care about dependencies
-  // and don't need to find any application roots. Short-ciruit.
+  // and don't need to find any application roots. Short-circuit.
   if (!depRoots.length) {
     return Promise.resolve(depRoots);
   }
@@ -77,7 +79,7 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
       // - [ ] TODO: Cannot be shorter than shortest depRoot
 
       // Start at full path.
-      let curPath: string|null = mod.identifier;
+      let curPath: string|null = _normalizeWebpackPath(mod.identifier);
 
       // Iterate parts.
       // tslint:disable-next-line no-conditional-assignment
@@ -88,24 +90,23 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
           !depRoots.some((d) => !!curPath && curPath.indexOf(d) === 0)
         ) {
           curPath = null;
-        } else if (candidateAppRoots.indexOf(curPath) === -1) {
+        } else if (appRoots.indexOf(curPath) === -1) {
           // Add potential unique root.
-          candidateAppRoots.push(curPath);
+          appRoots.push(curPath);
         }
       }
     });
 
-  // Check all the potential application roots for the presence of a
+  // Check all the potential dep and app roots for the presence of a
   // `package.json` file. This is a bit of disk I/O but saves us later I/O and
   // processing to not have false roots in the list of potential roots.
-  //
-  // We fortunately _don't_ need to check dependencies roots, because anything
-  // with a `node_modules` directory in it **must** have a `package.json`.
+  const roots = depRoots.concat(appRoots);
   return Promise.all(
-    candidateAppRoots.map((appRoot) => exists(join(appRoot, "package.json"))),
+    roots.map((rootPath) => exists(join(rootPath, "package.json"))),
   ).then((rootExists) => {
-    const appRoots = candidateAppRoots.filter((_, i) => rootExists[i]);
-    console.log("TODO HERE", { depRoots, candidateAppRoots, appRoots });
+    const foundRoots = roots.filter((_, i) => rootExists[i]);
+    // console.log("TODO HERE", { depRoots, appRoots, foundRoots });
+
     // TODO: ISSUE: query paths in identifier...
     // TODO: HERE -- probably best solution: split on ?! and take after. Simple split.
     // TODO: TICKET -- do more properly with fullPath branch (still have ignored, multi things)
@@ -119,7 +120,7 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     //   depRoots,
     //   appRoots,
     // }, null, 2));
-    return _requireSort(depRoots.concat(appRoots));
+    return _requireSort(foundRoots);
   });
 };
 
