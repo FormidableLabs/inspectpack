@@ -355,7 +355,14 @@ const getAssetData = (
           const dataVers = data.packages[name][version] = data.packages[name][version] || {};
           const dataObj = dataVers[relPath] = dataVers[relPath] || {};
           dataObj.skews = (dataObj.skews || []).concat(depsForPkgVers[filePath].skews);
-          dataObj.modules = (dataObj.modules || []).concat(modules);
+
+          dataObj.modules = dataObj.modules || [];
+          // Add _new, unique_ modules.
+          // Note that `baseName` might have multiple matches for duplicate installs, but
+          // `fileName` won't.
+          const newMods = modules
+            .filter((newMod) => !dataObj.modules.some((mod) => mod.fileName === newMod.fileName));
+          dataObj.modules = dataObj.modules.concat(newMods);
         });
       });
     });
