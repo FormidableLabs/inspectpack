@@ -45,6 +45,9 @@ export const nodeModulesParts = (name: string) => toPosixPath(name).split(NM_RE)
 // True if name is part of a `node_modules` path.
 export const _isNodeModules = (name: string): boolean => nodeModulesParts(name).length > 1;
 
+// Remove all relative higher-up paths (`./` or `../../../`).
+const _removePrepath = (val: string) => val.replace(/^(\.+(\/|\\)+)+/g, "");
+
 // Attempt to "unwind" webpack paths in `identifier` and `name` to remove
 // prefixes and produce a normal, usable filepath.
 //
@@ -75,14 +78,10 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
   // - v3: "/PATH/TO/ROOT/node_modules/pkg/index.js"
   // - v4: "./node_modules/pkg/index.js"
   if (name) {
-    name = name
+    // Expand `node_modules`, remove prefix `./`, `../`, etc.
+    name = _removePrepath(name)
       .replace("/~/", "/node_modules/")
       .replace("\\~\\", "\\node_modules\\");
-
-    if (name.startsWith("./") || name.startsWith(".\\")) {
-      // Remove dot-slash relative part.
-      name = name.slice(2);
-    }
 
     // Now, truncate suffix of the candidate if name has less.
     const nameLastIdx = candidate.lastIndexOf(name);
@@ -101,7 +100,7 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
 // Normalizations:
 // - Remove starting path if `./`
 // - Switch Windows paths to Mac/Unix style.
-export const _getBaseName = (name: string): string | null => {
+export const _getBaseName = (name: string): string => {
   // Slice to just after last occurrence of node_modules.
   const parts = nodeModulesParts(name);
   const lastName = parts[parts.length - 1];
@@ -126,6 +125,48 @@ export const _getBaseName = (name: string): string | null => {
   }
 
   return toPosixPath(candidate);
+};
+
+// Convert an identifier into a full path.
+//
+// Uses the (normalized) `name` field to assess that the (normalized) identifier
+// is indeed a real file on disk.
+export const _getFullPath = (identifier: string, name: string, TODO_REMOVE_OBJ: any): string => {
+  const posixIdentifier = toPosixPath(identifier);
+
+   // Start some normalization.
+  let posixName = _removePrepath(toPosixPath(name));
+  if (posixName.startsWith("./")) {
+    // Remove dot-slash relative part.
+    posixName = posixName.slice(2);
+  }
+
+  // If the name is not the end of the identifier, it probably is webpack v1-2
+  // with `~` instead of `node_modules`
+  const idxOfName = posixIdentifier.indexOf(posixName);
+  if (
+    // Direct match.
+    idxOfName === 0 ||
+    // Suffix match.
+    idxOfName === posixIdentifier.length - posixName.length
+  ) {
+    return normalize(posixIdentifier);
+  }
+
+  if (identifier.lastIndexOf(name) !== identifier.length - name.length) {
+    console.log("TODO MISMATCH", JSON.stringify({
+      posixIdentifier,
+      posixName,
+      normalize: normalize(posixIdentifier),
+      TODO_REMOVE_OBJ: {
+        issuer: TODO_REMOVE_OBJ.issuer,
+        source: TODO_REMOVE_OBJ.source || "NO_SOURCE",
+      }
+    }, null, 2));
+  }
+
+  // TODO: HERE -- this stuff isn't even remotely done. Above or below :).
+  return "TODO";
 };
 
 export abstract class Action {
@@ -218,9 +259,13 @@ export abstract class Action {
           const isNodeModules = _isNodeModules(normalizedId);
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
 
+          // TODO(FULL_PATH): Add into data
+          const fullPath = _getFullPath(normalizedId, normalizedName, mod);
+
           return list.concat([{
             baseName,
             chunks,
+            fullPath,
             identifier,
             isNodeModules,
             isSynthetic,

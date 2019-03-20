@@ -7,7 +7,7 @@ inspectpack
 
 An inspection tool for Webpack frontend JavaScript bundles.
 
-`inspectpack` provides insight into your webpack-built JS bundles and detailed analysis of opportunites to reduce module sizes, unneeded duplicates, etc. It can be used as a webpack **plugin** during your compliations or as an **offline CLI tool** to report on your previous builds.
+`inspectpack` provides insight into your webpack-built JS bundles and detailed analysis of opportunites to reduce module sizes, unneeded duplicates, etc. It can be used as a webpack **plugin** during your compilations or as an **offline CLI tool** to report on your previous builds.
 
 It is also the engine for the handy [`webpack-dashboard`](https://github.com/FormidableLabs/webpack-dashboard) plugin.
 

@@ -38,6 +38,7 @@ class Sizes extends Action {
             files: assets[name].mods.map((mod) => ({
               baseName: mod.baseName,
               fileName: mod.identifier,
+              fullPath: mod.fullPath,
               size: {
                 full: mod.size,
               },
@@ -73,7 +74,7 @@ class SizesTemplate extends Template {
       .then(({ meta, assets }) => {
         const files = (mods: IActionModule[]) => mods
           .map((obj) => this.trim(chalk`
-            * {gray ${obj.fileName}}
+            * {gray ${obj.fullPath || obj.fileName}}
               * Size: ${numF(obj.size.full)}
           `, 12))
           .join("\n");
@@ -103,12 +104,13 @@ class SizesTemplate extends Template {
   public tsv(): Promise<string> {
     return Promise.resolve()
       .then(() => this.action.getData() as Promise<ISizesData>)
-      .then(({ assets }) => ["Asset\tFull Name\tShort Name\tSize"]
+      .then(({ assets }) => ["Asset\tFull Path\tFile Name\tShort Name\tSize"]
         .concat(Object.keys(assets)
           // Get items
           .map((name) => assets[name].files
             .map((obj) => [
               name,
+              obj.fullPath,
               obj.fileName,
               obj.baseName === null ? "(source)" : obj.baseName,
               obj.size.full,

@@ -132,6 +132,7 @@ class Duplicates extends Action {
                       modules: modsMap[baseName][source].map((mod) => ({
                         baseName: mod.baseName,
                         fileName: mod.identifier,
+                        fullPath: mod.fullPath,
                         size: {
                           full: mod.size,
                         },
