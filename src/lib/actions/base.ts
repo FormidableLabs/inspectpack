@@ -66,6 +66,9 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
     candidate = candidate.substr(prefixEnd + 1);
   }
 
+  // Naive heuristic: remove known starting webpack tokens.
+  candidate = candidate.replace(/^(multi |ignored )/, "");
+
   // Assume a normalized then truncate to name if applicable.
   //
   // E.g.,
@@ -94,8 +97,6 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
     }
   }
 
-  // Naive heuristic: remove known starting webpack tokens.
-  candidate = candidate.replace(/^(multi |ignored )/, "");
 
   return candidate;
 };
