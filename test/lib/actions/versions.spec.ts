@@ -2,6 +2,7 @@ import { join, resolve, sep } from "path";
 import {
   _packageName,
   _packageRoots,
+  _requireSort,
   create,
   IVersionsData,
   IVersionsMeta,
@@ -82,6 +83,85 @@ const patchAction = (name) => (instance) => {
   }
 
   return instance;
+};
+
+// Complex roots from hidden roots regression sample.
+const complexHiddenAppRoots = {
+  "node_modules": {
+    "fbjs": {
+      "package.json":  JSON.stringify({
+        name: "fbjs",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "hoist-non-react-statics": {
+      "package.json":  JSON.stringify({
+        name: "hoist-non-react-statics",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "prop-types": {
+      "package.json":  JSON.stringify({
+        name: "prop-types",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "react-addons-shallow-compare": {
+      "node_modules": {
+        "fbjs/package.json":  JSON.stringify({
+          name: "fbjs",
+          version: "2.2.2",
+        }, null, 2),
+      },
+      "package.json":  JSON.stringify({
+        dependencies: {
+          fbjs: "^2.0.0",
+        },
+        name: "react-addons-shallow-compare",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "react-apollo": {
+      "node_modules": {
+        "hoist-non-react-statics": {
+          "package.json":  JSON.stringify({
+            name: "hoist-non-react-statics",
+            version: "2.2.2",
+          }, null, 2),
+        },
+        "prop-types": {
+          "package.json":  JSON.stringify({
+            name: "prop-types",
+            version: "2.2.2",
+          }, null, 2),
+        },
+      },
+      "package.json":  JSON.stringify({
+        dependencies: {
+          "hoist-non-react-statics": "^2.0.0",
+          "prop-types": "^2.0.0",
+        },
+        name: "react-apollo",
+        version: "1.1.1",
+      }, null, 2),
+    },
+  },
+  "package.json": JSON.stringify({
+    name: "complex-hidden-app-roots",
+  }, null, 2),
+  "packages": {
+    "hidden-app": {
+      "package.json": JSON.stringify({
+        dependencies: {
+          "fbjs": "^1.0.0",
+          "hoist-non-react-statics": "^1.0.0",
+          "prop-types": "^1.0.0",
+          "react-apollo": "^1.0.0",
+        },
+        name: "hidden-app",
+      }, null, 2),
+    },
+  },
 };
 
 describe("lib/actions/versions", () => {
@@ -878,6 +958,55 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
     it("displays versions skews correctly for hidden app roots"); // TODO IMPLEMENT
   });
 
+  describe("_requireSort", () => {
+    it("handles base cases", () => {
+      expect(_requireSort([])).to.eql([]);
+    });
+
+    it("handles simple roots", () => {
+      const vals = [
+        "/BASE",
+        "/BASE/packages/hidden-app",
+      ];
+
+      expect(_requireSort(vals)).to.eql(vals);
+    });
+
+    it("handles complex roots", () => {
+      expect(_requireSort([
+        "/foo/two/a",
+        "/foo/1/2",
+        "/bar/foo/one/b",
+        "/foo/one/b",
+        "/bar/foo/one",
+        "/bar/foo/one/a",
+        "/foo/one",
+        "/foo/one/a",
+        "/bar/",
+        "/foo/two",
+        "/foo/1",
+        "/bar/foo",
+        "/foo/two/d",
+        "/foo/",
+      ])).to.eql([
+        "/bar/",
+        "/bar/foo",
+        "/bar/foo/one",
+        "/bar/foo/one/a",
+        "/bar/foo/one/b",
+        "/foo/",
+        "/foo/1",
+        "/foo/1/2",
+        "/foo/one",
+        "/foo/one/a",
+        "/foo/one/b",
+        "/foo/two",
+        "/foo/two/a",
+        "/foo/two/d",
+      ]);
+    });
+  });
+
   describe("_packageRoots", () => {
     beforeEach(() => {
       mock({});
@@ -999,15 +1128,13 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
       });
     });
 
-    // TODO UNSKIP
-    // TODO IMPLEMENT
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-    it.skip("handles complex hidden application roots", () => {
+    it("handles complex hidden application roots", () => {
+      const appRoot = resolve("complex-hidden-app-roots");
       mock({
-        "complex-hidden-app-roots": {},
+        "complex-hidden-app-roots": complexHiddenAppRoots,
       });
 
-      const appRoot = resolve("complex-hidden-app-roots");
       // tslint:disable max-line-length
       const mods = [
         {
@@ -1070,7 +1197,9 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
 
       return _packageRoots(mods).then((pkgRoots) => {
         expect(pkgRoots).to.eql([
-        ]);
+          "",
+          "packages/hidden-app",
+        ].map((id) => join(appRoot, id)));
       });
     });
   });

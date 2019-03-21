@@ -23,8 +23,14 @@ import {
   Template,
 } from "./base";
 
-// Node.js `require`-compliant sorted order.
-// TODO: TESTS
+// Node.js `require`-compliant sorted order, in the **reverse** of what will
+// be looked up so that we can seed the cache with the found packages from
+// roots early.
+//
+// E.g.,
+// - `/my-app/`
+// - `/my-app/foo/`
+// - `/my-app/foo/bar`
 export const _requireSort = (vals: string[]) => {
   return vals.sort();
 };
