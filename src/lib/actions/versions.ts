@@ -82,18 +82,23 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   mods
     .filter((mod) => !mod.isNodeModules && !mod.isSynthetic)
     .forEach((mod) => {
-      // - [ ] TODO: Cannot be shorter than shortest depRoot
-
       // Start at full path.
       // TODO(106): Revise code and tests for `fullPath`.
       // https://github.com/FormidableLabs/inspectpack/issues/106
       let curPath: string|null = _normalizeWebpackPath(mod.identifier);
 
+      // We can't ever go below the minimum dep root.
+      const depRootMinLength = depRoots
+        .map((depRoot) => depRoot.length)
+        .reduce((memo, len) => memo > 0 && memo < len ? memo : len, 0);
+
       // Iterate parts.
       // tslint:disable-next-line no-conditional-assignment
       while (curPath = curPath && dirname(curPath)) {
-        // Stop if (1) hit existing dep root, or (2) no longer _end_ at dep root
+        // Stop if (1) below all dep roots, (2) hit existing dep root, or
+        // (3) no longer _end_ at dep root
         if (
+          depRootMinLength > curPath.length ||
           depRoots.indexOf(curPath) > -1 ||
           !depRoots.some((d) => !!curPath && curPath.indexOf(d) === 0)
         ) {
@@ -123,10 +128,6 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     // - [ ] TODO(TEST): Regression test for duplicate packages showing
     //       up in issue reproduction respository.
     //       `$ yarn workspace @haaretz/haaretz.co.il build`
-    // console.log("TODO HERE ROOTS", JSON.stringify({
-    //   depRoots,
-    //   appRoots,
-    // }, null, 2));
     return _requireSort(foundRoots);
   });
 };
@@ -385,19 +386,11 @@ class Versions extends Action {
     const pkgMap = {};
 
     // Infer the absolute paths to the package roots.
+    //
+    // The package roots come back in an order such that we cache things early
+    // that may be used later for nested directories that may need to search
+    // up higher for "flattened" dependencies.
     return _packageRoots(mods).then((pkgRoots) => {
-      // TODO: REMOVE
-      // - [ ] TODO: Need to infer this "for realz"
-      // - [ ] TODO: Need to sort these things in order of `require` resolution. (HINT: REVERSE)
-      //
-      // TODO: NOTE
-      // - `dependencies()` can share a package map cache.
-      // - We can sort the `pkgRoots` to do "more root" first, and less root later.
-      // - Possibly using the cache we can give "more" options to traverse up beyond current root?
-      //
-      // TODO: Also
-      // - [ ] Throw error on not found package?
-
       // If we don't have a package root, then we have no dependencies in the
       // bundle and we can short circuit.
       if (!pkgRoots.length) {
