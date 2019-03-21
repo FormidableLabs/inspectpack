@@ -123,15 +123,7 @@ export const readPackages = (
       dirs
         // Filter to known packages.
         .filter(isIncludedPkg)
-        .map((dir) => {
-          // console.log("TODO HERE NEXT LEVEL", JSON.stringify({
-          //   path,
-          //   dir,
-          // }, null, 2))
-
-          return dir;
-        })
-        // Recurse
+        // Recurse.
         .map((dir) => readPackages(join(path, "node_modules", dir), pkgsFilter, _cache)),
     ))
     // The cache **is** our return value.
@@ -169,9 +161,6 @@ export const _findPackage = ({
   // naturally be the "selected" module.
   //
   // Fixes https://github.com/FormidableLabs/inspectpack/issues/10
-  //
-  // - [ ] TODO(TEST): Add _multiple_ upper roots and make sure we choose the correct one.
-  // - [ ] TODO(ROOTS): Need to **sort** correctly according to resolution for iteration
   const cachedRoots = Object.keys(pkgMap)
     // Get directories.
     .map((k) => dirname(k))
