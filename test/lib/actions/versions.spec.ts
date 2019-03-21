@@ -728,9 +728,8 @@ describe("lib/actions/versions", () => {
 
       // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
       it("displays versions skews correctly for hidden app roots with empty node_modules", () => {
-        const curFixtures = fixtureDirs["test/fixtures/hidden-app-roots"];
+        const curFixtures = JSON.parse(JSON.stringify(fixtureDirs["test/fixtures/hidden-app-roots"]));
         // Add empty `node_modules` to hit different code path.
-        // TODO: Check this doesn't pollute state.
         curFixtures.packages["hidden-app"].node_modules = {};
 
         mock({

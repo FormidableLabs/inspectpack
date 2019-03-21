@@ -250,7 +250,7 @@ const _recurseDependencies = ({
       // Short-circuit on not founds.
       if (pkgPath === null || pkgObj === null) {
         // TODO: Throw if not found?
-        // console.log("TODO HERE MISS", { filePath, name, isFlattened, pkgPath, pkgObj });
+        // console.log("TODO PACKAGE MISS", { filePath, name, isFlattened, pkgPath, pkgObj });
         return null;
       }
 

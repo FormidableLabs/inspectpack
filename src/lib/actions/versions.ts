@@ -120,9 +120,6 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
     const foundRoots = roots.filter((_, i) => rootExists[i]);
     // console.log("TODO HERE", { depRoots, appRoots, foundRoots });
 
-    // TODO: ISSUE: query paths in identifier...
-    // TODO: HERE -- probably best solution: split on ?! and take after. Simple split.
-
     // - [ ] TODO(TEST): synthetic mod.
     // - [ ] TODO(TEST): Loader paths in identifier.
     // - [ ] TODO(TEST): Regression test for duplicate packages showing
