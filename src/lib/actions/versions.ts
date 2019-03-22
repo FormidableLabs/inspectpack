@@ -312,6 +312,24 @@ const createEmptyData = (): IVersionsData => ({
   },
 });
 
+// Find largest common match for `node_module` dependencies.
+const commonPath = (val1: string, val2: string) => {
+  // Find last common index.
+  let i = 0;
+  while (i < val1.length && val1.charAt(i) === val2.charAt(i)) {
+    i++;
+  }
+
+  let candidate = val1.substring(0, i);
+
+  // Remove trailing slash and trailing `node_modules` in order.
+  const parts = candidate.split(sep);
+  const nmIndex = parts.indexOf("node_modules");
+  candidate = parts.slice(0, nmIndex).join(sep);
+
+  return candidate;
+};
+
 const getAssetData = (
   pkgRoots: string[],
   allDeps: Array<IDependencies | null>,
@@ -320,6 +338,15 @@ const getAssetData = (
   // Start assembling and merging in deps for each package root.
   const data = createEmptyAsset();
   const modsMap = modulesByPackageNameByPackagePath(mods);
+
+  // Find largest-common-part of all roots for this version to do relative paths from.
+  const commonRoot = pkgRoots.reduce(
+    (memo, pkgRoot) => memo === null ? pkgRoot : commonPath(memo, pkgRoot),
+    null
+  );
+
+  // TODO HERE: Not quite right. Need a commonPath per each **name**.
+  // TODO: See test failures.
 
   allDeps.forEach((deps, depsIdx) => {
     // Skip nulls.
@@ -352,7 +379,7 @@ const getAssetData = (
           if (!modules.length) { return; }
 
           // Need to posix-ify after call to `relative`.
-          const relPath = toPosixPath(relative(pkgRoots[depsIdx], filePath));
+          const relPath = toPosixPath(relative(commonRoot, filePath));
 
           // Late patch everything.
           data.packages[name] = data.packages[name] || {};

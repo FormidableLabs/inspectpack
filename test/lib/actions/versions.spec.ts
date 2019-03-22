@@ -928,8 +928,24 @@ inspectpack --action=versions
         });
     });
 
+    // TODO IMPLEMENT
+    // TODO UNSKIP
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-    it("displays versions skews correctly for hidden app roots"); // TODO IMPLEMENT
+    it.skip("displays versions skews correctly for hidden app roots", () => {
+      mock({
+        "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+      });
+
+      return hiddenAppRootsInstance.template.text()
+        .then((textStr) => {
+          expect(textStr).to.eql(`
+inspectpack --action=versions
+=============================
+
+TODO
+          `.trim());
+        });
+    });
   });
 
   describe("tsv", () => {
