@@ -97,7 +97,6 @@ export const _normalizeWebpackPath = (identifier: string, name?: string): string
     }
   }
 
-
   return candidate;
 };
 

@@ -713,13 +713,13 @@ describe("lib/actions/versions", () => {
             let expectProp;
 
             expectProp = expect(data).to.have.nested.property(
-              "assets.bundle\\.js.packages.foo.1\\.1\\.1.\\.\\./\\.\\./node_modules/foo",
+              "assets.bundle\\.js.packages.foo.1\\.1\\.1.node_modules/foo",
             );
             expectProp.to.have.property("skews").that.has.length(1);
             expectProp.to.have.property("modules").that.has.length(1);
 
             expectProp = expect(data).to.have.nested.property(
-              "assets.bundle\\.js.packages.foo.3\\.3\\.3.\\.\\./\\.\\./node_modules/different-foo/node_modules/foo",
+              "assets.bundle\\.js.packages.foo.3\\.3\\.3.node_modules/different-foo/node_modules/foo",
             );
             expectProp.to.have.property("skews").that.has.length(1);
             expectProp.to.have.property("modules").that.has.length(2);
@@ -764,13 +764,13 @@ describe("lib/actions/versions", () => {
             let expectProp;
 
             expectProp = expect(data).to.have.nested.property(
-              "assets.bundle\\.js.packages.foo.1\\.1\\.1.\\.\\./\\.\\./node_modules/foo",
+              "assets.bundle\\.js.packages.foo.1\\.1\\.1.node_modules/foo",
             );
             expectProp.to.have.property("skews").that.has.length(1);
             expectProp.to.have.property("modules").that.has.length(1);
 
             expectProp = expect(data).to.have.nested.property(
-              "assets.bundle\\.js.packages.foo.3\\.3\\.3.\\.\\./\\.\\./node_modules/different-foo/node_modules/foo",
+              "assets.bundle\\.js.packages.foo.3\\.3\\.3.node_modules/different-foo/node_modules/foo",
             );
             expectProp.to.have.property("skews").that.has.length(1);
             expectProp.to.have.property("modules").that.has.length(2);
@@ -909,16 +909,18 @@ inspectpack --action=versions
 ## Summary
 * Packages with skews:      1
 * Total resolved versions:  2
-* Total installed packages: 2
+* Total installed packages: 3
 * Total depended packages:  3
 * Total bundled files:      4
 
 ## \`bundle.js\`
 * foo
   * 1.1.1
-    * ~/foo
-      * Num deps: 2, files: 2
+    * packages/package1/~/foo
+      * Num deps: 1, files: 1
       * package1@1.1.1 -> foo@^1.0.0
+    * packages/package2/~/foo
+      * Num deps: 1, files: 1
       * package2@2.2.2 -> foo@^1.0.0
   * 3.3.3
     * ~/different-foo/~/foo

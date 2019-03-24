@@ -325,7 +325,9 @@ const commonPath = (val1: string, val2: string) => {
   // Remove trailing slash and trailing `node_modules` in order.
   const parts = candidate.split(sep);
   const nmIndex = parts.indexOf("node_modules");
-  candidate = parts.slice(0, nmIndex).join(sep);
+  if (nmIndex > -1) {
+    candidate = parts.slice(0, nmIndex).join(sep);
+  }
 
   return candidate;
 };
@@ -342,13 +344,10 @@ const getAssetData = (
   // Find largest-common-part of all roots for this version to do relative paths from.
   const commonRoot = pkgRoots.reduce(
     (memo, pkgRoot) => memo === null ? pkgRoot : commonPath(memo, pkgRoot),
-    null
+    null,
   );
 
-  // TODO HERE: Not quite right. Need a commonPath per each **name**.
-  // TODO: See test failures.
-
-  allDeps.forEach((deps, depsIdx) => {
+  allDeps.forEach((deps) => {
     // Skip nulls.
     if (deps === null) { return; }
 
