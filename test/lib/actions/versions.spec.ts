@@ -991,7 +991,22 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
     });
 
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-    it("displays versions skews correctly for hidden app roots"); // TODO IMPLEMENT
+    it("displays versions skews correctly for hidden app roots", () => {
+      mock({
+        "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+      });
+
+      return hiddenAppRootsInstance.template.tsv()
+        .then((tsvStr) => {
+          /*tslint:disable max-line-length*/
+          expect(tsvStr).to.eql(`
+Asset	Package	Version	Installed Path	Dependency Path
+bundle.js	foo	1.1.1	~/foo	package1@1.1.1 -> foo@^1.0.0
+bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1 -> foo@^3.0.1
+          `.trim());
+          /*tslint:enable max-line-length*/
+        });
+    });
   });
 
   describe("_requireSort", () => {

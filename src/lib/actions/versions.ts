@@ -116,17 +116,11 @@ export const _packageRoots = (mods: IModule[]): Promise<string[]> => {
   const roots = depRoots.concat(appRoots);
   return Promise.all(
     roots.map((rootPath) => exists(join(rootPath, "package.json"))),
-  ).then((rootExists) => {
-    const foundRoots = roots.filter((_, i) => rootExists[i]);
-    // console.log("TODO HERE", { depRoots, appRoots, foundRoots });
-
-    // - [ ] TODO(TEST): synthetic mod.
-    // - [ ] TODO(TEST): Loader paths in identifier.
-    // - [ ] TODO(TEST): Regression test for duplicate packages showing
-    //       up in issue reproduction respository.
-    //       `$ yarn workspace @haaretz/haaretz.co.il build`
-    return _requireSort(foundRoots);
-  });
+  )
+    .then((rootExists) => {
+      const foundRoots = roots.filter((_, i) => rootExists[i]);
+      return _requireSort(foundRoots);
+    });
 };
 
 // Simple helper to get package name from a base name.
