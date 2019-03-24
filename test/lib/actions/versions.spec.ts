@@ -935,10 +935,8 @@ inspectpack --action=versions
         });
     });
 
-    // TODO IMPLEMENT
-    // TODO UNSKIP
     // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
-    it.skip("displays versions skews correctly for hidden app roots", () => {
+    it("displays versions skews correctly for hidden app roots", () => {
       mock({
         "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
       });
@@ -949,7 +947,23 @@ inspectpack --action=versions
 inspectpack --action=versions
 =============================
 
-TODO
+## Summary
+* Packages with skews:      1
+* Total resolved versions:  2
+* Total installed packages: 2
+* Total depended packages:  2
+* Total bundled files:      3
+
+## \`bundle.js\`
+* foo
+  * 1.1.1
+    * ~/foo
+      * Num deps: 1, files: 1
+      * package1@1.1.1 -> foo@^1.0.0
+  * 3.3.3
+    * ~/different-foo/~/foo
+      * Num deps: 1, files: 2
+      * package1@1.1.1 -> different-foo@^1.0.1 -> foo@^3.0.1
           `.trim());
         });
     });
