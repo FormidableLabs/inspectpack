@@ -256,6 +256,10 @@ export interface IVersionsMeta {
 interface IVersionsSummary extends IVersionsMeta {
   // Inferred base path of the project / node_modules.
   packageRoots: string[];
+
+  // Longest common path between package roots.
+  // Installed paths are relative to this.
+  commonRoot: string | null;
 }
 
 interface IVersionsPackages extends IDependenciesByPackageName {
@@ -308,6 +312,7 @@ const createEmptyData = (): IVersionsData => ({
   assets: {},
   meta: {
     ...createEmptyMeta(),
+    commonRoot: null,
     packageRoots: [],
   },
 });
@@ -333,19 +338,13 @@ const commonPath = (val1: string, val2: string) => {
 };
 
 const getAssetData = (
-  pkgRoots: string[],
+  commonRoot: string,
   allDeps: Array<IDependencies | null>,
   mods: IModule[],
 ): IVersionsAsset => {
   // Start assembling and merging in deps for each package root.
   const data = createEmptyAsset();
   const modsMap = modulesByPackageNameByPackagePath(mods);
-
-  // Find largest-common-part of all roots for this version to do relative paths from.
-  const commonRoot = pkgRoots.reduce(
-    (memo, pkgRoot) => memo === null ? pkgRoot : commonPath(memo, pkgRoot),
-    null,
-  );
 
   allDeps.forEach((deps) => {
     // Skip nulls.
@@ -469,17 +468,24 @@ class Versions extends Action {
           const { assets } = this;
           const assetNames = Object.keys(assets).sort(sort);
 
+          // Find largest-common-part of all roots for this version to do relative paths from.
+          // **Note**: No second memo argument. First `memo` is first array element.
+          const commonRoot = pkgRoots.reduce((memo, pkgRoot) => commonPath(memo, pkgRoot));
+
           // Create root data without meta summary.
           const data: IVersionsData =  {
             ...createEmptyData(),
             assets: assetNames.reduce((memo, assetName) => ({
               ...memo,
-              [assetName]: getAssetData(pkgRoots, allDeps, assets[assetName].mods),
+              [assetName]: getAssetData(commonRoot, allDeps, assets[assetName].mods),
             }), {}),
           };
 
           // Attach root-level meta.
           data.meta.packageRoots = pkgRoots;
+          data.meta.commonRoot = commonRoot;
+
+          // Each asset.
           assetNames.forEach((assetName) => {
             const { packages, meta } = data.assets[assetName];
 

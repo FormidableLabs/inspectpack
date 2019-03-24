@@ -18,6 +18,7 @@ const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
 const EMPTY_DUPLICATES_DATA = {
   assets: {},
   meta: {
+    commonRoot: null,
     depended: {
       num: 0,
     },

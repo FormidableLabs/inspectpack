@@ -1,21 +1,27 @@
 History
 =======
 
+## UNRELEASED
+
+* Add `commonRoot` to `versions` metadata to indicate what installed paths are relative to.
+* BUG: Detect hidden application roots for things like `yarn` workspaces that are completely flattened.
+  [#103](https://github.com/FormidableLabs/inspectpack/issues/103)
+
 ## 4.1.2
 
-- BUG: Use `name` field to better process `identifier` to remove things like
+* BUG: Use `name` field to better process `identifier` to remove things like
   `/PATH/TO/node_modules/font-awesome/font-awesome.css 0"`. May result in some
   `baseName`s being identical despite different `identifier`s because of
   loaders and generated code.
 
 ## 4.1.1
 
-- BUG: A loader in the `identifier` field would incorrectly have all modules inferred "as a `node_modules` file", even if not. Implements a naive loader stripping heuristic to correctly assess if `node_modules` or real application source.
-- Optimizes internal calls to `_isNodeModules()` from 2 to 1 for better performance.
+* BUG: A loader in the `identifier` field would incorrectly have all modules inferred "as a `node_modules` file", even if not. Implements a naive loader stripping heuristic to correctly assess if `node_modules` or real application source.
+* Optimizes internal calls to `_isNodeModules()` from 2 to 1 for better performance.
 
 ## 4.1.0
 
-- Add `emitHandler` option to `DuplicatesPlugin` to allow customized output.
+* Add `emitHandler` option to `DuplicatesPlugin` to allow customized output.
 
 ## 4.0.1
 
@@ -29,7 +35,7 @@ History
 * `--action=versions`:
     * _Reports_: The `tsv` and `text` reports have now changed to reflect
       dependencies hierarchies as _installed_ (e.g., `scoped@1.2.3 ->
-      flattened-foo@1.1.1 -> @scope/foo@1.1.1`) to a semever range meaning
+      flattened-foo@1.1.1 -> @scope/foo@1.1.1`) to a semver range meaning
       something like as _depended_ (e.g., `scoped@1.2.3 -> flattened-foo@^1.1.0
       -> @scope/foo@^1.1.1`). We expect that this change will provide much more
       useful information as to how and why your dependency graph impacts what is
@@ -57,9 +63,9 @@ History
 
 ### Miscellaneous
 
-- Updated README.md with note that `--action=versions` is not filtered to only
+* Updated README.md with note that `--action=versions` is not filtered to only
   packages that would have files show up in the `--action=duplicates` report.
-- Update `--action=versions` logic to explicitly use `semver-compare` for sort
+* Update `--action=versions` logic to explicitly use `semver-compare` for sort
   order.
 
 ## 3.0.0

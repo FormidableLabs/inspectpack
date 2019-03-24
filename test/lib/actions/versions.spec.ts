@@ -42,18 +42,21 @@ export const EMPTY_VERSIONS_DATA: IVersionsData = {
   assets: {},
   meta: {
     ...EMPTY_VERSIONS_META,
+    commonRoot: null,
     packageRoots: [],
   },
 };
 
 const BASE_DUPS_CJS_DATA = merge(EMPTY_VERSIONS_DATA, {
   meta: {
+    commonRoot: resolve(__dirname, "../../fixtures/duplicates-cjs"),
     packageRoots: [resolve(__dirname, "../../fixtures/duplicates-cjs")],
   },
 });
 
 const BASE_SCOPED_DATA = merge(EMPTY_VERSIONS_DATA, {
   meta: {
+    commonRoot: resolve(__dirname, "../../fixtures/scoped"),
     packageRoots: [resolve(__dirname, "../../fixtures/scoped")],
   },
 });
@@ -689,6 +692,7 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(EMPTY_VERSIONS_DATA.meta, {
+              commonRoot: resolve(__dirname, "../../fixtures/hidden-app-roots"),
               depended: {
                 num: 2,
               },
@@ -740,6 +744,7 @@ describe("lib/actions/versions", () => {
           .then((data) => {
             expect(data).to.have.keys("meta", "assets");
             expect(data).to.have.property("meta").that.eql(merge(EMPTY_VERSIONS_DATA.meta, {
+              commonRoot: resolve(__dirname, "../../fixtures/hidden-app-roots"),
               depended: {
                 num: 2,
               },
