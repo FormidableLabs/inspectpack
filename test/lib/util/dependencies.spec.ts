@@ -1,4 +1,4 @@
-import { join, resolve } from "path";
+import { join, resolve, sep } from "path";
 import {
   _files,
   _findPackage,
@@ -14,6 +14,10 @@ import { toPosixPath } from "../../../src/lib/util/files";
 
 const posixifyKeys = (obj) => Object.keys(obj)
   .reduce((memo, key) => ({ ...memo, [toPosixPath(key)]: obj[key] }), {});
+
+const toNativePath = (filePath) => filePath.split("/").join(sep);
+const nativifyKeys = (obj) => Object.keys(obj)
+  .reduce((memo, key) => ({ ...memo, [toNativePath(key)]: obj[key] }), {});
 
 describe("lib/util/dependencies", () => {
   let sandbox;
@@ -301,13 +305,17 @@ describe("lib/util/dependencies", () => {
 
       expect(_findPackage(_baseArgs)).to.eql(_emptyResp);
 
-      expect(_findPackage({ ..._baseArgs, name: "bar", pkgMap: {
-        "base/node_modules/foo/package.json": {
-          name: "foo",
-          version: "1.0.0",
-        },
-        "base/package.json": base,
-      } })).to.eql(_emptyResp);
+      expect(_findPackage({
+        ..._baseArgs,
+        name: "bar",
+        pkgMap: nativifyKeys({
+          "base/node_modules/foo/package.json": {
+            name: "foo",
+            version: "1.0.0",
+          },
+          "base/package.json": base,
+        }),
+      })).to.eql(_emptyResp);
     });
 
     it("finds unflattened packages", () => {
@@ -323,13 +331,16 @@ describe("lib/util/dependencies", () => {
         version: "3.0.0",
       };
 
-      expect(_findPackage({ ..._baseArgs, pkgMap: {
-        "base/node_modules/foo/package.json": foo,
-        "base/package.json": base,
-      } })).to.eql({
+      expect(_findPackage({
+        ..._baseArgs,
+        pkgMap: nativifyKeys({
+          "base/node_modules/foo/package.json": foo,
+          "base/package.json": base,
+        }),
+      })).to.eql({
         isFlattened: false,
         pkgObj: foo,
-        pkgPath: "base/node_modules/foo",
+        pkgPath: toNativePath("base/node_modules/foo"),
       });
     });
 
@@ -354,15 +365,15 @@ describe("lib/util/dependencies", () => {
       expect(_findPackage({
         ..._baseArgs,
         filePath: "base/packages/my-pkg",
-        pkgMap: {
+        pkgMap: nativifyKeys({
           "base/node_modules/foo/package.json": foo,
           "base/package.json": base,
           "base/packages/my-pkg/package.json": myPkg,
-        },
+        }),
       })).to.eql({
         isFlattened: true,
         pkgObj: foo,
-        pkgPath: "base/node_modules/foo",
+        pkgPath: toNativePath("base/node_modules/foo"),
       });
     });
   });
