@@ -333,8 +333,7 @@ describe("lib/util/dependencies", () => {
       });
     });
 
-    // TODO: UNSKIP FAILING TEST
-    it.skip("finds hidden roots packages outside of file path", () => {
+    it("finds hidden roots packages outside of file path", () => {
       const myPkg = {
         dependencies: {
           foo: "^3.0.0",
@@ -346,12 +345,22 @@ describe("lib/util/dependencies", () => {
         name: "foo",
         version: "3.0.0",
       };
+      // Note: Base _doesn't_ have `foo` dependency.
+      const base = {
+        name: "base",
+        version: "1.0.0",
+      };
 
-      expect(_findPackage({ ..._baseArgs, pkgMap: {
-        "base/node_modules/foo/package.json": foo,
-        "base/packages/my-pkg/package.json": myPkg,
-      } })).to.eql({
-        isFlattened: true, // TODO: THIS IS FAILING.
+      expect(_findPackage({
+        ..._baseArgs,
+        filePath: "base/packages/my-pkg",
+        pkgMap: {
+          "base/node_modules/foo/package.json": foo,
+          "base/package.json": base,
+          "base/packages/my-pkg/package.json": myPkg,
+        },
+      })).to.eql({
+        isFlattened: true,
         pkgObj: foo,
         pkgPath: "base/node_modules/foo",
       });
