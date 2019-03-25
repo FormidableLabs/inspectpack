@@ -18,21 +18,11 @@ const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
 const EMPTY_DUPLICATES_DATA = {
   assets: {},
   meta: {
-    commonRoot: null,
-    depended: {
+    extraFiles: {
       num: 0,
     },
-    files: {
-      num: 0,
-    },
-    installed: {
-      num: 0,
-    },
-    packageRoots: [],
-    packages: {
-      num: 0,
-    },
-    resolved: {
+    extraSources: {
+      bytes: 0,
       num: 0,
     },
   },
@@ -79,9 +69,18 @@ describe("plugin/duplicates", () => {
   });
 
   describe("_getDuplicatesVersionsData", () => {
+    let warningSpy;
+
+    beforeEach(() => {
+      warningSpy = sandbox.spy();
+    });
+
     it("handles base cases", () => {
-      expect(_getDuplicatesVersionsData(EMPTY_DUPLICATES_DATA, EMPTY_VERSIONS_DATA))
-        .to.eql(EMPTY_VERSIONS_DATA);
+      const actual = _getDuplicatesVersionsData(
+        EMPTY_DUPLICATES_DATA, EMPTY_VERSIONS_DATA, warningSpy,
+      );
+      expect(actual).to.eql(EMPTY_VERSIONS_DATA);
+      expect(warningSpy).to.not.be.called; // tslint:disable-line no-unused-expression
     });
 
     describe(`handles ${MULTI_SCENARIO}`, () => {
@@ -91,6 +90,7 @@ describe("plugin/duplicates", () => {
           const noDupsVersions = _getDuplicatesVersionsData(
             multiDataDuplicates[vers - 1],
             origVersionsData,
+            warningSpy,
           );
 
           // Should remove all of the no-duplicates bundle.
@@ -113,6 +113,9 @@ describe("plugin/duplicates", () => {
           expect(noDupsVersions)
             .to.have.nested.property("assets.bundle\\.js")
             .that.eql(expectedBundle);
+
+          // Expect no warnings.
+          expect(warningSpy).to.not.be.called; // tslint:disable-line no-unused-expression
         });
       });
     });

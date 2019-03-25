@@ -115,6 +115,7 @@ const getDuplicatesPackageNames = (data: IDuplicatesData): IPackageNames => {
 export const _getDuplicatesVersionsData = (
   dupData: IDuplicatesData,
   pkgDataOrig: IVersionsData,
+  addWarning: (val: string) => number,
 ): IVersionsData => {
   // Start with a clone of the data.
   const pkgData: IVersionsData = JSON.parse(JSON.stringify(pkgDataOrig));
@@ -157,6 +158,46 @@ export const _getDuplicatesVersionsData = (
         delete packages[pkgName];
       });
   });
+
+  // Validate mutated package data by checking we have matching number of
+  // sources (identical or not).
+  const extraSources = dupData.meta.extraSources.num;
+
+  interface IFilesMap { [baseName: string]: number; }
+  const foundFilesMap: IFilesMap = {};
+  Object.keys(pkgData.assets).forEach((assetName) => {
+    const pkgs = pkgData.assets[assetName].packages;
+    Object.keys(pkgs).forEach((pkgName) => {
+      Object.keys(pkgs[pkgName]).forEach((pkgVers) => {
+        const pkgInstalls = pkgs[pkgName][pkgVers];
+        Object.keys(pkgInstalls).forEach((installPath) => {
+          pkgInstalls[installPath].modules.forEach((mod) => {
+            if (!mod.baseName) { return; }
+            foundFilesMap[mod.baseName] = (foundFilesMap[mod.baseName] || 0) + 1;
+          });
+        });
+      });
+    });
+  });
+  const foundDupFilesMap: IFilesMap = Object.keys(foundFilesMap)
+    .reduce((memo: IFilesMap, baseName) => {
+      if (foundFilesMap[baseName] >= 2) {
+        memo[baseName] = foundFilesMap[baseName];
+      }
+
+      return memo;
+    }, {});
+  const foundSources = Object.keys(foundDupFilesMap)
+    .reduce((memo, baseName) => {
+      return memo + foundDupFilesMap[baseName];
+    }, 0);
+
+  if (extraSources !== foundSources) {
+    addWarning(error(
+      `Missing sources: Expected ${numF(extraSources)}, found ${numF(foundSources)}.\n` +
+      chalk`{white Found map:} {gray ${JSON.stringify(foundDupFilesMap)}}\n`,
+    ));
+  }
 
   return pkgData;
 };
@@ -212,7 +253,7 @@ export class DuplicatesPlugin {
         }
 
         // Filter versions/packages data to _just_ duplicates.
-        const pkgData = _getDuplicatesVersionsData(dupData, pkgDataOrig);
+        const pkgData = _getDuplicatesVersionsData(dupData, pkgDataOrig, addMsg);
 
         // Choose output format.
         const fmt = emitErrors ? error : warning;
