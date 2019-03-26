@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.2.0
 
 * Add `commonRoot` to `versions` metadata to indicate what installed paths are relative to.
 * BUG: Detect hidden application roots for things like `yarn` workspaces that are completely flattened.
