@@ -8,5 +8,6 @@
   { "WEBPACK_CWD": "../../test/fixtures/multiple-chunks" },
   { "WEBPACK_CWD": "../../test/fixtures/scoped" },
   { "WEBPACK_CWD": "../../test/fixtures/tree-shaking" },
-  { "WEBPACK_CWD": "../../test/fixtures/multiple-resolved-no-duplicates" }
+  { "WEBPACK_CWD": "../../test/fixtures/multiple-resolved-no-duplicates" },
+  { "WEBPACK_CWD": "../../test/fixtures/hidden-app-roots" }
 ]

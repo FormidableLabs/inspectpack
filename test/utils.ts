@@ -37,6 +37,9 @@ const FIXTURES_STATS = FIXTURES_DIRS.map((f) => join(__dirname, "fixtures", f, "
 // Extra patches for webpack-config-driven stuff that doesn't fit within
 // node_modules-based traversals.
 const FIXTURES_EXTRA_DIRS = {
+  "hidden-app-roots": [
+    "packages/hidden-app",
+  ],
   "multiple-roots": [
     "packages/package1",
     "packages/package2",

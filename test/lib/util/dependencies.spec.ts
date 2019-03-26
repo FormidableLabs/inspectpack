@@ -1,6 +1,7 @@
-import { join, resolve } from "path";
+import { join, resolve, sep } from "path";
 import {
   _files,
+  _findPackage,
   _resolvePackageMap,
   dependencies,
   readPackage,
@@ -13,6 +14,10 @@ import { toPosixPath } from "../../../src/lib/util/files";
 
 const posixifyKeys = (obj) => Object.keys(obj)
   .reduce((memo, key) => ({ ...memo, [toPosixPath(key)]: obj[key] }), {});
+
+const toNativePath = (filePath) => filePath.split("/").join(sep);
+const nativifyKeys = (obj) => Object.keys(obj)
+  .reduce((memo, key) => ({ ...memo, [toNativePath(key)]: obj[key] }), {});
 
 describe("lib/util/dependencies", () => {
   let sandbox;
@@ -227,6 +232,149 @@ describe("lib/util/dependencies", () => {
             "package.json": foo,
           });
         });
+    });
+
+    it("includes multiple deps", () => {
+      const foo1 = {
+        name: "foo",
+        version: "1.0.0",
+      };
+      const diffFoo = {
+        dependencies: {
+          foo: "^3.0.0",
+        },
+        name: "different-foo",
+        version: "1.0.1",
+      };
+      const foo3 = {
+        name: "foo",
+        version: "3.0.0",
+      };
+      const base = {
+        dependencies: {
+          "different-foo": "1.0.0",
+          "foo": "^3.0.0",
+        },
+        name: "base",
+        version: "1.0.2",
+      };
+
+      mock({
+        "node_modules": {
+          "different-foo": {
+            "node_modules": {
+              foo: {
+                "package.json": JSON.stringify(foo3),
+              },
+            },
+            "package.json": JSON.stringify(diffFoo),
+          },
+          "foo": {
+            "package.json": JSON.stringify(foo1),
+          },
+        },
+        "package.json": JSON.stringify(base),
+      });
+
+      return readPackages(".")
+        .then(_resolvePackageMap)
+        .then(posixifyKeys)
+        .then((pkgs) => {
+          expect(pkgs).to.eql({
+            "node_modules/different-foo/node_modules/foo/package.json": foo3,
+            "node_modules/different-foo/package.json": diffFoo,
+            "node_modules/foo/package.json": foo1,
+            "package.json": base,
+          });
+        });
+    });
+  });
+
+  describe("_findPackage", () => {
+    const _baseArgs = { filePath: "base", name: "foo", pkgMap: {} };
+    const _emptyResp = { isFlattened: false, pkgObj: null, pkgPath: null };
+
+    it("handles empty cases", () => {
+      const base = {
+        dependencies: {
+          foo: "^3.0.0",
+        },
+        name: "base",
+        version: "1.0.2",
+      };
+
+      expect(_findPackage(_baseArgs)).to.eql(_emptyResp);
+
+      expect(_findPackage({
+        ..._baseArgs,
+        name: "bar",
+        pkgMap: nativifyKeys({
+          "base/node_modules/foo/package.json": {
+            name: "foo",
+            version: "1.0.0",
+          },
+          "base/package.json": base,
+        }),
+      })).to.eql(_emptyResp);
+    });
+
+    it("finds unflattened packages", () => {
+      const base = {
+        dependencies: {
+          foo: "^3.0.0",
+        },
+        name: "base",
+        version: "1.0.2",
+      };
+      const foo = {
+        name: "foo",
+        version: "3.0.0",
+      };
+
+      expect(_findPackage({
+        ..._baseArgs,
+        pkgMap: nativifyKeys({
+          "base/node_modules/foo/package.json": foo,
+          "base/package.json": base,
+        }),
+      })).to.eql({
+        isFlattened: false,
+        pkgObj: foo,
+        pkgPath: toNativePath("base/node_modules/foo"),
+      });
+    });
+
+    it("finds hidden roots packages outside of file path", () => {
+      const myPkg = {
+        dependencies: {
+          foo: "^3.0.0",
+        },
+        name: "my-pkg",
+        version: "1.0.2",
+      };
+      const foo = {
+        name: "foo",
+        version: "3.0.0",
+      };
+      // Note: Base _doesn't_ have `foo` dependency.
+      const base = {
+        name: "base",
+        version: "1.0.0",
+      };
+
+      expect(_findPackage({
+        ..._baseArgs,
+        filePath: "base/packages/my-pkg",
+        pkgMap: nativifyKeys({
+          "base/node_modules/foo/package.json": foo,
+          "base/package.json": base,
+          "base/packages/my-pkg/package.json": myPkg,
+        }),
+      })).to.eql({
+        isFlattened: true,
+        pkgObj: foo,
+        pkgPath: toNativePath("base/node_modules/foo"),
+      });
     });
   });
 

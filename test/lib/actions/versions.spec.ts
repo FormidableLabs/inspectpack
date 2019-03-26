@@ -1,6 +1,8 @@
 import { join, resolve, sep } from "path";
 import {
   _packageName,
+  _packageRoots,
+  _requireSort,
   create,
   IVersionsData,
   IVersionsMeta,
@@ -40,18 +42,21 @@ export const EMPTY_VERSIONS_DATA: IVersionsData = {
   assets: {},
   meta: {
     ...EMPTY_VERSIONS_META,
+    commonRoot: null,
     packageRoots: [],
   },
 };
 
 const BASE_DUPS_CJS_DATA = merge(EMPTY_VERSIONS_DATA, {
   meta: {
+    commonRoot: resolve(__dirname, "../../fixtures/duplicates-cjs"),
     packageRoots: [resolve(__dirname, "../../fixtures/duplicates-cjs")],
   },
 });
 
 const BASE_SCOPED_DATA = merge(EMPTY_VERSIONS_DATA, {
   meta: {
+    commonRoot: resolve(__dirname, "../../fixtures/scoped"),
     packageRoots: [resolve(__dirname, "../../fixtures/scoped")],
   },
 });
@@ -83,6 +88,85 @@ const patchAction = (name) => (instance) => {
   return instance;
 };
 
+// Complex roots from hidden roots regression sample.
+const complexHiddenAppRoots = {
+  "node_modules": {
+    "fbjs": {
+      "package.json":  JSON.stringify({
+        name: "fbjs",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "hoist-non-react-statics": {
+      "package.json":  JSON.stringify({
+        name: "hoist-non-react-statics",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "prop-types": {
+      "package.json":  JSON.stringify({
+        name: "prop-types",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "react-addons-shallow-compare": {
+      "node_modules": {
+        "fbjs/package.json":  JSON.stringify({
+          name: "fbjs",
+          version: "2.2.2",
+        }, null, 2),
+      },
+      "package.json":  JSON.stringify({
+        dependencies: {
+          fbjs: "^2.0.0",
+        },
+        name: "react-addons-shallow-compare",
+        version: "1.1.1",
+      }, null, 2),
+    },
+    "react-apollo": {
+      "node_modules": {
+        "hoist-non-react-statics": {
+          "package.json":  JSON.stringify({
+            name: "hoist-non-react-statics",
+            version: "2.2.2",
+          }, null, 2),
+        },
+        "prop-types": {
+          "package.json":  JSON.stringify({
+            name: "prop-types",
+            version: "2.2.2",
+          }, null, 2),
+        },
+      },
+      "package.json":  JSON.stringify({
+        dependencies: {
+          "hoist-non-react-statics": "^2.0.0",
+          "prop-types": "^2.0.0",
+        },
+        name: "react-apollo",
+        version: "1.1.1",
+      }, null, 2),
+    },
+  },
+  "package.json": JSON.stringify({
+    name: "complex-hidden-app-roots",
+  }, null, 2),
+  "packages": {
+    "hidden-app": {
+      "package.json": JSON.stringify({
+        dependencies: {
+          "fbjs": "^1.0.0",
+          "hoist-non-react-statics": "^1.0.0",
+          "prop-types": "^1.0.0",
+          "react-apollo": "^1.0.0",
+        },
+        name: "hidden-app",
+      }, null, 2),
+    },
+  },
+};
+
 describe("lib/actions/versions", () => {
   let fixtures;
   let fixtureDirs;
@@ -90,6 +174,7 @@ describe("lib/actions/versions", () => {
   let dupsCjsInstance;
   let scopedInstance;
   let multipleRootsInstance;
+  let hiddenAppRootsInstance;
 
   const getData = (name) => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
@@ -106,6 +191,7 @@ describe("lib/actions/versions", () => {
     "duplicates-cjs",
     "scoped",
     "multiple-roots",
+    "hidden-app-roots",
   ].map((name) => create({
       stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
     }).validate()))
@@ -115,12 +201,14 @@ describe("lib/actions/versions", () => {
         dupsCjsInstance,
         scopedInstance,
         multipleRootsInstance,
+        hiddenAppRootsInstance,
       ] = instances;
 
       expect(simpleInstance).to.not.be.an("undefined");
       expect(dupsCjsInstance).to.not.be.an("undefined");
       expect(scopedInstance).to.not.be.an("undefined");
       expect(multipleRootsInstance).to.not.be.an("undefined");
+      expect(hiddenAppRootsInstance).to.not.be.an("undefined");
     }),
   );
 
@@ -593,6 +681,106 @@ describe("lib/actions/versions", () => {
             expectProp.to.have.property("modules").that.has.length(2);
           });
       });
+
+      // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+      it("displays versions skews correctly for hidden app roots", () => {
+        mock({
+          "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+        });
+
+        return hiddenAppRootsInstance.getData()
+          .then((data) => {
+            expect(data).to.have.keys("meta", "assets");
+            expect(data).to.have.property("meta").that.eql(merge(EMPTY_VERSIONS_DATA.meta, {
+              commonRoot: resolve(__dirname, "../../fixtures/hidden-app-roots"),
+              depended: {
+                num: 2,
+              },
+              files: {
+                num: 3,
+              },
+              installed: {
+                num: 2,
+              },
+              packageRoots: [
+                resolve(__dirname, "../../fixtures/hidden-app-roots"),
+                resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
+              ],
+              packages: {
+                num: 1,
+              },
+              resolved: {
+                num: 2,
+              },
+            }));
+
+            let expectProp;
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.1\\.1\\.1.node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(1);
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.3\\.3\\.3.node_modules/different-foo/node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(2);
+          });
+      });
+
+      // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+      it("displays versions skews correctly for hidden app roots with empty node_modules", () => {
+        const curFixtures = JSON.parse(JSON.stringify(fixtureDirs["test/fixtures/hidden-app-roots"]));
+        // Add empty `node_modules` to hit different code path.
+        curFixtures.packages["hidden-app"].node_modules = {};
+
+        mock({
+          "test/fixtures/hidden-app-roots": curFixtures,
+        });
+
+        return hiddenAppRootsInstance.getData()
+          .then((data) => {
+            expect(data).to.have.keys("meta", "assets");
+            expect(data).to.have.property("meta").that.eql(merge(EMPTY_VERSIONS_DATA.meta, {
+              commonRoot: resolve(__dirname, "../../fixtures/hidden-app-roots"),
+              depended: {
+                num: 2,
+              },
+              files: {
+                num: 3,
+              },
+              installed: {
+                num: 2,
+              },
+              packageRoots: [
+                resolve(__dirname, "../../fixtures/hidden-app-roots"),
+                resolve(__dirname, "../../fixtures/hidden-app-roots/packages/hidden-app"),
+              ],
+              packages: {
+                num: 1,
+              },
+              resolved: {
+                num: 2,
+              },
+            }));
+
+            let expectProp;
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.1\\.1\\.1.node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(1);
+
+            expectProp = expect(data).to.have.nested.property(
+              "assets.bundle\\.js.packages.foo.3\\.3\\.3.node_modules/different-foo/node_modules/foo",
+            );
+            expectProp.to.have.property("skews").that.has.length(1);
+            expectProp.to.have.property("modules").that.has.length(2);
+          });
+      });
     });
   });
 
@@ -726,21 +914,56 @@ inspectpack --action=versions
 ## Summary
 * Packages with skews:      1
 * Total resolved versions:  2
-* Total installed packages: 2
+* Total installed packages: 3
 * Total depended packages:  3
 * Total bundled files:      4
 
 ## \`bundle.js\`
 * foo
   * 1.1.1
-    * ~/foo
-      * Num deps: 2, files: 2
+    * packages/package1/~/foo
+      * Num deps: 1, files: 1
       * package1@1.1.1 -> foo@^1.0.0
+    * packages/package2/~/foo
+      * Num deps: 1, files: 1
       * package2@2.2.2 -> foo@^1.0.0
   * 3.3.3
     * ~/different-foo/~/foo
       * Num deps: 1, files: 2
       * multiple-roots@1.2.3 -> different-foo@^1.0.1 -> foo@^3.0.1
+          `.trim());
+        });
+    });
+
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    it("displays versions skews correctly for hidden app roots", () => {
+      mock({
+        "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+      });
+
+      return hiddenAppRootsInstance.template.text()
+        .then((textStr) => {
+          expect(textStr).to.eql(`
+inspectpack --action=versions
+=============================
+
+## Summary
+* Packages with skews:      1
+* Total resolved versions:  2
+* Total installed packages: 2
+* Total depended packages:  2
+* Total bundled files:      3
+
+## \`bundle.js\`
+* foo
+  * 1.1.1
+    * ~/foo
+      * Num deps: 1, files: 1
+      * package1@1.1.1 -> foo@^1.0.0
+  * 3.3.3
+    * ~/different-foo/~/foo
+      * Num deps: 1, files: 2
+      * package1@1.1.1 -> different-foo@^1.0.1 -> foo@^3.0.1
           `.trim());
         });
     });
@@ -765,6 +988,270 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
           `.trim());
           /*tslint:enable max-line-length*/
         });
+    });
+
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    it("displays versions skews correctly for hidden app roots", () => {
+      mock({
+        "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+      });
+
+      return hiddenAppRootsInstance.template.tsv()
+        .then((tsvStr) => {
+          /*tslint:disable max-line-length*/
+          expect(tsvStr).to.eql(`
+Asset	Package	Version	Installed Path	Dependency Path
+bundle.js	foo	1.1.1	~/foo	package1@1.1.1 -> foo@^1.0.0
+bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1 -> foo@^3.0.1
+          `.trim());
+          /*tslint:enable max-line-length*/
+        });
+    });
+  });
+
+  describe("_requireSort", () => {
+    it("handles base cases", () => {
+      expect(_requireSort([])).to.eql([]);
+    });
+
+    it("handles simple roots", () => {
+      const vals = [
+        "/BASE",
+        "/BASE/packages/hidden-app",
+      ];
+
+      expect(_requireSort(vals)).to.eql(vals);
+    });
+
+    it("handles complex roots", () => {
+      expect(_requireSort([
+        "/foo/two/a",
+        "/foo/1/2",
+        "/bar/foo/one/b",
+        "/foo/one/b",
+        "/bar/foo/one",
+        "/bar/foo/one/a",
+        "/foo/one",
+        "/foo/one/a",
+        "/bar/",
+        "/foo/two",
+        "/foo/1",
+        "/bar/foo",
+        "/foo/two/d",
+        "/foo/",
+      ])).to.eql([
+        "/bar/",
+        "/bar/foo",
+        "/bar/foo/one",
+        "/bar/foo/one/a",
+        "/bar/foo/one/b",
+        "/foo/",
+        "/foo/1",
+        "/foo/1/2",
+        "/foo/one",
+        "/foo/one/a",
+        "/foo/one/b",
+        "/foo/two",
+        "/foo/two/a",
+        "/foo/two/d",
+      ]);
+    });
+  });
+
+  describe("_packageRoots", () => {
+    beforeEach(() => {
+      mock({});
+    });
+
+    it("handles base cases", () => {
+      return _packageRoots([]).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([]);
+      });
+    });
+
+    it("handles no node_modules cases", () => {
+      return _packageRoots([
+        {
+          identifier: resolve("src/baz/index.js"),
+          isNodeModules: false,
+        },
+        {
+          identifier: resolve("src/baz/bug.js"),
+          isNodeModules: false,
+        },
+      ])
+      .then((pkgRoots) => {
+        expect(pkgRoots).to.eql([]);
+      });
+    });
+
+    it("handles no node_modules with package.json cases", () => {
+      mock({
+        "src/baz": {
+          "package.json": JSON.stringify({
+            name: "baz",
+          }, null, 2),
+        },
+      });
+
+      return _packageRoots([
+        {
+          identifier: resolve("src/baz/index.js"),
+          isNodeModules: false,
+        },
+        {
+          identifier: resolve("src/baz/bug.js"),
+          isNodeModules: false,
+        },
+      ])
+      .then((pkgRoots) => {
+        expect(pkgRoots).to.eql([]);
+      });
+    });
+
+    it("handles simple cases", () => {
+      mock({
+        "my-app": {
+          "package.json": JSON.stringify({
+            name: "my-app",
+          }, null, 2),
+        },
+      });
+
+      return _packageRoots([
+        {
+          identifier: resolve("my-app/src/baz/index.js"),
+          isNodeModules: false,
+        },
+        {
+          identifier: resolve("my-app/node_modules/foo/index.js"),
+          isNodeModules: true,
+        },
+        {
+          identifier: resolve("my-app/node_modules/foo/node_modules/bug/bug.js"),
+          isNodeModules: true,
+        },
+      ]).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([
+          resolve("my-app"),
+        ]);
+      });
+    });
+
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    it("handles hidden application roots", () => {
+      mock({
+        "test/fixtures/hidden-app-roots": fixtureDirs["test/fixtures/hidden-app-roots"],
+      });
+
+      const appRoot = resolve("test/fixtures/hidden-app-roots");
+      const mods = [
+        {
+          identifier: "node_modules/different-foo/index.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/different-foo/node_modules/foo/car.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/different-foo/node_modules/foo/index.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/foo/index.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "packages/hidden-app/src/index.js",
+          isNodeModules: false,
+        },
+      ].map(({ identifier, isNodeModules }) => ({
+        identifier: join(appRoot, identifier),
+        isNodeModules,
+      }));
+
+      return _packageRoots(mods).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([
+          appRoot,
+          join(appRoot, "packages/hidden-app"),
+        ]);
+      });
+    });
+
+    // Regression test: https://github.com/FormidableLabs/inspectpack/issues/103
+    it("handles complex hidden application roots", () => {
+      const appRoot = resolve("complex-hidden-app-roots");
+      mock({
+        "complex-hidden-app-roots": complexHiddenAppRoots,
+      });
+
+      // tslint:disable max-line-length
+      const mods = [
+        {
+          identifier: "node_modules/prop-types/factoryWithThrowingShims.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/fbjs/lib/shallowEqual.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-addons-shallow-compare/node_modules/fbjs/lib/shallowEqual.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/prop-types/factoryWithThrowingShims.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/prop-types/lib/ReactPropTypesSecret.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/prop-types/lib/ReactPropTypesSecret.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/css-in-js-utils/lib/hyphenateProperty.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/inline-style-prefixer/node_modules/css-in-js-utils/lib/hyphenateProperty.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/react-apollo/node_modules/prop-types/index.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "node_modules/prop-types/index.js",
+          isNodeModules: true,
+        },
+        {
+          identifier: "packages/hidden-app/src/index.js",
+          isNodeModules: false,
+        },
+      ].map(({ identifier, isNodeModules }) => ({
+        identifier: join(appRoot, identifier),
+        isNodeModules,
+      }));
+      // tslint:enable max-line-length
+
+      return _packageRoots(mods).then((pkgRoots) => {
+        expect(pkgRoots).to.eql([
+          "",
+          "packages/hidden-app",
+        ].map((id) => join(appRoot, id)));
+      });
     });
   });
 

@@ -1,4 +1,4 @@
-import { dirname, join, resolve } from "path";
+import { dirname, join } from "path";
 import { readDir, readJson, toPosixPath } from "./files";
 
 export interface INpmPackageBase {
@@ -123,7 +123,7 @@ export const readPackages = (
       dirs
         // Filter to known packages.
         .filter(isIncludedPkg)
-        // Recurse
+        // Recurse.
         .map((dir) => readPackages(join(path, "node_modules", dir), pkgsFilter, _cache)),
     ))
     // The cache **is** our return value.
@@ -142,51 +142,70 @@ export const _resolvePackageMap = (
     {},
   ));
 
-const _findPackage = ({
+export const _findPackage = ({
   filePath,
   name,
   pkgMap,
-  rootPath,
 }: {
   filePath: string,
   name: string,
   pkgMap: INpmPackageMap,
-  rootPath: string,
 }): {
   isFlattened: boolean,
   pkgPath: string | null;
   pkgObj: INpmPackage | null;
 } => {
-  const resolvedRoot = resolve(rootPath);
+  // We now check the existing package map which, if iterating in correct
+  // directory order, should already have higher up roots that may contain
+  // `node_modules` **within** the `require` resolution rules that would
+  // naturally be the "selected" module.
+  //
+  // Fixes https://github.com/FormidableLabs/inspectpack/issues/10
+  const cachedRoots = Object.keys(pkgMap)
+    // Get directories.
+    .map((k) => dirname(k))
+    // Limit to those that are a higher up directory from our root, which
+    // is fair game by Node.js `require` resolution rules, and not the current
+    // root because that already failed.
+    .filter((p) => p !== filePath && filePath.indexOf(p) === 0);
+
+  const roots = [filePath].concat(cachedRoots);
 
   // Iterate down potential paths.
-  let curFilePath = filePath;
+  // If we find it as _first_ result, then it hasn't been flattened.
   let isFlattened = false;
-  while (resolvedRoot.length <= resolve(curFilePath).length) {
-    // Check at this level.
-    const pkgPath = join(curFilePath, "node_modules", name);
-    const pkgJsonPath = join(pkgPath, "package.json");
-    const pkgObj = pkgMap[pkgJsonPath];
 
-    // Found a match.
-    if (pkgObj) {
-      // Validation: These should all be **real** npm packages, so we should
-      // **never** fail here. But, can't hurt to check.
-      if (!pkgObj.name) {
-        throw new Error(`Found package without name: ${JSON.stringify(pkgObj)}`);
-      } else if (!pkgObj.version) {
-        throw new Error(`Found package without version: ${JSON.stringify(pkgObj)}`);
+  for (const curRoot of roots) {
+    // Reset to full path. This _will_ end up in some duplicate checks, but
+    // shouldn't be too expensive.
+    let curFilePath = filePath;
+
+    while (curRoot.length <= curFilePath.length) {
+      // Check at this level.
+      const pkgPath = join(curFilePath, "node_modules", name);
+      const pkgJsonPath = join(pkgPath, "package.json");
+      const pkgObj = pkgMap[pkgJsonPath];
+
+      // Found a match.
+      if (pkgObj) {
+        // Validation: These should all be **real** npm packages, so we should
+        // **never** fail here. But, can't hurt to check.
+        if (!pkgObj.name) {
+          throw new Error(`Found package without name: ${JSON.stringify(pkgObj)}`);
+        } else if (!pkgObj.version) {
+          throw new Error(`Found package without version: ${JSON.stringify(pkgObj)}`);
+        }
+
+        return { isFlattened, pkgPath, pkgObj };
       }
 
-      return { isFlattened, pkgPath, pkgObj };
+      // Decrement path. If we find it now, it's flattened.
+      curFilePath = dirname(curFilePath);
+      isFlattened = true;
     }
-
-    // Decrement path. If we find it now, it's flattened.
-    curFilePath = dirname(curFilePath);
-    isFlattened = true;
   }
 
-  return { isFlattened, pkgPath: null, pkgObj: null };
+  return { isFlattened: false, pkgPath: null, pkgObj: null };
 };
 
 // - Populates `pkgMap` with installed `package.json`s
@@ -198,14 +217,12 @@ const _recurseDependencies = ({
   names,
   pkgMap,
   pkgsFilter,
-  rootPath,
 }: {
   filePath: string,
   foundMap?: { [filePath: string]: { [name: string]: IDependencies | null } },
   names: string[],
   pkgMap: INpmPackageMap,
   pkgsFilter?: string[],
-  rootPath: string,
 }): IDependencies[] => {
   // Build up cache.
   const _foundMap = foundMap || {};
@@ -217,10 +234,12 @@ const _recurseDependencies = ({
     // Inflated current level.
     .map((name): { pkg: IDependencies, pkgNames: string[] } | null => {
       // Find actual location.
-      const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, rootPath, pkgMap });
+      const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, pkgMap });
 
       // Short-circuit on not founds.
-      if (pkgPath === null || pkgObj === null) { return null; }
+      if (pkgPath === null || pkgObj === null) {
+        return null;
+      }
 
       // Build and check cache.
       const found = _foundMap[pkgPath] = _foundMap[pkgPath] || {};
@@ -267,7 +286,6 @@ const _recurseDependencies = ({
           names: pkgNames,
           pkgMap,
           pkgsFilter,
-          rootPath,
         });
       }
 
@@ -446,7 +464,6 @@ export const dependencies = (
           names,
           pkgMap,
           pkgsFilter,
-          rootPath: filePath,
         }),
         filePath,
         name: rootPkg.name || "ROOT",
