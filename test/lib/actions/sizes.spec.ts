@@ -271,126 +271,154 @@ describe("lib/actions/sizes", () => {
   });
 
   describe("json", () => {
+    /*tslint:disable max-line-length*/
+    const expectedScopedData = {
+      assets: {
+        "bundle.js": {
+          files: [
+            {
+              baseName: "@scope/foo/bike.js",
+              fileName: "scoped/node_modules/@scope/foo/bike.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "@scope/foo/index.js",
+              fileName: "scoped/node_modules/@scope/foo/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "bar/index.js",
+              fileName: "scoped/node_modules/bar/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "bar/tender.js",
+              fileName: "scoped/node_modules/bar/tender.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "flattened-foo/index.js",
+              fileName: "scoped/node_modules/flattened-foo/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "unscoped-foo/index.js",
+              fileName: "scoped/node_modules/unscoped-foo/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "deeper-unscoped/index.js",
+              fileName: "scoped/node_modules/unscoped-foo/node_modules/deeper-unscoped/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "foo/car.js",
+              fileName: "scoped/node_modules/unscoped-foo/node_modules/deeper-unscoped/node_modules/foo/car.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "foo/index.js",
+              fileName: "scoped/node_modules/unscoped-foo/node_modules/deeper-unscoped/node_modules/foo/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "foo/car.js",
+              fileName: "scoped/node_modules/unscoped-foo/node_modules/foo/car.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "foo/index.js",
+              fileName: "scoped/node_modules/unscoped-foo/node_modules/foo/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "uses-foo/index.js",
+              fileName: "scoped/node_modules/uses-foo/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: "@scope/foo/index.js",
+              fileName: "scoped/node_modules/uses-foo/node_modules/@scope/foo/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+            {
+              baseName: null,
+              fileName: "scoped/src/index.js",
+              size: {
+                full: "NUM",
+              },
+            },
+          ],
+          meta: {
+            full: "NUM",
+          },
+        },
+      },
+      meta: {
+        full: "NUM",
+      },
+    };
+    /*tslint:enable max-line-length*/
+
     it("displays sizes correctly for scoped packages", () => {
       return scopedInstance.template.json()
         .then((dataStr) => {
           // Inflate to real object and re-use previous test assertions.
           const data = JSON.parse(normalizeOutput(JSON_PATH_RE, dataStr));
 
-          /*tslint:disable max-line-length*/
-          expect(data).to.eql({
-            assets: {
-              "bundle.js": {
-                files: [
-                  {
-                    baseName: "@scope/foo/bike.js",
-                    fileName: "scoped/node_modules/@scope/foo/bike.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "@scope/foo/index.js",
-                    fileName: "scoped/node_modules/@scope/foo/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "bar/index.js",
-                    fileName: "scoped/node_modules/bar/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "bar/tender.js",
-                    fileName: "scoped/node_modules/bar/tender.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "flattened-foo/index.js",
-                    fileName: "scoped/node_modules/flattened-foo/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "unscoped-foo/index.js",
-                    fileName: "scoped/node_modules/unscoped-foo/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "deeper-unscoped/index.js",
-                    fileName: "scoped/node_modules/unscoped-foo/node_modules/deeper-unscoped/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "foo/car.js",
-                    fileName: "scoped/node_modules/unscoped-foo/node_modules/deeper-unscoped/node_modules/foo/car.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "foo/index.js",
-                    fileName: "scoped/node_modules/unscoped-foo/node_modules/deeper-unscoped/node_modules/foo/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "foo/car.js",
-                    fileName: "scoped/node_modules/unscoped-foo/node_modules/foo/car.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "foo/index.js",
-                    fileName: "scoped/node_modules/unscoped-foo/node_modules/foo/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "uses-foo/index.js",
-                    fileName: "scoped/node_modules/uses-foo/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: "@scope/foo/index.js",
-                    fileName: "scoped/node_modules/uses-foo/node_modules/@scope/foo/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                  {
-                    baseName: null,
-                    fileName: "scoped/src/index.js",
-                    size: {
-                      full: "NUM",
-                    },
-                  },
-                ],
-                meta: {
-                  full: "NUM",
-                },
-              },
-            },
-            meta: {
-              full: "NUM",
-            },
-          });
-          /*tslint:enable max-line-length*/
+          expect(data).to.eql(expectedScopedData);
+        });
+    });
+
+    // Regression test:
+    // https://github.com/FormidableLabs/inspectpack/issues/110
+    it("displays sizes correctly for scoped packages with null chunks", () => {
+      // Mutate stats data to replicate null chunk scenario.
+
+      // Add null asset chunk.
+      scopedInstance.stats.assets[0].chunks = [null].concat(
+        scopedInstance.stats.assets[0].chunks,
+      );
+
+      // Add null module chunks.
+      scopedInstance.stats.modules.forEach((mod) => {
+        if (mod.chunks) {
+          mod.chunks = [null, null, null].concat(mod.chunks);
+        }
+      });
+
+      return scopedInstance.template.json()
+        .then((dataStr) => {
+          // Inflate to real object and re-use previous test assertions.
+          const data = JSON.parse(normalizeOutput(JSON_PATH_RE, dataStr));
+
+          expect(data).to.eql(expectedScopedData);
         });
     });
   });

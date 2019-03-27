@@ -17,7 +17,7 @@ import * as t from "io-ts";
  */
 
 // Common
-const RWebpackStatsChunk = t.union([t.string, t.number]);
+const RWebpackStatsChunk = t.union([t.string, t.number, t.null]);
 
 export type IWebpackStatsChunk = t.TypeOf<typeof RWebpackStatsChunk>;
 

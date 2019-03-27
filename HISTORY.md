@@ -1,6 +1,11 @@
 History
 =======
 
+## Unreleased
+
+* BUG: Handle `null` chunks in webpack stats object.
+  [#110](https://github.com/FormidableLabs/inspectpack/issues/110)
+
 ## 4.2.0
 
 * Add `commonRoot` to `versions` metadata to indicate what installed paths are relative to.
