@@ -1,7 +1,7 @@
 History
 =======
 
-## Unreleased
+## 4.2.1
 
 * BUG: Handle `null` chunks in webpack stats object.
   [#110](https://github.com/FormidableLabs/inspectpack/issues/110)
