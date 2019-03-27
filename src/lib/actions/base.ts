@@ -262,6 +262,9 @@ export abstract class Action {
       };
 
       asset.chunks.forEach((chunk) => {
+        // Skip null chunks, allowing only strings or numbers.
+        if (chunk === null) { return; }
+
         chunk = chunk.toString(); // force to string.
         chunksToAssets[chunk] = chunksToAssets[chunk] || new Set();
 
@@ -273,6 +276,9 @@ export abstract class Action {
     // Iterate modules and attach as appropriate.
     this.modules.forEach((mod) => {
       mod.chunks.forEach((chunk) => {
+        // Skip null chunks, allowing only strings or numbers.
+        if (chunk === null) { return; }
+
         chunk = chunk.toString(); // force to string.
         (chunksToAssets[chunk] || []).forEach((assetName) => {
           const assetObj = modulesSetByAsset[assetName];
