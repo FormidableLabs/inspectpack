@@ -170,7 +170,7 @@ const complexHiddenAppRoots = {
 
 // TODO HERE: This encapsulates the problem and is broken in node10.5+
 describe("TODO REMOVE", () => {
-  it.only("errors on malformed root package.json", (done) => {
+  it.skip("errors on malformed root package.json", (done) => {
     // TODO HERE: Merely adding a **real** `readFile` of the any file before
     // errors the latter one.
     readFile("test/fixtures/duplicates-cjs/package.json", (err, data) => {
