@@ -14,8 +14,8 @@ describe.only("mock-fs temp test suite", () => {
     // TODO HERE: Merely adding a **real** `readFile` of the any file before
     // errors the latter one. Comment this out and test passes.
     // Uncomment and test hangs.
-    const { data1 } = await readFileP("test/fixtures/duplicates-cjs/package.json");
-    console.log("TODO HERE 001", { data1 });
+    const buf1 = await readFileP("test/fixtures/duplicates-cjs/package.json");
+    console.log("TODO HERE 001", { data: buf1.toString() });
 
     mock({
       "test/fixtures/duplicates-cjs": {
@@ -23,7 +23,7 @@ describe.only("mock-fs temp test suite", () => {
       },
     });
 
-    const { data2 } = await readFileP("test/fixtures/duplicates-cjs/package.json");
-    console.log("TODO HERE 002", { data2 });
+    const buf2 = await readFileP("test/fixtures/duplicates-cjs/package.json");
+    console.log("TODO HERE 002", { data: buf2.toString() });
   });
 });
