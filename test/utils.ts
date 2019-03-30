@@ -52,7 +52,11 @@ export const loadFixtures = () => {
     .then((objs) => objs.reduce((memo, f, i) => ({
       ...memo,
       [toPosixPath(FIXTURES_DIRS[i]).replace("../../test/fixtures/", "")]: f,
-    }), {}));
+    }), {}))
+    .catch((err) => {
+      console.log("[loadFixtures] TODO HERE err", { err });
+      throw err;
+    });
 
   return _fixtures;
 };

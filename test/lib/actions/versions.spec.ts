@@ -18,7 +18,7 @@ import {
 import chalk from "chalk";
 import * as merge from "deepmerge";
 import * as mock from "mock-fs";
-import { toPosixPath } from "../../../src/lib/util/files";
+import { toPosixPath, readJson } from "../../../src/lib/util/files";
 import { readFile } from "fs";
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
@@ -170,29 +170,22 @@ const complexHiddenAppRoots = {
 
 // TODO HERE: This encapsulates the problem and is broken in node10.5+
 describe("TODO REMOVE", () => {
-  let fixtures;
-
-  before(() => Promise.all([
-    loadFixtures().then((f) => { fixtures = f; }),
-    // TODO loadFixtureDirs().then((d) => { fixtureDirs = d; }),
-  ])
-    .then(() => {
-      console.log("TODO BEFORE FIX DONE", {
-        keysLen: fixtures && Object.keys(fixtures).length
-      });
-    })
-  );
-
   it.only("errors on malformed root package.json", (done) => {
-    mock({
-      "test/fixtures/duplicates-cjs": {
-        // "package.json": "BAD_NOT_JSON", // TODO DOESN'T HANG IF COMMENTED
-      },
-    });
-
+    // TODO HERE: Merely adding a **real** `readFile` of the any file before
+    // errors the latter one.
     readFile("test/fixtures/duplicates-cjs/package.json", (err, data) => {
-      console.log("TODO HERE", { err, data });
-      done();
+      console.log("TODO HERE 001", { err, data });
+
+      mock({
+        "test/fixtures/duplicates-cjs": {
+          "package.json": "BAD_NOT_JSON", // TODO DOESN'T HANG IF COMMENTED
+        },
+      });
+
+      readFile("test/fixtures/duplicates-cjs/package.json", (err, data) => {
+        console.log("TODO HERE 002", { err, data });
+        done();
+      });
     });
 
     // return dupsCjsInstance.getData()
