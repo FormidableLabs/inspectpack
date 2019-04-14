@@ -19,6 +19,10 @@ It is also the engine for the handy [`webpack-dashboard`](https://github.com/For
 - [Notes, tips, tricks](#notes-tips-tricks)
 - [Other useful tools](#other-useful-tools)
 
+### Maintenance Status: Active
+
+Formidable is actively working on this project, and we expect to continue for work for the foreseeable future. Bug reports, feature requests and pull requests are welcome. 
+
 ## Plugin
 
 The `DuplicatesPlugin` identifies unnecessarily duplicated code in your webpack bundles with an actionable report to help you trim down wasted bytes.
