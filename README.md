@@ -4,6 +4,8 @@ inspectpack
 [![Travis Status][trav_img]][trav_site]
 [![AppVeyor Status][appveyor_img]][appveyor_site]
 [![Coverage Status][cov_img]][cov_site]
+[![Maintenance Status][maintenance-image]](#maintenance-status)
+
 
 An inspection tool for Webpack frontend JavaScript bundles.
 
@@ -18,10 +20,6 @@ It is also the engine for the handy [`webpack-dashboard`](https://github.com/For
   - [`sizes`](#sizes)
 - [Notes, tips, tricks](#notes-tips-tricks)
 - [Other useful tools](#other-useful-tools)
-
-### Maintenance Status: Active
-
-Formidable is actively working on this project, and we expect to continue for work for the foreseeable future. Bug reports, feature requests and pull requests are welcome. 
 
 ## Plugin
 
@@ -488,6 +486,10 @@ Other tools that inspect Webpack bundles:
 * [webpack-visualizer](https://github.com/chrisbateman/webpack-visualizer)
 * [webpack-chart](https://github.com/alexkuz/webpack-chart)
 
+## Maintenance Status
+
+**Active:** Formidable is actively working on this project, and we expect to continue for work for the foreseeable future. Bug reports, feature requests and pull requests are welcome. 
+
 [npm_img]: https://badge.fury.io/js/inspectpack.svg
 [npm_site]: http://badge.fury.io/js/inspectpack
 [trav_img]: https://api.travis-ci.com/FormidableLabs/inspectpack.svg
@@ -497,3 +499,5 @@ Other tools that inspect Webpack bundles:
 [cov]: https://codecov.io
 [cov_img]: https://codecov.io/gh/FormidableLabs/inspectpack/branch/master/graph/badge.svg
 [cov_site]: https://codecov.io/gh/FormidableLabs/inspectpack
+[maintenance-image]: https://img.shields.io/badge/maintenance-active-green.svg
+
