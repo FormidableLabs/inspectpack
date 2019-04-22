@@ -1,6 +1,12 @@
 History
 =======
 
+## UNRELEASED
+
+* TEST: Upgrade `mock-fs` to allow modern Nodes. Update Travis + Appveyor.
+  [#83](https://github.com/FormidableLabs/inspectpack/issues/83)
+  [#94](https://github.com/FormidableLabs/inspectpack/issues/94)
+
 ## 4.2.1
 
 * BUG: Handle `null` chunks in webpack stats object.
