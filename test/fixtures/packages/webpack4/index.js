@@ -5,4 +5,4 @@ if (process.env.DEBUG) {
   console.log(`webpack version: ${require("webpack/package.json").version}`);
 }
 
-module.exports = require("webpack-cli/bin/cli");
+module.exports = require("webpack-cli");
