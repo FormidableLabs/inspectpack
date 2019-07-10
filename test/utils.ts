@@ -1,4 +1,4 @@
-import { basename, join, relative, sep } from "path";
+import { basename, join, normalize, relative, sep } from "path";
 
 import { readDir, readJson, toPosixPath } from "../src/lib/util/files";
 
@@ -172,7 +172,8 @@ export const patchAllMods = (name) => (mod) => {
   // **Side Effect**: Relies on populated `_assets` from above.
   //
   // See: https://github.com/FormidableLabs/inspectpack/issues/77
-  if (name.startsWith("tree-shaking/dist-development-4") && mod.baseName === "foo/green.js") {
+  if (name.startsWith("tree-shaking/dist-development-4") &&
+    mod.baseName === normalize("foo/green.js")) {
     mod.chunks = [];
   }
 
