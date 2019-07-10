@@ -5,9 +5,11 @@ import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
+  FIXTURES_WEBPACK4_BLACKLIST,
   JSON_PATH_RE,
   loadFixtures,
   normalizeOutput,
+  patchAllMods,
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
@@ -25,6 +27,9 @@ const PATCHED_ASSETS = {
 // Normalize actions across different versions of webpack.
 // Mutates.
 const patchAction = (name) => (instance) => {
+  // Patch all modules.
+  instance._modules = instance.modules.map(patchAllMods(name));
+
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
   if (patches) {
@@ -88,6 +93,12 @@ describe("lib/actions/duplicates", () => {
           // Blacklist `import` + webpack@1 and skip test.
           if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
             it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+            return;
+          }
+
+          // Blacklist `import` + webpack@4 and skip test.
+          if (lastIdx + 1 === 4 && FIXTURES_WEBPACK4_BLACKLIST.indexOf(scenario) > -1) {
+            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v4)`);
             return;
           }
 

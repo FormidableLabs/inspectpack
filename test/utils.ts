@@ -22,6 +22,14 @@ export const FIXTURES_WEBPACK1_BLACKLIST = [
   "tree-shaking",
 ];
 
+// Skip testing webpack4 vs. webpack1-3 because tree shaking appears to work
+// in this scenario now-ish...
+//
+// See: https://github.com/FormidableLabs/inspectpack/issues/77
+export const FIXTURES_WEBPACK4_BLACKLIST = [
+  "tree-shaking",
+];
+
 export const VERSIONS = versions.map((v) => v.WEBPACK_VERSION);
 
 const FIXTURES_DIRS = FIXTURES
@@ -154,6 +162,21 @@ export const loadFixtureDirs = () => {
     }, _fixtureDirs));
 
   return _fixtureDirsProm;
+};
+
+// General action patching
+export const patchAllMods = (name) => (mod) => {
+  // Looks like tree-shaking **does** work in updated webpack4.
+  // Manually adjust just `foo/green.js` which is DCE'd to normalize dev vs prod
+  //
+  // **Side Effect**: Relies on populated `_assets` from above.
+  //
+  // See: https://github.com/FormidableLabs/inspectpack/issues/77
+  if (name.startsWith("tree-shaking/dist-development-4") && mod.baseName === "foo/green.js") {
+    mod.chunks = [];
+  }
+
+  return mod;
 };
 
 // Reusable re's that have same capture groups.
