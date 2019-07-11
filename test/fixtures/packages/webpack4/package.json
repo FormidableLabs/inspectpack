@@ -4,8 +4,8 @@
   "description": "Webpack4 installs",
   "main": "index.js",
   "license": "MIT",
-  "optionalDependencies": {
-    "webpack-cli": "^2.1.2",
-    "webpack": "^4.6.0"
+  "dependencies": {
+    "webpack-cli": "^3.3.5",
+    "webpack": "^4.35.3"
   }
 }

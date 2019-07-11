@@ -5,9 +5,11 @@ import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
+  FIXTURES_WEBPACK4_BLACKLIST,
   JSON_PATH_RE,
   loadFixtures,
   normalizeOutput,
+  patchAllMods,
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
@@ -38,15 +40,24 @@ const PATCHED_MODS = {
   },
 };
 
+// Patch in _all_ assets.
+const PATCHED_ASSETS_ALL = {
+  // Emitted was added in late webpack4.
+  // (_Note_: Really bool, typically `false` in our fixtures)
+  emitted: "REMOVED",
+};
+
 // Normalize actions across different versions of webpack.
 // Mutates.
 const patchAction = (name) => (instance) => {
   // Patch internal data based on baseName keys.
   // **Note**: Patch modules **first** since memoized, then used by assets.
-  instance._modules = instance.modules.map((mod) => {
-    const patched = PATCHED_MODS[mod.baseName];
-    return patched ? { ...mod, ...patched } : mod;
-  });
+  instance._modules = instance.modules
+    .map((mod) => {
+      const patched = PATCHED_MODS[mod.baseName];
+      return patched ? { ...mod, ...patched } : mod;
+    })
+    .map(patchAllMods(name));
 
   // Patch assets scenarios manually.
   // - `multiple-chunks`: just use the normal bundle, not the split stuff.
@@ -58,12 +69,22 @@ const patchAction = (name) => (instance) => {
     };
   }
 
+  // Iterate assets.
+  Object.keys(instance.assets).forEach((assetName) => {
+    // Patch all.
+    instance._assets[assetName].asset = {
+      ...instance.assets[assetName].asset,
+      ...instance._assets[assetName].asset,
+      ...PATCHED_ASSETS_ALL,
+    };
+  });
+
   return instance;
 };
 
 // Normalize getData calls.
 // Mutates.
-const patchData = (_) => (data) => {
+const patchData = () => (data) => {
   const assets = Object.keys(data.assets)
     .reduce((memo, asset) => ({
       ...memo,
@@ -137,7 +158,13 @@ describe("lib/actions/base", () => {
 
           // Blacklist `import` + webpack@1 and skip test.
           if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+            it(`should match modules/assets v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+            return;
+          }
+
+          // Blacklist `import` + webpack@4 and skip test.
+          if (lastIdx + 1 === 4 && FIXTURES_WEBPACK4_BLACKLIST.indexOf(scenario) > -1) {
+            it(`should match modules/assets  v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v4)`);
             return;
           }
 
@@ -235,6 +262,12 @@ describe("lib/actions/sizes", () => {
           // Blacklist `import` + webpack@1 and skip test.
           if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
             it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+            return;
+          }
+
+          // Blacklist `import` + webpack@4 and skip test.
+          if (lastIdx + 1 === 4 && FIXTURES_WEBPACK4_BLACKLIST.indexOf(scenario) > -1) {
+            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v4)`);
             return;
           }
 
