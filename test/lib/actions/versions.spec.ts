@@ -93,85 +93,6 @@ const patchAction = (name) => (instance) => {
   return instance;
 };
 
-// Complex roots from hidden roots regression sample.
-const complexHiddenAppRoots = {
-  "node_modules": {
-    "fbjs": {
-      "package.json":  JSON.stringify({
-        name: "fbjs",
-        version: "1.1.1",
-      }, null, 2),
-    },
-    "hoist-non-react-statics": {
-      "package.json":  JSON.stringify({
-        name: "hoist-non-react-statics",
-        version: "1.1.1",
-      }, null, 2),
-    },
-    "prop-types": {
-      "package.json":  JSON.stringify({
-        name: "prop-types",
-        version: "1.1.1",
-      }, null, 2),
-    },
-    "react-addons-shallow-compare": {
-      "node_modules": {
-        "fbjs/package.json":  JSON.stringify({
-          name: "fbjs",
-          version: "2.2.2",
-        }, null, 2),
-      },
-      "package.json":  JSON.stringify({
-        dependencies: {
-          fbjs: "^2.0.0",
-        },
-        name: "react-addons-shallow-compare",
-        version: "1.1.1",
-      }, null, 2),
-    },
-    "react-apollo": {
-      "node_modules": {
-        "hoist-non-react-statics": {
-          "package.json":  JSON.stringify({
-            name: "hoist-non-react-statics",
-            version: "2.2.2",
-          }, null, 2),
-        },
-        "prop-types": {
-          "package.json":  JSON.stringify({
-            name: "prop-types",
-            version: "2.2.2",
-          }, null, 2),
-        },
-      },
-      "package.json":  JSON.stringify({
-        dependencies: {
-          "hoist-non-react-statics": "^2.0.0",
-          "prop-types": "^2.0.0",
-        },
-        name: "react-apollo",
-        version: "1.1.1",
-      }, null, 2),
-    },
-  },
-  "package.json": JSON.stringify({
-    name: "complex-hidden-app-roots",
-  }, null, 2),
-  "packages": {
-    "hidden-app": {
-      "package.json": JSON.stringify({
-        dependencies: {
-          "fbjs": "^1.0.0",
-          "hoist-non-react-statics": "^1.0.0",
-          "prop-types": "^1.0.0",
-          "react-apollo": "^1.0.0",
-        },
-        name: "hidden-app",
-      }, null, 2),
-    },
-  },
-};
-
 describe("lib/actions/versions", () => {
   let fixtures;
   let fixtureDirs;
@@ -180,6 +101,7 @@ describe("lib/actions/versions", () => {
   let scopedInstance;
   let multipleRootsInstance;
   let hiddenAppRootsInstance;
+  let circularDepsInstance;
 
   const getData = (name) => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
@@ -197,6 +119,7 @@ describe("lib/actions/versions", () => {
     "scoped",
     "multiple-roots",
     "hidden-app-roots",
+    "circular-deps",
   ].map((name) => create({
       stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
     }).validate()))
@@ -207,6 +130,7 @@ describe("lib/actions/versions", () => {
         scopedInstance,
         multipleRootsInstance,
         hiddenAppRootsInstance,
+        circularDepsInstance,
       ] = instances;
 
       expect(simpleInstance).to.not.be.an("undefined");
@@ -214,6 +138,7 @@ describe("lib/actions/versions", () => {
       expect(scopedInstance).to.not.be.an("undefined");
       expect(multipleRootsInstance).to.not.be.an("undefined");
       expect(hiddenAppRootsInstance).to.not.be.an("undefined");
+      expect(circularDepsInstance).to.not.be.an("undefined");
     }),
   );
 
@@ -792,6 +717,40 @@ describe("lib/actions/versions", () => {
             expectProp.to.have.property("modules").that.has.length(2);
           });
       });
+
+      it("displays versions skews correctly for circular deps", () => {
+        mock({
+          "test/fixtures/circular-deps": fixtureDirs["test/fixtures/circular-deps"],
+        });
+
+        return circularDepsInstance.getData()
+          .then((data) => {
+            expect(data).to.have.keys("meta", "assets");
+            expect(data).to.have.property("meta").that.eql(merge(EMPTY_VERSIONS_DATA.meta, {
+              commonRoot: resolve(__dirname, "../../fixtures/circular-deps"),
+              depended: {
+                num: 0,
+              },
+              files: {
+                num: 0,
+              },
+              installed: {
+                num: 0,
+              },
+              packageRoots: [
+                resolve(__dirname, "../../fixtures/circular-deps"),
+              ],
+              packages: {
+                num: 0,
+              },
+              resolved: {
+                num: 0,
+              },
+            }));
+
+            expect(data).to.have.nested.property("assets.bundle\\.js");
+          });
+      });
     });
   });
 
@@ -1194,7 +1153,83 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
     it("handles complex hidden application roots", () => {
       const appRoot = resolve("complex-hidden-app-roots");
       mock({
-        "complex-hidden-app-roots": complexHiddenAppRoots,
+        "complex-hidden-app-roots": {
+          "node_modules": {
+            "fbjs": {
+              "package.json":  JSON.stringify({
+                name: "fbjs",
+                version: "1.1.1",
+              }, null, 2),
+            },
+            "hoist-non-react-statics": {
+              "package.json":  JSON.stringify({
+                name: "hoist-non-react-statics",
+                version: "1.1.1",
+              }, null, 2),
+            },
+            "prop-types": {
+              "package.json":  JSON.stringify({
+                name: "prop-types",
+                version: "1.1.1",
+              }, null, 2),
+            },
+            "react-addons-shallow-compare": {
+              "node_modules": {
+                "fbjs/package.json":  JSON.stringify({
+                  name: "fbjs",
+                  version: "2.2.2",
+                }, null, 2),
+              },
+              "package.json":  JSON.stringify({
+                dependencies: {
+                  fbjs: "^2.0.0",
+                },
+                name: "react-addons-shallow-compare",
+                version: "1.1.1",
+              }, null, 2),
+            },
+            "react-apollo": {
+              "node_modules": {
+                "hoist-non-react-statics": {
+                  "package.json":  JSON.stringify({
+                    name: "hoist-non-react-statics",
+                    version: "2.2.2",
+                  }, null, 2),
+                },
+                "prop-types": {
+                  "package.json":  JSON.stringify({
+                    name: "prop-types",
+                    version: "2.2.2",
+                  }, null, 2),
+                },
+              },
+              "package.json":  JSON.stringify({
+                dependencies: {
+                  "hoist-non-react-statics": "^2.0.0",
+                  "prop-types": "^2.0.0",
+                },
+                name: "react-apollo",
+                version: "1.1.1",
+              }, null, 2),
+            },
+          },
+          "package.json": JSON.stringify({
+            name: "complex-hidden-app-roots",
+          }, null, 2),
+          "packages": {
+            "hidden-app": {
+              "package.json": JSON.stringify({
+                dependencies: {
+                  "fbjs": "^1.0.0",
+                  "hoist-non-react-statics": "^1.0.0",
+                  "prop-types": "^1.0.0",
+                  "react-apollo": "^1.0.0",
+                },
+                name: "hidden-app",
+              }, null, 2),
+            },
+          },
+        },
       });
 
       // tslint:disable max-line-length
