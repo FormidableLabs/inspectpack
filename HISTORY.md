@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.2.2
 
 * Update `yargs` for security.
   [#118](https://github.com/FormidableLabs/inspectpack/issues/118)
