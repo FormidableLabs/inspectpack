@@ -3,6 +3,8 @@ History
 
 ## UNRELEASED
 
+* Update `yargs` for security.
+  [#118](https://github.com/FormidableLabs/inspectpack/issues/118)
 * TEST: Upgrade `mock-fs` to allow modern Nodes. Update Travis + Appveyor.
   [#83](https://github.com/FormidableLabs/inspectpack/issues/83)
   [#94](https://github.com/FormidableLabs/inspectpack/issues/94)
