@@ -1,6 +1,11 @@
 History
 =======
 
+## UNRELEASED
+
+* Fix issue with duplicates but no version skews.
+  [#125](https://github.com/FormidableLabs/inspectpack/issues/125)
+
 ## 4.2.2
 
 * Update `yargs` for security.
