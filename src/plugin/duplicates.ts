@@ -223,7 +223,7 @@ export class DuplicatesPlugin {
       compiler.hooks.emit.tapPromise("inspectpack-duplicates-plugin", this.analyze.bind(this));
     } else {
       // Webpack1-3 integration
-      compiler.plugin("emit", this.analyze.bind(this));
+      compiler.plugin("emit", this.analyze.bind(this) as any);
     }
   }
 

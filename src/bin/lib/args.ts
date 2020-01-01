@@ -15,17 +15,13 @@ const validate = (parser: yargs.Argv): Promise<IRenderOptions> => {
   const { action, format } = argv;
 
   // Defaults
-  const statsFile = argv.stats;
+  const statsFile = argv.stats as string;
 
-  return Promise.resolve()
-    // Stats
-    .then(() => readJson(statsFile))
-    // Final object
-    .then((stats) => ({
-      action,
-      format,
-      stats,
-    }));
+  return readJson(statsFile).then((stats) => ({
+    action,
+    format,
+    stats,
+  }) as IRenderOptions);
 };
 
 const args = () => yargs
