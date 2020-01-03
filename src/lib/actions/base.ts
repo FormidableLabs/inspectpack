@@ -23,7 +23,7 @@ export interface IActionConstructor {
   stats: IWebpackStats;
 }
 
-interface IModulesByAsset {
+export interface IModulesByAsset {
   [asset: string]: {
     asset: IWebpackStatsAsset;
     mods: IModule[];

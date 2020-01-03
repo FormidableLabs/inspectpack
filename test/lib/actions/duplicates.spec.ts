@@ -64,8 +64,6 @@ describe("lib/actions/duplicates", () => {
   before(() => loadFixtures().then((f) => { fixtures = f; }));
 
   beforeEach(() => Promise.all([
-    "simple",
-    "duplicates-cjs",
     "scoped",
   ].map((name) => create({
       stats: fixtures[toPosixPath(join(name, "dist-development-4"))],

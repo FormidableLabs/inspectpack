@@ -2,7 +2,8 @@ import chalk from "chalk";
 import { expect } from "chai";
 import { join, resolve } from "path";
 
-import { IAction } from "../../../src/lib/actions/base";
+import { IWebpackStatsChunk } from "../../../src/lib/interfaces/webpack-stats";
+import { IAction, IModulesByAsset, TemplateFormat } from "../../../src/lib/actions/base";
 import { create, ISizesData } from "../../../src/lib/actions/sizes";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
@@ -16,7 +17,9 @@ import {
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
+  IFixtures,
 } from "../../utils";
+import { IModule } from "../../../src/lib/interfaces/modules";
 
 const PATCHED_MOMENT_LOCALE_ES = {
   baseName: "moment/locale sync /es/",
@@ -59,7 +62,7 @@ const patchAction = (name: string) => (instance: IAction) => {
   // **Note**: Patch modules **first** since memoized, then used by assets.
   (<any>instance)._modules = instance.modules
     .map((mod) => {
-      const patched = PATCHED_MODS[mod.baseName];
+      const patched = mod.baseName && PATCHED_MODS[mod.baseName];
       return patched ? { ...mod, ...patched } : mod;
     })
     .map(patchAllMods(name));
@@ -112,14 +115,14 @@ const patchData = (data: ISizesData) => {
 
 // Normalize modules for comparison.
 // - `chunks` are emptied because different by webpack version.
-const normalizeModules = (modules) => modules.map((mod) => ({ ...mod, chunks: [] }));
+const normalizeModules = (modules: IModule[]) => modules.map((mod) => ({ ...mod, chunks: [] }));
 
 // Normalize assets for comparison.
 // - `size` is hard-coded because different by webpack version's boilerplate / generated
 //   code.
 // - `chunks` can be different
 // - `mods.chunks` can be different
-const normalizeAssets = (modulesByAsset) => Object.keys(modulesByAsset)
+const normalizeAssets = (modulesByAsset: IModulesByAsset) => Object.keys(modulesByAsset)
   .reduce((memo, name) => ({
     ...memo,
     [name]: {
@@ -136,9 +139,9 @@ const normalizeAssets = (modulesByAsset) => Object.keys(modulesByAsset)
 // We add the base class tests here that need a concrete implementation.
 describe("lib/actions/base", () => {
   describe("modules, assets", () => {
-    let fixtures;
+    let fixtures: IFixtures;
 
-    const getInstance = (name) => Promise.resolve()
+    const getInstance = (name: string): Promise<IAction> => Promise.resolve()
       .then(() => create({ stats: fixtures[toPosixPath(name)] }))
       .then(patchAction(name));
 
@@ -149,7 +152,7 @@ describe("lib/actions/base", () => {
     describe("all versions", () => {
       FIXTURES.map((scenario) => {
         const lastIdx = VERSIONS.length - 1;
-        let instances;
+        let instances: IAction[];
 
         before(() => {
           return Promise.all(
@@ -215,22 +218,18 @@ describe("lib/actions/base", () => {
 });
 
 describe("lib/actions/sizes", () => {
-  let fixtures;
-  let simpleInstance;
-  let dupsCjsInstance;
-  let scopedInstance;
+  let fixtures: IFixtures;
+  let scopedInstance: IAction;
 
   const getData = (name: string): Promise<ISizesData> => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
     .then(patchAction(name))
-    .then((instance) => instance.getData())
+    .then((instance) => instance.getData() as Promise<ISizesData>)
     .then(patchData);
 
   before(() => loadFixtures().then((f) => { fixtures = f; }));
 
   beforeEach(() => Promise.all([
-    "simple",
-    "duplicates-cjs",
     "scoped",
   ].map((name) =>
     create({
@@ -241,8 +240,6 @@ describe("lib/actions/sizes", () => {
   ))
     .then((instances) => {
       [
-        simpleInstance,
-        dupsCjsInstance,
         scopedInstance,
       ] = instances;
     }),
@@ -252,13 +249,13 @@ describe("lib/actions/sizes", () => {
     describe("all versions", () => {
       FIXTURES.map((scenario) => {
         const lastIdx = VERSIONS.length - 1;
-        let datas;
+        let datas: ISizesData[];
 
         before(() => {
           return Promise.all(
             VERSIONS.map((vers) => getData(join(scenario, `dist-development-${vers}`))),
           )
-            .then((d) => { datas = d; });
+            .then((d) => { datas = d as ISizesData[]; });
         });
 
         VERSIONS.map((vers, i) => {
@@ -440,14 +437,13 @@ describe("lib/actions/sizes", () => {
       // Mutate stats data to replicate null chunk scenario.
 
       // Add null asset chunk.
-      scopedInstance.stats.assets[0].chunks = [null].concat(
+      scopedInstance.stats.assets[0].chunks = ([null] as IWebpackStatsChunk[]).concat(
         scopedInstance.stats.assets[0].chunks,
       );
-
       // Add null module chunks.
       scopedInstance.stats.modules.forEach((mod) => {
         if (mod.chunks) {
-          mod.chunks = [null, null, null].concat(mod.chunks);
+          mod.chunks = ([null, null, null] as IWebpackStatsChunk[]).concat(mod.chunks);
         }
       });
 
@@ -462,7 +458,7 @@ describe("lib/actions/sizes", () => {
   });
 
   describe("text", () => {
-    let origChalkEnabled;
+    let origChalkEnabled: boolean;
 
     beforeEach(() => {
       // Stash and disable chalk for tests.
@@ -524,7 +520,7 @@ inspectpack --action=sizes
 
   describe("tsv", () => {
     it("displays sizes correctly for scoped packages", () => {
-      return scopedInstance.template.render("tsv")
+      return scopedInstance.template.render(TemplateFormat.tsv)
         .then((tsvStr) => {
           /*tslint:disable max-line-length*/
           expect(normalizeOutput(TSV_PATH_RE, tsvStr)).to.eql(`
