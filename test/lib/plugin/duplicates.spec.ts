@@ -68,7 +68,7 @@ describe("plugin/duplicates", () => {
     .then((d) => { multiDataVersions = d as actionsVersions.IVersionsData[]; }));
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {
