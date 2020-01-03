@@ -17,6 +17,7 @@ import chalk from "chalk";
 import { toPosixPath } from "../../../src/lib/util/files";
 import { loadFixtures, VERSIONS, IFixtures } from "../../utils";
 import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
+import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";
 
 const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
 
@@ -134,7 +135,7 @@ describe("plugin/duplicates", () => {
       VERSIONS.forEach((vers) => {
         // Mock compilation:
         let compilation: ICompilation;
-        let toJson;
+        let toJson: () => IWebpackStats;;
 
         // Report outputs
         // tslint:disable max-line-length
