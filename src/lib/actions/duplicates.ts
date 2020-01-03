@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 import { IActionModule, IModule, SYNTHETIC_SOURCE_TOKEN } from "../interfaces/modules";
 import { numF, sort } from "../util/strings";

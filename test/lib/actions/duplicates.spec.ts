@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { join, sep } from "path";
 
 import { IAction, TemplateFormat } from "../../../src/lib/actions/base";
@@ -295,16 +295,16 @@ describe("lib/actions/duplicates", () => {
   });
 
   describe("text", () => {
-    let origChalkEnabled: boolean;
+    let origChalkLevel: chalk.Level;
 
     beforeEach(() => {
       // Stash and disable chalk for tests.
-      origChalkEnabled = chalk.enabled;
-      chalk.enabled = false;
+      origChalkLevel = chalk.level;
+      (chalk as any).level = chalk.Level.None;
     });
 
     afterEach(() => {
-      chalk.enabled = origChalkEnabled;
+      (chalk as any).level = origChalkLevel;
     });
 
     it("displays duplicates correctly for scoped packages", () => {

@@ -13,7 +13,7 @@ import {
    ICompilation,
 } from "../../../src/plugin/duplicates";
 
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import { IFixtures, loadFixtures, VERSIONS } from "../../utils";
@@ -197,16 +197,16 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
         });
 
         describe(`v${vers}`, () => {
-          let origChalkEnabled: boolean;
+          let origChalkLevel: chalk.Level;
 
           beforeEach(() => {
             // Stash and disable chalk for tests.
-            origChalkEnabled = chalk.enabled;
-            chalk.enabled = false;
+            origChalkLevel = chalk.level;
+            (chalk as any).level = chalk.Level.None;
           });
 
           afterEach(() => {
-            chalk.enabled = origChalkEnabled;
+            (chalk as any).level = origChalkLevel;
           });
 
           it(`produces a default report`, () => {

@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import semverCompare = require("semver-compare");
 import { actions } from "../lib";
 import { IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";

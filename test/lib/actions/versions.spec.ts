@@ -1,7 +1,7 @@
 import { join, resolve, sep } from "path";
 
 import { expect } from "chai";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import * as merge from "deepmerge";
 import * as mock from "mock-fs";
 
@@ -822,16 +822,16 @@ describe("lib/actions/versions", () => {
   });
 
   describe("text", () => {
-    let origChalkEnabled: boolean;
+    let origChalkLevel: chalk.Level;
 
     beforeEach(() => {
       // Stash and disable chalk for tests.
-      origChalkEnabled = chalk.enabled;
-      chalk.enabled = false;
+      origChalkLevel = chalk.level;
+      (chalk as any).level = chalk.Level.None;
     });
 
     afterEach(() => {
-      chalk.enabled = origChalkEnabled;
+      (chalk as any).level = origChalkLevel;
     });
 
     it("displays versions skews correctly for scoped packages", () => {
