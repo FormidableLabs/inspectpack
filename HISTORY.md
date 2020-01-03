@@ -1,6 +1,10 @@
 History
 =======
 
+## UNRELEASED
+
+* Upgrade prod and dev dependencies, including TypeScript (to `3.7.4`).
+
 ## 4.2.2
 
 * Update `yargs` for security.
