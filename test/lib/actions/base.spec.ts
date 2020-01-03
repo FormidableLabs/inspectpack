@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { _getBaseName, _isNodeModules, _normalizeWebpackPath } from "../../../src/lib/actions/base";
 
 describe("lib/actions/base", () => {

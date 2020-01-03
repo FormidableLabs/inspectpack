@@ -10,7 +10,7 @@ import {
   Template,
 } from "./base";
 
-interface ISizesData {
+export interface ISizesData {
   meta: {
     full: number;
   };

@@ -1,4 +1,10 @@
 import { join, resolve, sep } from "path";
+
+import { expect } from "chai";
+import * as mock from "mock-fs";
+import * as sinon from "sinon";
+
+import { toPosixPath } from "../../../src/lib/util/files";
 import {
   _files,
   _findPackage,
@@ -7,10 +13,6 @@ import {
   readPackage,
   readPackages,
 } from "../../../src/lib/util/dependencies";
-
-import * as mock from "mock-fs";
-import * as sinon from "sinon";
-import { toPosixPath } from "../../../src/lib/util/files";
 
 const posixifyKeys = (obj) => Object.keys(obj)
   .reduce((memo, key) => ({ ...memo, [toPosixPath(key)]: obj[key] }), {});

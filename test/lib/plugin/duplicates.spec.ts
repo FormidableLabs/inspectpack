@@ -1,5 +1,6 @@
 import { join } from "path";
 
+import { expect } from "chai";
 import * as mock from "mock-fs";
 import * as sinon from "sinon";
 

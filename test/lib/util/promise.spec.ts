@@ -1,6 +1,6 @@
-import {
-  serial,
-} from "../../../src/lib/util/promise";
+import { expect } from "chai";
+
+import { serial } from "../../../src/lib/util/promise";
 
 describe("lib/util/promise", () => {
 

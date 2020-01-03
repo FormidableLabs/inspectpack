@@ -1,4 +1,11 @@
 import { join, resolve, sep } from "path";
+
+import chalk from "chalk";
+import { expect } from "chai";
+import * as merge from "deepmerge";
+import * as mock from "mock-fs";
+
+import { toPosixPath } from "../../../src/lib/util/files";
 import {
   _packageName,
   _packageRoots,
@@ -16,11 +23,6 @@ import {
   patchAllMods,
   VERSIONS,
 } from "../../utils";
-
-import chalk from "chalk";
-import * as merge from "deepmerge";
-import * as mock from "mock-fs";
-import { toPosixPath } from "../../../src/lib/util/files";
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
   depended: {

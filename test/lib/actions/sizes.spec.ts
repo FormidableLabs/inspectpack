@@ -1,6 +1,9 @@
 import chalk from "chalk";
+import { expect } from "chai";
 import { join, resolve } from "path";
-import { create } from "../../../src/lib/actions/sizes";
+
+import { IAction } from "../../../src/lib/actions/base";
+import { create, ISizesData } from "../../../src/lib/actions/sizes";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
@@ -23,7 +26,9 @@ const PATCHED_MOMENT_LOCALE_ES = {
 };
 
 // Keyed off `baseName`.
-const PATCHED_MODS = {
+// Should be `IWebpackStatsModuleBase`, but want subset to merge and override.
+type IPatchedMods = { [id: string]: any }
+const PATCHED_MODS: IPatchedMods = {
   "moment/locale /es/": PATCHED_MOMENT_LOCALE_ES,
   "moment/locale sync /es/": PATCHED_MOMENT_LOCALE_ES,
   "webpack/buildin/global.js": {
@@ -49,10 +54,10 @@ const PATCHED_ASSETS_ALL = {
 
 // Normalize actions across different versions of webpack.
 // Mutates.
-const patchAction = (name) => (instance) => {
+const patchAction = (name: string) => (instance: IAction) => {
   // Patch internal data based on baseName keys.
   // **Note**: Patch modules **first** since memoized, then used by assets.
-  instance._modules = instance.modules
+  (<any>instance)._modules = instance.modules
     .map((mod) => {
       const patched = PATCHED_MODS[mod.baseName];
       return patched ? { ...mod, ...patched } : mod;
@@ -63,7 +68,7 @@ const patchAction = (name) => (instance) => {
   // - `multiple-chunks`: just use the normal bundle, not the split stuff.
   //   The splits are too varying to try and manually track.
   if (name.startsWith("multiple-chunks")) {
-    instance._assets = {
+    (<any>instance)._assets = {
       "bundle-multiple.js": instance.assets["bundle-multiple.js"],
       "bundle.js": instance.assets["bundle.js"],
     };
@@ -72,9 +77,9 @@ const patchAction = (name) => (instance) => {
   // Iterate assets.
   Object.keys(instance.assets).forEach((assetName) => {
     // Patch all.
-    instance._assets[assetName].asset = {
+    (<any>instance)._assets[assetName].asset = {
       ...instance.assets[assetName].asset,
-      ...instance._assets[assetName].asset,
+      ...(<any>instance)._assets[assetName].asset,
       ...PATCHED_ASSETS_ALL,
     };
   });
@@ -84,7 +89,7 @@ const patchAction = (name) => (instance) => {
 
 // Normalize getData calls.
 // Mutates.
-const patchData = () => (data) => {
+const patchData = (data: ISizesData) => {
   const assets = Object.keys(data.assets)
     .reduce((memo, asset) => ({
       ...memo,
@@ -215,11 +220,11 @@ describe("lib/actions/sizes", () => {
   let dupsCjsInstance;
   let scopedInstance;
 
-  const getData = (name) => Promise.resolve()
+  const getData = (name: string): Promise<ISizesData> => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
     .then(patchAction(name))
     .then((instance) => instance.getData())
-    .then(patchData(name));
+    .then(patchData);
 
   before(() => loadFixtures().then((f) => { fixtures = f; }));
 

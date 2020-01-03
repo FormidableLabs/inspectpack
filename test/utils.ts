@@ -1,10 +1,14 @@
 import { basename, join, relative, sep } from "path";
 
 import { readDir, readJson, toPosixPath } from "../src/lib/util/files";
+import { IWebpackStats } from "../src/lib/interfaces/webpack-stats";
+import { IModule } from "../src/lib/interfaces/modules";
 
 /*tslint:disable no-var-requires*/
-const versions = require("./fixtures/config/versions.json");
-const scenarios = require("./fixtures/config/scenarios.json");
+type IVersion = { WEBPACK_VERSION: string }
+const versions: IVersion[] = require("./fixtures/config/versions.json");
+type IScenario = { WEBPACK_CWD: string }
+const scenarios: IScenario[] = require("./fixtures/config/scenarios.json");
 /*tslint:enable no-var-requires*/
 
 export const FIXTURES = scenarios.map((s) => s.WEBPACK_CWD.replace("../../test/fixtures/", ""));
@@ -33,7 +37,7 @@ export const FIXTURES_WEBPACK4_BLACKLIST = [
 export const VERSIONS = versions.map((v) => v.WEBPACK_VERSION);
 
 const FIXTURES_DIRS = FIXTURES
-  .map((f) => VERSIONS.reduce((m, v) => m.concat([
+  .map((f) => VERSIONS.reduce((m: string[], v) => m.concat([
     join("../../test/fixtures", f, `dist-development-${v}`),
     join("../../test/fixtures", f, `dist-production-${v}`),
   ]), []))
@@ -44,7 +48,7 @@ const FIXTURES_STATS = FIXTURES_DIRS.map((f) => join(__dirname, "fixtures", f, "
 
 // Extra patches for webpack-config-driven stuff that doesn't fit within
 // node_modules-based traversals.
-const FIXTURES_EXTRA_DIRS = {
+const FIXTURES_EXTRA_DIRS: { [scenario: string]: string[] } = {
   "hidden-app-roots": [
     "packages/hidden-app",
   ],
@@ -54,10 +58,11 @@ const FIXTURES_EXTRA_DIRS = {
   ],
 };
 
-let _fixtures;
-export const loadFixtures = () => {
+export type IFixtures = { [name: string]: IWebpackStats };
+let _fixtures: Promise<IFixtures>;
+export const loadFixtures = (): Promise<IFixtures> => {
   _fixtures = _fixtures || Promise.all(FIXTURES_STATS.map((f) => readJson(f)))
-    .then((objs) => objs.reduce((memo, f, i) => ({
+    .then((objs) => objs.reduce((memo: IFixtures, f, i) => ({
       ...memo,
       [toPosixPath(FIXTURES_DIRS[i]).replace("../../test/fixtures/", "")]: f,
     }), {}));
@@ -65,7 +70,8 @@ export const loadFixtures = () => {
   return _fixtures;
 };
 
-const _traverseFixtureDir = (dirPath) => Promise.resolve()
+// TODO(ts): Get better type here.
+const _traverseFixtureDir = (dirPath: string): Promise<any> => Promise.resolve()
   .then(() => readDir(dirPath))
   .then((names) => {
     const havePkg = names.indexOf("package.json") > -1;
@@ -94,7 +100,7 @@ const _traverseFixtureDir = (dirPath) => Promise.resolve()
             .map((n) => readDir(join(dirPath, "node_modules", n))
               .then((dirs) => dirs.map((d) => join(n, d))),
             ),
-        ).then((extraScoped) => [].concat(
+        ).then((extraScoped) => ([] as string[]).concat(
           // Limit our existing package directories to non-scoped.
           pkgDirs.filter((n) => !n.startsWith("@")),
           // Flatten our any additional scoped dirs.
@@ -119,7 +125,7 @@ const _traverseFixtureDir = (dirPath) => Promise.resolve()
               }
 
               return memo;
-            }, {}),
+            }, {} as any), // TODO(ts): Better typing
         })),
       );
 
@@ -142,15 +148,17 @@ const _traverseFixtureDir = (dirPath) => Promise.resolve()
           }, memo);
 
           return memo;
-        }, {}));
+        }, {} as any)); // TODO(ts): Better typing
 
-    return Promise.all([].concat(pkgProm, nmProm, extraProm));
+    // TODO(ts): Better typing
+    return Promise.all(([] as Promise<any>[]).concat(pkgProm, nmProm, extraProm));
   })
-  .then((results) => Object.assign.apply(null, results)); // merge together.
+  // merge together.
+  .then((results) => results.reduce((memo, result) => ({ ...memo, ...result }), {}));
 
 const _fixtureDirs = {};
-let _fixtureDirsProm;
-export const loadFixtureDirs = () => {
+let _fixtureDirsProm: Promise<object>; // TODO(ts): Better typing
+export const loadFixtureDirs = (): Promise<object> => {
   _fixtureDirsProm = _fixtureDirsProm || Promise
     // Traverse all fixture dirs.
     .all(FIXTURES_DIR_PATHS.map((f) => _traverseFixtureDir(f)))
@@ -165,7 +173,7 @@ export const loadFixtureDirs = () => {
 };
 
 // General action patching
-export const patchAllMods = (name) => (mod) => {
+export const patchAllMods = (name: string) => (mod: IModule) => {
   // Looks like tree-shaking **does** work in updated webpack4.
   // Manually adjust just `foo/green.js` which is DCE'd to normalize dev vs prod
   //

@@ -65,6 +65,7 @@
     "@types/node": "^13.1.2",
     "@types/pify": "^3.0.2",
     "@types/semver-compare": "^1.0.1",
+    "@types/sinon-chai": "^3.2.3",
     "@types/yargs": "^13.0.4",
     "babel-eslint": "^10.0.3",
     "builder": "^5.0.0",
