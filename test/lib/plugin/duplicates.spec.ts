@@ -11,7 +11,7 @@ import { _getDuplicatesVersionsData, DuplicatesPlugin } from "../../../src/plugi
 
 import chalk from "chalk";
 import { toPosixPath } from "../../../src/lib/util/files";
-import { loadFixtures, VERSIONS } from "../../utils";
+import { loadFixtures, VERSIONS, IFixtures } from "../../utils";
 import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
 
 const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
@@ -35,30 +35,32 @@ const EMPTY_VERSIONS_DATA_ASSET = {
 };
 
 describe("plugin/duplicates", () => {
-  let sandbox;
-  let fixtures;
-  let multiDataDuplicates;
-  let multiDataVersions;
+  let sandbox: sinon.SinonSandbox;
+  let fixtures: IFixtures;
+  let multiDataDuplicates: actionsDups.IDuplicatesData[];
+  let multiDataVersions: actionsVersions.IVersionsData[];
 
-  const getDuplicatesData = (name) => Promise.resolve()
+  const getDuplicatesData = (name: string): Promise<actionsDups.IDuplicatesData> =>
+    Promise.resolve()
     .then(() => actionsDups.create({ stats: fixtures[toPosixPath(name)] }).validate())
-    .then((instance) => instance.getData());
+    .then((instance) => instance.getData() as Promise<actionsDups.IDuplicatesData>);
 
-  const getVersionsData = (name) => Promise.resolve()
+  const getVersionsData = (name: string): Promise<actionsVersions.IVersionsData> =>
+    Promise.resolve()
     .then(() => actionsVersions.create({ stats: fixtures[toPosixPath(name)] }).validate())
-    .then((instance) => instance.getData());
+    .then((instance) => instance.getData() as Promise<actionsVersions.IVersionsData>);
 
   before(() => loadFixtures().then((f) => { fixtures = f; }));
 
   before(() => Promise.all(
     VERSIONS.map((vers) => getDuplicatesData(join(MULTI_SCENARIO, `dist-development-${vers}`))),
   )
-    .then((d) => { multiDataDuplicates = d; }));
+    .then((d) => { multiDataDuplicates = d as actionsDups.IDuplicatesData[]; }));
 
   before(() => Promise.all(
     VERSIONS.map((vers) => getVersionsData(join(MULTI_SCENARIO, `dist-development-${vers}`))),
   )
-    .then((d) => { multiDataVersions = d; }));
+    .then((d) => { multiDataVersions = d as actionsVersions.IVersionsData[]; }));
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
