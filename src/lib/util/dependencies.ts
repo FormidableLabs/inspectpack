@@ -7,7 +7,7 @@ export interface INpmPackageBase {
   version: string;
 }
 
-interface INpmPackage extends INpmPackageBase {
+export interface INpmPackage extends INpmPackageBase {
   dependencies: {
     [key: string]: string,
   };
@@ -20,7 +20,7 @@ interface INpmPackageMapPromise {
   [pkgPath: string]: Promise<INpmPackage | null>;
 }
 
-interface INpmPackageMap {
+export interface INpmPackageMap {
   [pkgPath: string]: INpmPackage | null;
 }
 
