@@ -23,6 +23,7 @@ import {
   loadFixtures,
   patchAllMods,
   VERSIONS,
+  IFixtures,
 } from "../../utils";
 
 
@@ -99,19 +100,19 @@ const patchAction = (name: string) => (instance: IAction) => {
 };
 
 describe("lib/actions/versions", () => {
-  let fixtures;
-  let fixtureDirs;
-  let simpleInstance;
-  let dupsCjsInstance;
-  let scopedInstance;
-  let multipleRootsInstance;
-  let hiddenAppRootsInstance;
-  let circularDepsInstance;
+  let fixtures: IFixtures;
+  let fixtureDirs: any; // TODO(ts): Better typing
+  let simpleInstance: IAction;
+  let dupsCjsInstance: IAction;
+  let scopedInstance: IAction;
+  let multipleRootsInstance: IAction;
+  let hiddenAppRootsInstance: IAction;
+  let circularDepsInstance: IAction;
 
-  const getData = (name) => Promise.resolve()
+  const getData = (name: string): Promise<IVersionsData> => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
     .then(patchAction(name))
-    .then((instance) => instance.getData());
+    .then((instance) => instance.getData() as Promise<IVersionsData>);
 
   before(() => Promise.all([
     loadFixtures().then((f) => { fixtures = f; }),
@@ -155,13 +156,13 @@ describe("lib/actions/versions", () => {
     describe("all versions", () => {
       FIXTURES.map((scenario) => {
         const lastIdx = VERSIONS.length - 1;
-        let datas;
+        let datas: IVersionsData[];
 
         before(() => {
           return Promise.all(
             VERSIONS.map((vers) => getData(join(scenario, `dist-development-${vers}`))),
           )
-            .then((d) => { datas = d; });
+            .then((d) => { datas = d as IVersionsData[]; });
         });
 
         VERSIONS.map((vers, i) => {
@@ -821,7 +822,7 @@ describe("lib/actions/versions", () => {
   });
 
   describe("text", () => {
-    let origChalkEnabled;
+    let origChalkEnabled: boolean;
 
     beforeEach(() => {
       // Stash and disable chalk for tests.
