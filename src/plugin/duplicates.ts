@@ -18,7 +18,7 @@ interface ICompiler {
   plugin: (name: string, callback: () => void) => void;
 }
 
-interface ICompilation {
+export interface ICompilation {
   errors: Error[];
   warnings: Error[];
   getStats: () => {
@@ -227,7 +227,7 @@ export class DuplicatesPlugin {
     }
   }
 
-  public analyze(compilation: ICompilation, callback: () => void) {
+  public analyze(compilation: ICompilation, callback?: () => void) {
     const { errors, warnings } = compilation;
     const stats = compilation.getStats().toJson();
 

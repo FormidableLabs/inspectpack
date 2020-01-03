@@ -7,7 +7,11 @@ import * as sinon from "sinon";
 import * as actionsDups from "../../../src/lib/actions/duplicates";
 import * as actionsVersions from "../../../src/lib/actions/versions";
 
-import { _getDuplicatesVersionsData, DuplicatesPlugin } from "../../../src/plugin/duplicates";
+import {
+   _getDuplicatesVersionsData,
+   DuplicatesPlugin,
+   ICompilation,
+} from "../../../src/plugin/duplicates";
 
 import chalk from "chalk";
 import { toPosixPath } from "../../../src/lib/util/files";
@@ -72,7 +76,7 @@ describe("plugin/duplicates", () => {
   });
 
   describe("_getDuplicatesVersionsData", () => {
-    let warningSpy;
+    let warningSpy: sinon.SinonSpy;
 
     beforeEach(() => {
       warningSpy = sandbox.spy();
@@ -89,9 +93,9 @@ describe("plugin/duplicates", () => {
     describe(`handles ${MULTI_SCENARIO}`, () => {
       VERSIONS.forEach((vers) => {
         it(`v${vers}`, () => {
-          const origVersionsData = multiDataVersions[vers - 1];
+          const origVersionsData = multiDataVersions[parseInt(vers) - 1];
           const noDupsVersions = _getDuplicatesVersionsData(
-            multiDataDuplicates[vers - 1],
+            multiDataDuplicates[parseInt(vers) - 1],
             origVersionsData,
             warningSpy,
           );
@@ -192,7 +196,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
         });
 
         describe(`v${vers}`, () => {
-          let origChalkEnabled;
+          let origChalkEnabled: boolean;
 
           beforeEach(() => {
             // Stash and disable chalk for tests.
@@ -205,7 +209,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
           });
 
           it(`produces a default report`, () => {
-            const plugin = new DuplicatesPlugin();
+            const plugin = new DuplicatesPlugin({});
 
             return plugin.analyze(compilation).then(() => {
               expect(compilation.errors).to.eql([]);
