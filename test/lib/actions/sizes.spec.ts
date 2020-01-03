@@ -53,6 +53,7 @@ const PATCHED_ASSETS_ALL = {
   // Emitted was added in late webpack4.
   // (_Note_: Really bool, typically `false` in our fixtures)
   emitted: "REMOVED",
+  info: {},
 };
 
 // Normalize actions across different versions of webpack.
