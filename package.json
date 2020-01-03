@@ -29,11 +29,11 @@
     "node": ">=6.0.0"
   },
   "scripts": {
-    "clean-lib": "rimraf bin lib",
+    "clean-lib": "rimraf bin lib plugin",
     "clean-test": "rimraf \"test/fixtures/*/dist-*\"",
     "clean": "builder concurrent clean-lib clean-test --buffer",
     "preversion": "npm run clean && npm run build-test && npm run check",
-    "version": "npm run build",
+    "version": "npm run clean && npm run build",
     "build-lib": "tsc",
     "build-test-wp": "node test/fixtures/packages/webpack.js --config ../../test/fixtures/config/webpack.config.js && node test/fixtures/packages/check-bundle.js",
     "build-test-scenarios": "builder envs --envs-path=test/fixtures/config/scenarios.json build-test-wp --buffer --queue=1",
