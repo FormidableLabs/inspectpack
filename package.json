@@ -62,6 +62,7 @@
   "devDependencies": {
     "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.7",
+    "@types/mock-fs": "^4.10.0",
     "@types/node": "^13.1.2",
     "@types/pify": "^3.0.2",
     "@types/semver-compare": "^1.0.1",

@@ -5,6 +5,7 @@ import { expect } from "chai";
 import * as merge from "deepmerge";
 import * as mock from "mock-fs";
 
+import { IAction } from "../../../src/lib/actions/base";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   _packageName,
@@ -23,6 +24,7 @@ import {
   patchAllMods,
   VERSIONS,
 } from "../../utils";
+
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
   depended: {
@@ -66,7 +68,8 @@ const BASE_SCOPED_DATA = merge(EMPTY_VERSIONS_DATA, {
 });
 
 // Keyed off `scenario`. Remap chunk names.
-const PATCHED_ASSETS = {
+type IPatchedAsset = { [scenario: string]: { [asset: string]: string } };
+const PATCHED_ASSETS: IPatchedAsset = {
   "multiple-chunks": {
     "0.js": "bar.js",
     "1.js": "different-foo.js",
@@ -76,9 +79,9 @@ const PATCHED_ASSETS = {
 
 // Normalize actions across different versions of webpack.
 // Mutates.
-const patchAction = (name) => (instance) => {
+const patchAction = (name: string) => (instance: IAction) => {
   // Patch all modules.
-  instance._modules = instance.modules.map(patchAllMods(name));
+  (<any>instance)._modules = instance.modules.map(patchAllMods(name));
 
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
@@ -86,8 +89,8 @@ const patchAction = (name) => (instance) => {
     Object.keys(instance.assets).forEach((assetName) => {
       const reName = patches[assetName];
       if (reName) {
-        instance._assets[reName] = instance._assets[assetName];
-        delete instance._assets[assetName];
+        (<any>instance)._assets[reName] = (<any>instance)._assets[assetName];
+        delete (<any>instance)._assets[assetName];
       }
     });
   }
