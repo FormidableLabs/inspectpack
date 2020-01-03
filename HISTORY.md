@@ -3,7 +3,7 @@ History
 
 ## UNRELEASED
 
-* Use `source` string length over `size` reported from Webpack stats for assing real size of source.
+* Use `source` string length over `size` reported from Webpack stats for assessing real size of source.
 * Remove `*.map` files from published npm package.
 * Upgrade prod and dev dependencies, including TypeScript (to `3.7.4`).
 
