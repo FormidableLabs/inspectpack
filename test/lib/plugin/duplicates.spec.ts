@@ -14,10 +14,10 @@ import {
 } from "../../../src/plugin/duplicates";
 
 import chalk from "chalk";
-import { toPosixPath } from "../../../src/lib/util/files";
-import { loadFixtures, VERSIONS, IFixtures } from "../../utils";
-import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
 import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";
+import { toPosixPath } from "../../../src/lib/util/files";
+import { IFixtures, loadFixtures, VERSIONS } from "../../utils";
+import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
 
 const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
 
@@ -94,9 +94,9 @@ describe("plugin/duplicates", () => {
     describe(`handles ${MULTI_SCENARIO}`, () => {
       VERSIONS.forEach((vers) => {
         it(`v${vers}`, () => {
-          const origVersionsData = multiDataVersions[parseInt(vers) - 1];
+          const origVersionsData = multiDataVersions[parseInt(vers, 10) - 1];
           const noDupsVersions = _getDuplicatesVersionsData(
-            multiDataDuplicates[parseInt(vers) - 1],
+            multiDataDuplicates[parseInt(vers, 10) - 1],
             origVersionsData,
             warningSpy,
           );
@@ -135,7 +135,7 @@ describe("plugin/duplicates", () => {
       VERSIONS.forEach((vers) => {
         // Mock compilation:
         let compilation: ICompilation;
-        let toJson: () => IWebpackStats;;
+        let toJson: () => IWebpackStats;
 
         // Report outputs
         // tslint:disable max-line-length

@@ -1,13 +1,13 @@
 import { basename, join, relative, sep } from "path";
 
-import { readDir, readJson, toPosixPath } from "../src/lib/util/files";
-import { IWebpackStats } from "../src/lib/interfaces/webpack-stats";
 import { IModule } from "../src/lib/interfaces/modules";
+import { IWebpackStats } from "../src/lib/interfaces/webpack-stats";
+import { readDir, readJson, toPosixPath } from "../src/lib/util/files";
 
 /*tslint:disable no-var-requires*/
-type IVersion = { WEBPACK_VERSION: string }
+interface IVersion { WEBPACK_VERSION: string; }
 const versions: IVersion[] = require("./fixtures/config/versions.json");
-type IScenario = { WEBPACK_CWD: string }
+interface IScenario { WEBPACK_CWD: string; }
 const scenarios: IScenario[] = require("./fixtures/config/scenarios.json");
 /*tslint:enable no-var-requires*/
 
@@ -58,7 +58,7 @@ const FIXTURES_EXTRA_DIRS: { [scenario: string]: string[] } = {
   ],
 };
 
-export type IFixtures = { [name: string]: IWebpackStats };
+export interface IFixtures { [name: string]: IWebpackStats; }
 let _fixtures: Promise<IFixtures>;
 export const loadFixtures = (): Promise<IFixtures> => {
   _fixtures = _fixtures || Promise.all(FIXTURES_STATS.map((f) => readJson(f)))
@@ -151,7 +151,7 @@ const _traverseFixtureDir = (dirPath: string): Promise<any> => Promise.resolve()
         }, {} as any)); // TODO(ts): Better typing
 
     // TODO(ts): Better typing
-    return Promise.all(([] as Promise<any>[]).concat(pkgProm, nmProm, extraProm));
+    return Promise.all(([] as Array<Promise<any>>).concat(pkgProm, nmProm, extraProm));
   })
   // merge together.
   .then((results) => results.reduce((memo, result) => ({ ...memo, ...result }), {}));

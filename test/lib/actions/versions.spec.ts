@@ -1,12 +1,11 @@
 import { join, resolve, sep } from "path";
 
-import chalk from "chalk";
 import { expect } from "chai";
+import chalk from "chalk";
 import * as merge from "deepmerge";
 import * as mock from "mock-fs";
 
 import { IAction } from "../../../src/lib/actions/base";
-import { toPosixPath } from "../../../src/lib/util/files";
 import {
   _packageName,
   _packageRoots,
@@ -15,18 +14,18 @@ import {
   IVersionsData,
   IVersionsMeta,
 } from "../../../src/lib/actions/versions";
+import { IModule } from "../../../src/lib/interfaces/modules";
+import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
   FIXTURES_WEBPACK4_BLACKLIST,
+  IFixtures,
   loadFixtureDirs,
   loadFixtures,
   patchAllMods,
   VERSIONS,
-  IFixtures,
 } from "../../utils";
-import { IModule } from "../../../src/lib/interfaces/modules";
-
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
   depended: {
@@ -70,7 +69,7 @@ const BASE_SCOPED_DATA = merge(EMPTY_VERSIONS_DATA, {
 });
 
 // Keyed off `scenario`. Remap chunk names.
-type IPatchedAsset = { [scenario: string]: { [asset: string]: string } };
+interface IPatchedAsset { [scenario: string]: { [asset: string]: string }; }
 const PATCHED_ASSETS: IPatchedAsset = {
   "multiple-chunks": {
     "0.js": "bar.js",
@@ -83,7 +82,7 @@ const PATCHED_ASSETS: IPatchedAsset = {
 // Mutates.
 const patchAction = (name: string) => (instance: IAction) => {
   // Patch all modules.
-  (<any>instance)._modules = instance.modules.map(patchAllMods(name));
+  (instance as any)._modules = instance.modules.map(patchAllMods(name));
 
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
@@ -91,8 +90,8 @@ const patchAction = (name: string) => (instance: IAction) => {
     Object.keys(instance.assets).forEach((assetName) => {
       const reName = patches[assetName];
       if (reName) {
-        (<any>instance)._assets[reName] = (<any>instance)._assets[assetName];
-        delete (<any>instance)._assets[assetName];
+        (instance as any)._assets[reName] = (instance as any)._assets[assetName];
+        delete (instance as any)._assets[assetName];
       }
     });
   }

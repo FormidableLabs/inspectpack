@@ -1,15 +1,17 @@
-import chalk from "chalk";
 import { expect } from "chai";
+import chalk from "chalk";
 import { join, resolve } from "path";
 
-import { IWebpackStatsChunk } from "../../../src/lib/interfaces/webpack-stats";
 import { IAction, IModulesByAsset, TemplateFormat } from "../../../src/lib/actions/base";
 import { create, ISizesData } from "../../../src/lib/actions/sizes";
+import { IModule } from "../../../src/lib/interfaces/modules";
+import { IWebpackStatsChunk } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
   FIXTURES_WEBPACK4_BLACKLIST,
+  IFixtures,
   JSON_PATH_RE,
   loadFixtures,
   normalizeOutput,
@@ -17,9 +19,7 @@ import {
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
-  IFixtures,
 } from "../../utils";
-import { IModule } from "../../../src/lib/interfaces/modules";
 
 const PATCHED_MOMENT_LOCALE_ES = {
   baseName: "moment/locale sync /es/",
@@ -30,7 +30,7 @@ const PATCHED_MOMENT_LOCALE_ES = {
 
 // Keyed off `baseName`.
 // Should be `IWebpackStatsModuleBase`, but want subset to merge and override.
-type IPatchedMods = { [id: string]: any }
+interface IPatchedMods { [id: string]: any; }
 const PATCHED_MODS: IPatchedMods = {
   "moment/locale /es/": PATCHED_MOMENT_LOCALE_ES,
   "moment/locale sync /es/": PATCHED_MOMENT_LOCALE_ES,
@@ -61,7 +61,7 @@ const PATCHED_ASSETS_ALL = {
 const patchAction = (name: string) => (instance: IAction) => {
   // Patch internal data based on baseName keys.
   // **Note**: Patch modules **first** since memoized, then used by assets.
-  (<any>instance)._modules = instance.modules
+  (instance as any)._modules = instance.modules
     .map((mod) => {
       const patched = mod.baseName && PATCHED_MODS[mod.baseName];
       return patched ? { ...mod, ...patched } : mod;
@@ -72,7 +72,7 @@ const patchAction = (name: string) => (instance: IAction) => {
   // - `multiple-chunks`: just use the normal bundle, not the split stuff.
   //   The splits are too varying to try and manually track.
   if (name.startsWith("multiple-chunks")) {
-    (<any>instance)._assets = {
+    (instance as any)._assets = {
       "bundle-multiple.js": instance.assets["bundle-multiple.js"],
       "bundle.js": instance.assets["bundle.js"],
     };
@@ -81,9 +81,9 @@ const patchAction = (name: string) => (instance: IAction) => {
   // Iterate assets.
   Object.keys(instance.assets).forEach((assetName) => {
     // Patch all.
-    (<any>instance)._assets[assetName].asset = {
+    (instance as any)._assets[assetName].asset = {
       ...instance.assets[assetName].asset,
-      ...(<any>instance)._assets[assetName].asset,
+      ...(instance as any)._assets[assetName].asset,
       ...PATCHED_ASSETS_ALL,
     };
   });

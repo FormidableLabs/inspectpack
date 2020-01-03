@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import { expect } from "chai";
+import chalk from "chalk";
 import { join, sep } from "path";
 
 import { IAction, TemplateFormat } from "../../../src/lib/actions/base";
@@ -9,6 +9,7 @@ import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
   FIXTURES_WEBPACK4_BLACKLIST,
+  IFixtures,
   JSON_PATH_RE,
   loadFixtures,
   normalizeOutput,
@@ -16,11 +17,10 @@ import {
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
-  IFixtures,
 } from "../../utils";
 
 // Keyed off `scenario`. Remap chunk names.
-type IPatchedAsset = { [scenario: string]: { [asset: string]: string } };
+interface IPatchedAsset { [scenario: string]: { [asset: string]: string }; }
 const PATCHED_ASSETS: IPatchedAsset = {
   "multiple-chunks": {
     "0.js": "bar.js",
@@ -35,7 +35,7 @@ const PATCHED_ASSETS: IPatchedAsset = {
 // **Note**: Some egregious TS `any`-ing to get patches hooked up.
 const patchAction = (name: string) => (instance: IAction) => {
   // Patch all modules.
-  (<any>instance)._modules = instance.modules.map(patchAllMods(name));
+  (instance as any)._modules = instance.modules.map(patchAllMods(name));
 
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
@@ -43,8 +43,8 @@ const patchAction = (name: string) => (instance: IAction) => {
     Object.keys(instance.assets).forEach((assetName) => {
       const reName = patches[assetName];
       if (reName) {
-        (<any>instance)._assets[reName] = (<any>instance)._assets[assetName];
-        delete (<any>instance)._assets[assetName];
+        (instance as any)._assets[reName] = (instance as any)._assets[assetName];
+        delete (instance as any)._assets[assetName];
       }
     });
   }
