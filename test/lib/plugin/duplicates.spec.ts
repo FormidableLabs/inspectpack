@@ -1,16 +1,22 @@
 import { join } from "path";
 
+import { expect } from "chai";
 import * as mock from "mock-fs";
 import * as sinon from "sinon";
 
 import * as actionsDups from "../../../src/lib/actions/duplicates";
 import * as actionsVersions from "../../../src/lib/actions/versions";
 
-import { _getDuplicatesVersionsData, DuplicatesPlugin } from "../../../src/plugin/duplicates";
+import {
+   _getDuplicatesVersionsData,
+   DuplicatesPlugin,
+   ICompilation,
+} from "../../../src/plugin/duplicates";
 
-import chalk from "chalk";
+import * as chalk from "chalk";
+import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
-import { loadFixtures, VERSIONS } from "../../utils";
+import { IFixtures, loadFixtures, VERSIONS } from "../../utils";
 import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
 
 const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
@@ -34,33 +40,35 @@ const EMPTY_VERSIONS_DATA_ASSET = {
 };
 
 describe("plugin/duplicates", () => {
-  let sandbox;
-  let fixtures;
-  let multiDataDuplicates;
-  let multiDataVersions;
+  let sandbox: sinon.SinonSandbox;
+  let fixtures: IFixtures;
+  let multiDataDuplicates: actionsDups.IDuplicatesData[];
+  let multiDataVersions: actionsVersions.IVersionsData[];
 
-  const getDuplicatesData = (name) => Promise.resolve()
+  const getDuplicatesData = (name: string): Promise<actionsDups.IDuplicatesData> =>
+    Promise.resolve()
     .then(() => actionsDups.create({ stats: fixtures[toPosixPath(name)] }).validate())
-    .then((instance) => instance.getData());
+    .then((instance) => instance.getData() as Promise<actionsDups.IDuplicatesData>);
 
-  const getVersionsData = (name) => Promise.resolve()
+  const getVersionsData = (name: string): Promise<actionsVersions.IVersionsData> =>
+    Promise.resolve()
     .then(() => actionsVersions.create({ stats: fixtures[toPosixPath(name)] }).validate())
-    .then((instance) => instance.getData());
+    .then((instance) => instance.getData() as Promise<actionsVersions.IVersionsData>);
 
   before(() => loadFixtures().then((f) => { fixtures = f; }));
 
   before(() => Promise.all(
     VERSIONS.map((vers) => getDuplicatesData(join(MULTI_SCENARIO, `dist-development-${vers}`))),
   )
-    .then((d) => { multiDataDuplicates = d; }));
+    .then((d) => { multiDataDuplicates = d as actionsDups.IDuplicatesData[]; }));
 
   before(() => Promise.all(
     VERSIONS.map((vers) => getVersionsData(join(MULTI_SCENARIO, `dist-development-${vers}`))),
   )
-    .then((d) => { multiDataVersions = d; }));
+    .then((d) => { multiDataVersions = d as actionsVersions.IVersionsData[]; }));
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {
@@ -69,7 +77,7 @@ describe("plugin/duplicates", () => {
   });
 
   describe("_getDuplicatesVersionsData", () => {
-    let warningSpy;
+    let warningSpy: sinon.SinonSpy;
 
     beforeEach(() => {
       warningSpy = sandbox.spy();
@@ -86,9 +94,9 @@ describe("plugin/duplicates", () => {
     describe(`handles ${MULTI_SCENARIO}`, () => {
       VERSIONS.forEach((vers) => {
         it(`v${vers}`, () => {
-          const origVersionsData = multiDataVersions[vers - 1];
+          const origVersionsData = multiDataVersions[parseInt(vers, 10) - 1];
           const noDupsVersions = _getDuplicatesVersionsData(
-            multiDataDuplicates[vers - 1],
+            multiDataDuplicates[parseInt(vers, 10) - 1],
             origVersionsData,
             warningSpy,
           );
@@ -127,7 +135,7 @@ describe("plugin/duplicates", () => {
       VERSIONS.forEach((vers) => {
         // Mock compilation:
         let compilation: ICompilation;
-        let toJson;
+        let toJson: () => IWebpackStats;
 
         // Report outputs
         // tslint:disable max-line-length
@@ -189,20 +197,20 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
         });
 
         describe(`v${vers}`, () => {
-          let origChalkEnabled;
+          let origChalkLevel: chalk.Level;
 
           beforeEach(() => {
             // Stash and disable chalk for tests.
-            origChalkEnabled = chalk.enabled;
-            chalk.enabled = false;
+            origChalkLevel = chalk.level;
+            (chalk as any).level = chalk.Level.None;
           });
 
           afterEach(() => {
-            chalk.enabled = origChalkEnabled;
+            (chalk as any).level = origChalkLevel;
           });
 
           it(`produces a default report`, () => {
-            const plugin = new DuplicatesPlugin();
+            const plugin = new DuplicatesPlugin({});
 
             return plugin.analyze(compilation).then(() => {
               expect(compilation.errors).to.eql([]);

@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 import semverCompare = require("semver-compare");
 import { actions } from "../lib";
 import { IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
@@ -18,7 +18,7 @@ interface ICompiler {
   plugin: (name: string, callback: () => void) => void;
 }
 
-interface ICompilation {
+export interface ICompilation {
   errors: Error[];
   warnings: Error[];
   getStats: () => {
@@ -223,11 +223,11 @@ export class DuplicatesPlugin {
       compiler.hooks.emit.tapPromise("inspectpack-duplicates-plugin", this.analyze.bind(this));
     } else {
       // Webpack1-3 integration
-      compiler.plugin("emit", this.analyze.bind(this));
+      compiler.plugin("emit", this.analyze.bind(this) as any);
     }
   }
 
-  public analyze(compilation: ICompilation, callback: () => void) {
+  public analyze(compilation: ICompilation, callback?: () => void) {
     const { errors, warnings } = compilation;
     const stats = compilation.getStats().toJson();
 

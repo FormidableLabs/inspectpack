@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 export const numF = (val: string | number) => chalk.bold.cyan(val.toString());
 

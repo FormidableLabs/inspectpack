@@ -5,4 +5,3 @@ extends:
 rules:
   variable-name: [true, ban-keywords, check-format, allow-leading-underscore]
   max-classes-per-file: [true, 2]
-  no-unused-variable: true

@@ -2,6 +2,7 @@
 !/lib
 !/bin
 !/plugin
+*.map
 !LICENSE.txt
 !HISTORY.md
 !README.md
