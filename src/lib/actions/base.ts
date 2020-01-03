@@ -1,3 +1,4 @@
+import { isLeft, isRight } from "fp-ts/lib/Either";
 import { reporter } from "io-ts-reporters";
 import { normalize, relative } from "path";
 import { IModule } from "../interfaces/modules";
@@ -150,7 +151,7 @@ export abstract class Action {
       .then(() => {
         // Validate the stats object.
         const result = RWebpackStats.decode(this.stats);
-        if (result.isLeft()) {
+        if (isLeft(result)) {
           const errs = reporter(result);
           throw new Error(`Invalid webpack stats object. (Errors: ${errs.join(", ")})`);
         }
@@ -191,14 +192,14 @@ export abstract class Action {
           let name;
           let size;
 
-          if (RWebpackStatsModuleModules.decode(mod).isRight()) {
+          if (isRight(RWebpackStatsModuleModules.decode(mod))) {
             // Recursive case -- more modules.
             const modsMod = mod as IWebpackStatsModuleModules;
 
             // Return and recurse.
             return list.concat(this.getSourceMods(modsMod.modules, chunks));
 
-          } else if (RWebpackStatsModuleSource.decode(mod).isRight()) {
+          } else if (isRight(RWebpackStatsModuleSource.decode(mod))) {
             // Easy case -- a normal source code module.
             const srcMod = mod as IWebpackStatsModuleSource;
             identifier = srcMod.identifier;
@@ -211,7 +212,7 @@ export abstract class Action {
             size = srcMod.source.length || srcMod.size;
             source = srcMod.source;
 
-          } else if (RWebpackStatsModuleSynthetic.decode(mod).isRight()) {
+          } else if (isRight(RWebpackStatsModuleSynthetic.decode(mod))) {
             // Catch-all case -- a module without modules or source.
             const syntheticMod = mod as IWebpackStatsModuleSynthetic;
             identifier = syntheticMod.identifier;

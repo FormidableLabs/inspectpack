@@ -2244,10 +2244,10 @@ foreground-child@^2.0.0:
     cross-spawn "^7.0.0"
     signal-exit "^3.0.2"
 
-fp-ts@^1.0.0, fp-ts@^1.0.1:
-  version "1.19.5"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-1.19.5.tgz#3da865e585dfa1fdfd51785417357ac50afc520a"
-  integrity sha512-wDNqTimnzs8QqpldiId9OavWK2NptormjXnRJTQecNjzwfyp6P/8s/zG8e4h3ja3oqkKaY72UlTjQYt/1yXf9A==
+fp-ts@^2.0.2, fp-ts@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.3.1.tgz#8068bfcca118227932941101e062134d7ecd9119"
+  integrity sha512-KevPBnYt0aaJiuUzmU9YIxjrhC9AgJ8CLtLlXmwArovlNTeYM5NtEoKd86B0wHd7FIbzeE8sNXzCoYIOr7e6Iw==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -2731,20 +2731,18 @@ invert-kv@^2.0.0:
   resolved "https://registry.yarnpkg.com/invert-kv/-/invert-kv-2.0.0.tgz#7393f5afa59ec9ff5f67a27620d11c226e3eec02"
   integrity sha512-wPVv/y/QQ/Uiirj/vh3oP+1Ww+AWehmi1g5fFWGPF6IpCBCDVrhgHRMvrLfdYcwDh3QJbGXDW4JAuzxElLSqKA==
 
-io-ts-reporters@^0.0.20:
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/io-ts-reporters/-/io-ts-reporters-0.0.20.tgz#2b8cbb6a2bc4562dae6917a3a413fa2c9851a644"
-  integrity sha512-ZGyPkto96U8exipqA915ZqxIJsaFLavgZIQOEgg4Pa8qgq1Hl9ZKBtN708ZXPzlAGR/jxofrD4QNT8SHowIDVA==
+io-ts-reporters@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/io-ts-reporters/-/io-ts-reporters-1.0.0.tgz#c5901d49d454956698bbca48b328698f8ca1c9c7"
+  integrity sha512-jjMvTnFYYxX3ue3cajmqCAf7sM4+lFvaaUuAL+otJv2DE+WDxYvQeCcUYveoq37rVSftJHZBEOrnvz3x0VdRXA==
   dependencies:
-    fp-ts "^1.0.1"
-    io-ts "^1.0.2"
+    fp-ts "^2.0.2"
+    io-ts "^2.0.0"
 
-io-ts@^1.0.2, io-ts@^1.0.5:
-  version "1.10.4"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-1.10.4.tgz#cd5401b138de88e4f920adbcb7026e2d1967e6e2"
-  integrity sha512-b23PteSnYXSONJ6JQXRAlvJhuw8KOtkqa87W4wDtvMrud/DTJd5X+NpOOI+O/zZwVq6v0VLAaJ+1EDViKEuN9g==
-  dependencies:
-    fp-ts "^1.0.0"
+io-ts@^2.0.0, io-ts@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.0.3.tgz#1921e82a9f77d8a3ed191b4b82b33ac74c09b4bb"
+  integrity sha512-PLSW+/QELUEmt68jmS+1JOxDzK3jrNlfiCTb62mQYV7RfixuUHga+Up4gszLqLAtNOUSjv9UmqNX0n/tgpzniA==
 
 is-accessor-descriptor@^0.1.6:
   version "0.1.6"
