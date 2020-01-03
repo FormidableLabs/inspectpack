@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.3.0
 
 * Use `source` string length over `size` reported from Webpack stats for assessing real size of source.
 * Remove `*.map` files from published npm package.
