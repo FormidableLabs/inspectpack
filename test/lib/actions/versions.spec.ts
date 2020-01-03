@@ -25,6 +25,7 @@ import {
   VERSIONS,
   IFixtures,
 } from "../../utils";
+import { IModule } from "../../../src/lib/interfaces/modules";
 
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
@@ -1055,7 +1056,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
           identifier: resolve("src/baz/bug.js"),
           isNodeModules: false,
         },
-      ])
+      ] as IModule[])
       .then((pkgRoots) => {
         expect(pkgRoots).to.eql([]);
       });
@@ -1079,7 +1080,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
           identifier: resolve("src/baz/bug.js"),
           isNodeModules: false,
         },
-      ])
+      ] as IModule[])
       .then((pkgRoots) => {
         expect(pkgRoots).to.eql([]);
       });
@@ -1107,7 +1108,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
           identifier: resolve("my-app/node_modules/foo/node_modules/bug/bug.js"),
           isNodeModules: true,
         },
-      ]).then((pkgRoots) => {
+      ] as IModule[]).then((pkgRoots) => {
         expect(pkgRoots).to.eql([
           resolve("my-app"),
         ]);
@@ -1121,7 +1122,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
       });
 
       const appRoot = resolve("test/fixtures/hidden-app-roots");
-      const mods = [
+      const mods =  [
         {
           identifier: "node_modules/different-foo/index.js",
           isNodeModules: true,
@@ -1147,7 +1148,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
         isNodeModules,
       }));
 
-      return _packageRoots(mods).then((pkgRoots) => {
+      return _packageRoots(mods as IModule[]).then((pkgRoots: string[]) => {
         expect(pkgRoots).to.eql([
           appRoot,
           join(appRoot, "packages/hidden-app"),
@@ -1298,7 +1299,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
       }));
       // tslint:enable max-line-length
 
-      return _packageRoots(mods).then((pkgRoots) => {
+      return _packageRoots(mods as IModule[]).then((pkgRoots: string[]) => {
         expect(pkgRoots).to.eql([
           "",
           "packages/hidden-app",
