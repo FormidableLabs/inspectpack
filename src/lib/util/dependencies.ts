@@ -309,7 +309,11 @@ const _identifyCircularRefs = (
 
   // Detect circular and short-circuit.
   const circRef = _refPath.find((ref) => pkg === ref);
-  console.log("TODO CIRCULAR DEPS", { circRef, _refPath, pkg });
+  console.log("TODO CIRCULAR DEPS", {
+    circRef: (circRef || {}).filePath,
+    pkg: pkg.filePath,
+    _refPath: _refPath.map((o) => o.name),
+  });
   if (circRef) {
     return {
       isCircular: true,

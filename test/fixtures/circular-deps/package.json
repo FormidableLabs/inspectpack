@@ -4,6 +4,7 @@
   "description": "DUMMY APP",
   "main": "src/index.js",
   "dependencies": {
-    "bar": "^1.0.1"
+    "bar": "^1.0.1",
+    "memoizee": "0.4.14"
   }
 }
