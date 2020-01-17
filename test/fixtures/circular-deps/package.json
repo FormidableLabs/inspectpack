@@ -3,5 +3,7 @@
   "version": "1.2.3",
   "description": "DUMMY APP",
   "main": "src/index.js",
-  "dependencies": {}
+  "dependencies": {
+    "bar": "^1.0.1"
+  }
 }

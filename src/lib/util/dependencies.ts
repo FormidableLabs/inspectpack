@@ -280,6 +280,7 @@ const _recurseDependencies = ({
       // hits to have this mutation step avoided since we manually return
       // `[]` on a cache hit.
       if (pkgNames.length) {
+        console.log("TODO RECURSE DEPS", { filePath: pkg.filePath });
         pkg.dependencies = _recurseDependencies({
           filePath: pkg.filePath,
           foundMap: _foundMap,
@@ -308,6 +309,7 @@ const _identifyCircularRefs = (
 
   // Detect circular and short-circuit.
   const circRef = _refPath.find((ref) => pkg === ref);
+  console.log("TODO CIRCULAR DEPS", { circRef, _refPath, pkg });
   if (circRef) {
     return {
       isCircular: true,
