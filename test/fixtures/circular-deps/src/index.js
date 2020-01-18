@@ -3,6 +3,7 @@
 
 const { bar } = require("bar");
 const memoize = require("memoizee");
+// const memoize = () => {};
 
 const memoized = memoize(bar);
 

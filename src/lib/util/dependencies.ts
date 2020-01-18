@@ -280,7 +280,16 @@ const _recurseDependencies = ({
       // hits to have this mutation step avoided since we manually return
       // `[]` on a cache hit.
       if (pkgNames.length) {
-        console.log("TODO RECURSE DEPS", { filePath: pkg.filePath });
+        // TODO: IDEA -- May want to just refactor **everything** and detect
+        //       circular deps right here at this level.. (Check inspectdep).
+        // TODO: IDEA -- Use `ICircularRefs` for `pkg`.
+        // TODO: IDEA - use `_foundMap`?
+        // TODO: STUCK HERE IN RECURSION WITHOUT CIRCULAR REFS
+        console.log("TODO HERE", {
+          pkg,
+          pkgNames
+        });
+
         pkg.dependencies = _recurseDependencies({
           filePath: pkg.filePath,
           foundMap: _foundMap,
@@ -309,11 +318,6 @@ const _identifyCircularRefs = (
 
   // Detect circular and short-circuit.
   const circRef = _refPath.find((ref) => pkg === ref);
-  console.log("TODO CIRCULAR DEPS", {
-    circRef: (circRef || {}).filePath,
-    pkg: pkg.filePath,
-    _refPath: _refPath.map((o) => o.name),
-  });
   if (circRef) {
     return {
       isCircular: true,
@@ -476,6 +480,8 @@ export const dependencies = (
         range: rootPkg.version || "*", // Root package doesn't have a range.
         version: rootPkg.version || "*",
       };
+
+      console.log("TODO HERE RECURSE DONE");
 
       // At this point, we now have a potentially circular object with pointers.
       // We want to convert it as follows:
