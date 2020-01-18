@@ -280,6 +280,7 @@ const _recurseDependencies = ({
       // hits to have this mutation step avoided since we manually return
       // `[]` on a cache hit.
       if (pkgNames.length) {
+        // TODO: IDEA -- Have a `state: pending|finished` for pkg traversal.
         // TODO: IDEA -- May want to just refactor **everything** and detect
         //       circular deps right here at this level.. (Check inspectdep).
         // TODO: IDEA -- Use `ICircularRefs` for `pkg`.
