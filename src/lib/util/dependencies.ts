@@ -323,9 +323,10 @@ const _recurseDependencies = ({
           pkgMap,
           pkgsFilter,
         });
+
+        found.state = IFoundMapEntryState.complete;
       }
 
-      found.state = IFoundMapEntryState.complete;
       return pkg;
     }) as IDependencies[];
 };
