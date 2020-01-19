@@ -208,6 +208,23 @@ export const _findPackage = ({
   return { isFlattened: false, pkgPath: null, pkgObj: null };
 };
 
+enum IFoundMapEntryState {
+  started,
+  recursing,
+  complete,
+}
+
+interface IFoundMapEntry {
+  state: IFoundMapEntryState;
+  dependencies: {
+    [name: string]: IDependencies | null,
+  };
+}
+
+interface IFoundMap {
+  [filePath: string]: IFoundMapEntry;
+}
+
 // - Populates `pkgMap` with installed `package.json`s
 // - Creates a recursive `IDependencies[]` object that later needs to be
 //   flattened and ranges fixed.
@@ -219,7 +236,7 @@ const _recurseDependencies = ({
   pkgsFilter,
 }: {
   filePath: string,
-  foundMap?: { [filePath: string]: { [name: string]: IDependencies | null } },
+  foundMap?: IFoundMap,
   names: string[],
   pkgMap: INpmPackageMap,
   pkgsFilter?: string[],
@@ -232,7 +249,7 @@ const _recurseDependencies = ({
   return names
     .filter(isIncludedPkg)
     // Inflated current level.
-    .map((name): { pkg: IDependencies, pkgNames: string[] } | null => {
+    .map((name): { pkg: IDependencies, pkgNames: string[], found: IFoundMapEntry } | null => {
       // Find actual location.
       const { isFlattened, pkgPath, pkgObj } = _findPackage({ filePath, name, pkgMap });
 
@@ -242,9 +259,12 @@ const _recurseDependencies = ({
       }
 
       // Build and check cache.
-      const found = _foundMap[pkgPath] = _foundMap[pkgPath] || {};
-      if (found[name]) {
-        return { pkg: found[name] as IDependencies, pkgNames: [] };
+      const found: IFoundMapEntry = _foundMap[pkgPath] = _foundMap[pkgPath] || {
+        dependencies: {},
+        state: IFoundMapEntryState.started,
+      } as IFoundMapEntry;
+      if (found.dependencies[name]) {
+        return { pkg: found.dependencies[name] as IDependencies, pkgNames: [], found };
       }
 
       // Start building object.
@@ -258,39 +278,44 @@ const _recurseDependencies = ({
 
       // Add reference to cache.
       if (!isFlattened) {
-        found[name] = pkg;
+        found.dependencies[name] = pkg;
       }
 
       // Get list of package names to recurse.
       // We **don't** traverse devDeps here because shouldn't have with
       // real, installed packages.
+      // TODO(DEPS - ADD): Traverse optionalDependencies too!!!
       const pkgNames = Object.keys(pkgObj.dependencies || {});
-      return { pkg, pkgNames };
+      return { pkg, pkgNames, found };
     })
     // Remove empties
     .filter(Boolean)
     // Lazy recurse after all caches have been filled for current level.
     .map((obj) => {
       // TS: Have to cast because boolean filter isn't inferred correctly.
-      const { pkg, pkgNames } = obj as { pkg: IDependencies, pkgNames: string[] };
+      const { pkg, pkgNames, found } = obj as { pkg: IDependencies, pkgNames: string[], found: IFoundMapEntry };
 
       // Only recurse when have dependencies.
       //
       // **Note**: This also serves as a way for found / cached dependency
       // hits to have this mutation step avoided since we manually return
       // `[]` on a cache hit.
-      if (pkgNames.length) {
-        // TODO: IDEA -- Have a `state: pending|finished` for pkg traversal.
+      if (found.state === IFoundMapEntryState.started && pkgNames.length) {
+        // TODO: CURRENT -- Have a `state: started|recursing|comlete` for pkg traversal.
+        //
         // TODO: IDEA -- May want to just refactor **everything** and detect
         //       circular deps right here at this level.. (Check inspectdep).
         // TODO: IDEA -- Use `ICircularRefs` for `pkg`.
         // TODO: IDEA - use `_foundMap`?
         // TODO: STUCK HERE IN RECURSION WITHOUT CIRCULAR REFS
-        console.log("TODO HERE", {
-          pkg,
-          pkgNames
-        });
+        // console.log("TODO HERE", {
+        //   pkg,
+        //   pkgNames,
+        //   found,
+        //   _foundMap
+        // });
 
+        found.state = IFoundMapEntryState.recursing;
         pkg.dependencies = _recurseDependencies({
           filePath: pkg.filePath,
           foundMap: _foundMap,
@@ -300,6 +325,7 @@ const _recurseDependencies = ({
         });
       }
 
+      found.state = IFoundMapEntryState.complete;
       return pkg;
     }) as IDependencies[];
 };
@@ -482,8 +508,6 @@ export const dependencies = (
         version: rootPkg.version || "*",
       };
 
-      console.log("TODO HERE RECURSE DONE");
-
       // At this point, we now have a potentially circular object with pointers.
       // We want to convert it as follows:
       // 1. Unwind and "flatten" the pointers.
@@ -496,6 +520,8 @@ export const dependencies = (
       // Post process to correct ranges. There will likely be some wrong before
       // we do this.
       pkg = _resolveRanges(pkg, pkgMap);
+
+      // console.log("TODO HERE", JSON.stringify(pkg, null, 2));
 
       return pkg;
     });
