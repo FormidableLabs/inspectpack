@@ -1,6 +1,11 @@
 History
 =======
 
+## UNRELEASED
+
+* BUG: Handle circular dependencies recursion issue in `versions`.
+  [#128](https://github.com/FormidableLabs/inspectpack/issues/128)
+
 ## 4.3.0
 
 * Use `source` string length over `size` reported from Webpack stats for assessing real size of source.
