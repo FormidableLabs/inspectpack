@@ -301,21 +301,11 @@ const _recurseDependencies = ({
       // hits to have this mutation step avoided since we manually return
       // `[]` on a cache hit.
       if (found.state === IFoundMapEntryState.started && pkgNames.length) {
-        // TODO: CURRENT -- Have a `state: started|recursing|comlete` for pkg traversal.
-        //
-        // TODO: IDEA -- May want to just refactor **everything** and detect
-        //       circular deps right here at this level.. (Check inspectdep).
-        // TODO: IDEA -- Use `ICircularRefs` for `pkg`.
-        // TODO: IDEA - use `_foundMap`?
-        // TODO: STUCK HERE IN RECURSION WITHOUT CIRCULAR REFS
-        // console.log("TODO HERE", {
-        //   pkg,
-        //   pkgNames,
-        //   found,
-        //   _foundMap
-        // });
-
+        // Mark state before recursion so that we do only **one** traversal
+        // per unique file path.
+        // https://github.com/FormidableLabs/inspectpack/issues/128
         found.state = IFoundMapEntryState.recursing;
+
         pkg.dependencies = _recurseDependencies({
           filePath: pkg.filePath,
           foundMap: _foundMap,
@@ -521,8 +511,6 @@ export const dependencies = (
       // Post process to correct ranges. There will likely be some wrong before
       // we do this.
       pkg = _resolveRanges(pkg, pkgMap);
-
-      // console.log("TODO HERE", JSON.stringify(pkg, null, 2));
 
       return pkg;
     });
