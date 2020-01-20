@@ -4,7 +4,6 @@
   "description": "DUMMY APP",
   "main": "src/index.js",
   "dependencies": {
-    "moment": "^2.22.1",
-    "memoizee": "0.4.14"
+    "moment": "^2.22.1"
   }
 }
