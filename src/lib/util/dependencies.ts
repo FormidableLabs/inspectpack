@@ -284,7 +284,9 @@ const _recurseDependencies = ({
       // Get list of package names to recurse.
       // We **don't** traverse devDeps here because shouldn't have with
       // real, installed packages.
-      // TODO(DEPS - ADD): Traverse optionalDependencies too!!!
+      //
+      // TODO(129): Traverse optionalDependencies too.
+      // https://github.com/FormidableLabs/inspectpack/issues/129
       const pkgNames = Object.keys(pkgObj.dependencies || {});
       return { pkg, pkgNames, found };
     })
