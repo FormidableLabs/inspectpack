@@ -63,9 +63,18 @@ const patchAction = (name: string) => (instance: IAction) => {
   // **Note**: Patch modules **first** since memoized, then used by assets.
   (instance as any)._modules = instance.modules
     .map((mod) => {
+      // - `circular-deps`: Using `global` in v1 didn't include an extra file,
+      //   but v2 includes `webpack/buildin/global.js` so, manually remove.
+      if (name.startsWith("circular-deps") &&
+        mod.baseName === "webpack/buildin/global.js") {
+        return null;
+      }
+
+      // Apply general mutation mappings.
       const patched = mod.baseName && PATCHED_MODS[mod.baseName];
       return patched ? { ...mod, ...patched } : mod;
     })
+    .filter(Boolean)
     .map(patchAllMods(name));
 
   // Patch assets scenarios manually.
