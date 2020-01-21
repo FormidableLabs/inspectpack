@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.3.1
 
 * BUG: Handle circular dependencies recursion issue in `versions`.
   [#128](https://github.com/FormidableLabs/inspectpack/issues/128)
