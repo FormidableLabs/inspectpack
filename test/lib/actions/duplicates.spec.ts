@@ -1,11 +1,15 @@
-import chalk from "chalk";
+import { expect } from "chai";
+import * as chalk from "chalk";
 import { join, sep } from "path";
-import { create } from "../../../src/lib/actions/duplicates";
+
+import { IAction, TemplateFormat } from "../../../src/lib/actions/base";
+import { create, IDuplicatesData } from "../../../src/lib/actions/duplicates";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
   FIXTURES_WEBPACK4_BLACKLIST,
+  IFixtures,
   JSON_PATH_RE,
   loadFixtures,
   normalizeOutput,
@@ -16,7 +20,8 @@ import {
 } from "../../utils";
 
 // Keyed off `scenario`. Remap chunk names.
-const PATCHED_ASSETS = {
+interface IPatchedAsset { [scenario: string]: { [asset: string]: string }; }
+const PATCHED_ASSETS: IPatchedAsset = {
   "multiple-chunks": {
     "0.js": "bar.js",
     "1.js": "different-foo.js",
@@ -26,9 +31,11 @@ const PATCHED_ASSETS = {
 
 // Normalize actions across different versions of webpack.
 // Mutates.
-const patchAction = (name) => (instance) => {
+//
+// **Note**: Some egregious TS `any`-ing to get patches hooked up.
+const patchAction = (name: string) => (instance: IAction) => {
   // Patch all modules.
-  instance._modules = instance.modules.map(patchAllMods(name));
+  (instance as any)._modules = instance.modules.map(patchAllMods(name));
 
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
@@ -36,8 +43,8 @@ const patchAction = (name) => (instance) => {
     Object.keys(instance.assets).forEach((assetName) => {
       const reName = patches[assetName];
       if (reName) {
-        instance._assets[reName] = instance._assets[assetName];
-        delete instance._assets[assetName];
+        (instance as any)._assets[reName] = (instance as any)._assets[assetName];
+        delete (instance as any)._assets[assetName];
       }
     });
   }
@@ -46,29 +53,23 @@ const patchAction = (name) => (instance) => {
 };
 
 describe("lib/actions/duplicates", () => {
-  let fixtures;
-  let simpleInstance;
-  let dupsCjsInstance;
-  let scopedInstance;
+  let fixtures: IFixtures;
+  let scopedInstance: IAction;
 
-  const getData = (name) => Promise.resolve()
+  const getData = (name: string): Promise<IDuplicatesData> => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
     .then(patchAction(name))
-    .then((instance) => instance.getData());
+    .then((instance) => instance.getData() as Promise<IDuplicatesData>);
 
   before(() => loadFixtures().then((f) => { fixtures = f; }));
 
   beforeEach(() => Promise.all([
-    "simple",
-    "duplicates-cjs",
     "scoped",
   ].map((name) => create({
       stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
     }).validate()))
     .then((instances) => {
       [
-        simpleInstance,
-        dupsCjsInstance,
         scopedInstance,
       ] = instances;
     }),
@@ -76,18 +77,18 @@ describe("lib/actions/duplicates", () => {
 
   describe("getData", () => {
     describe("all versions", () => {
-      FIXTURES.map((scenario) => {
+      FIXTURES.map((scenario: string) => {
         const lastIdx = VERSIONS.length - 1;
-        let datas;
+        let datas: IDuplicatesData[];
 
         before(() => {
           return Promise.all(
-            VERSIONS.map((vers) => getData(join(scenario, `dist-development-${vers}`))),
+            VERSIONS.map((vers: string) => getData(join(scenario, `dist-development-${vers}`))),
           )
-            .then((d) => { datas = d; });
+            .then((d) => { datas = d as IDuplicatesData[]; });
         });
 
-        VERSIONS.map((vers, i) => {
+        VERSIONS.map((vers: string, i: number) => {
           if (i === lastIdx) { return; } // Skip last index, version "current".
 
           // Blacklist `import` + webpack@1 and skip test.
@@ -111,8 +112,8 @@ describe("lib/actions/duplicates", () => {
     });
 
     describe("development vs production", () => {
-      FIXTURES.map((scenario) => {
-        VERSIONS.map((vers) => {
+      FIXTURES.map((scenario: string) => {
+        VERSIONS.map((vers: string) => {
           it(`v${vers} scenario '${scenario}' should match`, () => {
             return Promise.all([
               getData(join(scenario, `dist-development-${vers}`)),
@@ -294,16 +295,16 @@ describe("lib/actions/duplicates", () => {
   });
 
   describe("text", () => {
-    let origChalkEnabled;
+    let origChalkLevel: chalk.Level;
 
     beforeEach(() => {
       // Stash and disable chalk for tests.
-      origChalkEnabled = chalk.enabled;
-      chalk.enabled = false;
+      origChalkLevel = chalk.level;
+      (chalk as any).level = chalk.Level.None;
     });
 
     afterEach(() => {
-      chalk.enabled = origChalkEnabled;
+      (chalk as any).level = origChalkLevel;
     });
 
     it("displays duplicates correctly for scoped packages", () => {
@@ -343,7 +344,7 @@ inspectpack --action=duplicates
 
   describe("tsv", () => {
     it("displays duplicates correctly for scoped packages", () => {
-      return scopedInstance.template.render("tsv")
+      return scopedInstance.template.render(TemplateFormat.tsv)
         .then((tsvStr) => {
           /*tslint:disable max-line-length*/
           expect(normalizeOutput(TSV_PATH_RE, tsvStr)).to.eql(`

@@ -1,4 +1,11 @@
 import { join, resolve, sep } from "path";
+
+import { expect } from "chai";
+import * as chalk from "chalk";
+import * as merge from "deepmerge";
+import * as mock from "mock-fs";
+
+import { IAction } from "../../../src/lib/actions/base";
 import {
   _packageName,
   _packageRoots,
@@ -7,20 +14,18 @@ import {
   IVersionsData,
   IVersionsMeta,
 } from "../../../src/lib/actions/versions";
+import { IModule } from "../../../src/lib/interfaces/modules";
+import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
   FIXTURES_WEBPACK4_BLACKLIST,
+  IFixtures,
   loadFixtureDirs,
   loadFixtures,
   patchAllMods,
   VERSIONS,
 } from "../../utils";
-
-import chalk from "chalk";
-import * as merge from "deepmerge";
-import * as mock from "mock-fs";
-import { toPosixPath } from "../../../src/lib/util/files";
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
   depended: {
@@ -64,7 +69,8 @@ const BASE_SCOPED_DATA = merge(EMPTY_VERSIONS_DATA, {
 });
 
 // Keyed off `scenario`. Remap chunk names.
-const PATCHED_ASSETS = {
+interface IPatchedAsset { [scenario: string]: { [asset: string]: string }; }
+const PATCHED_ASSETS: IPatchedAsset = {
   "multiple-chunks": {
     "0.js": "bar.js",
     "1.js": "different-foo.js",
@@ -74,9 +80,9 @@ const PATCHED_ASSETS = {
 
 // Normalize actions across different versions of webpack.
 // Mutates.
-const patchAction = (name) => (instance) => {
+const patchAction = (name: string) => (instance: IAction) => {
   // Patch all modules.
-  instance._modules = instance.modules.map(patchAllMods(name));
+  (instance as any)._modules = instance.modules.map(patchAllMods(name));
 
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
@@ -84,8 +90,8 @@ const patchAction = (name) => (instance) => {
     Object.keys(instance.assets).forEach((assetName) => {
       const reName = patches[assetName];
       if (reName) {
-        instance._assets[reName] = instance._assets[assetName];
-        delete instance._assets[assetName];
+        (instance as any)._assets[reName] = (instance as any)._assets[assetName];
+        delete (instance as any)._assets[assetName];
       }
     });
   }
@@ -94,19 +100,19 @@ const patchAction = (name) => (instance) => {
 };
 
 describe("lib/actions/versions", () => {
-  let fixtures;
-  let fixtureDirs;
-  let simpleInstance;
-  let dupsCjsInstance;
-  let scopedInstance;
-  let multipleRootsInstance;
-  let hiddenAppRootsInstance;
-  let circularDepsInstance;
+  let fixtures: IFixtures;
+  let fixtureDirs: any; // TODO(ts): Better typing
+  let simpleInstance: IAction;
+  let dupsCjsInstance: IAction;
+  let scopedInstance: IAction;
+  let multipleRootsInstance: IAction;
+  let hiddenAppRootsInstance: IAction;
+  let circularDepsInstance: IAction;
 
-  const getData = (name) => Promise.resolve()
+  const getData = (name: string): Promise<IVersionsData> => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
     .then(patchAction(name))
-    .then((instance) => instance.getData());
+    .then((instance) => instance.getData() as Promise<IVersionsData>);
 
   before(() => Promise.all([
     loadFixtures().then((f) => { fixtures = f; }),
@@ -150,13 +156,13 @@ describe("lib/actions/versions", () => {
     describe("all versions", () => {
       FIXTURES.map((scenario) => {
         const lastIdx = VERSIONS.length - 1;
-        let datas;
+        let datas: IVersionsData[];
 
         before(() => {
           return Promise.all(
             VERSIONS.map((vers) => getData(join(scenario, `dist-development-${vers}`))),
           )
-            .then((d) => { datas = d; });
+            .then((d) => { datas = d as IVersionsData[]; });
         });
 
         VERSIONS.map((vers, i) => {
@@ -816,16 +822,16 @@ describe("lib/actions/versions", () => {
   });
 
   describe("text", () => {
-    let origChalkEnabled;
+    let origChalkLevel: chalk.Level;
 
     beforeEach(() => {
       // Stash and disable chalk for tests.
-      origChalkEnabled = chalk.enabled;
-      chalk.enabled = false;
+      origChalkLevel = chalk.level;
+      (chalk as any).level = chalk.Level.None;
     });
 
     afterEach(() => {
-      chalk.enabled = origChalkEnabled;
+      (chalk as any).level = origChalkLevel;
     });
 
     it("displays versions skews correctly for scoped packages", () => {
@@ -1049,7 +1055,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
           identifier: resolve("src/baz/bug.js"),
           isNodeModules: false,
         },
-      ])
+      ] as IModule[])
       .then((pkgRoots) => {
         expect(pkgRoots).to.eql([]);
       });
@@ -1073,7 +1079,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
           identifier: resolve("src/baz/bug.js"),
           isNodeModules: false,
         },
-      ])
+      ] as IModule[])
       .then((pkgRoots) => {
         expect(pkgRoots).to.eql([]);
       });
@@ -1101,7 +1107,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
           identifier: resolve("my-app/node_modules/foo/node_modules/bug/bug.js"),
           isNodeModules: true,
         },
-      ]).then((pkgRoots) => {
+      ] as IModule[]).then((pkgRoots) => {
         expect(pkgRoots).to.eql([
           resolve("my-app"),
         ]);
@@ -1115,7 +1121,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
       });
 
       const appRoot = resolve("test/fixtures/hidden-app-roots");
-      const mods = [
+      const mods =  [
         {
           identifier: "node_modules/different-foo/index.js",
           isNodeModules: true,
@@ -1141,7 +1147,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
         isNodeModules,
       }));
 
-      return _packageRoots(mods).then((pkgRoots) => {
+      return _packageRoots(mods as IModule[]).then((pkgRoots: string[]) => {
         expect(pkgRoots).to.eql([
           appRoot,
           join(appRoot, "packages/hidden-app"),
@@ -1292,7 +1298,7 @@ bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1
       }));
       // tslint:enable max-line-length
 
-      return _packageRoots(mods).then((pkgRoots) => {
+      return _packageRoots(mods as IModule[]).then((pkgRoots: string[]) => {
         expect(pkgRoots).to.eql([
           "",
           "packages/hidden-app",

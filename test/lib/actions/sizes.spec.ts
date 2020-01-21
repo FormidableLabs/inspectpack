@@ -1,11 +1,17 @@
-import chalk from "chalk";
+import { expect } from "chai";
+import * as chalk from "chalk";
 import { join, resolve } from "path";
-import { create } from "../../../src/lib/actions/sizes";
+
+import { IAction, IModulesByAsset, TemplateFormat } from "../../../src/lib/actions/base";
+import { create, ISizesData } from "../../../src/lib/actions/sizes";
+import { IModule } from "../../../src/lib/interfaces/modules";
+import { IWebpackStatsChunk } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
   FIXTURES_WEBPACK4_BLACKLIST,
+  IFixtures,
   JSON_PATH_RE,
   loadFixtures,
   normalizeOutput,
@@ -23,7 +29,9 @@ const PATCHED_MOMENT_LOCALE_ES = {
 };
 
 // Keyed off `baseName`.
-const PATCHED_MODS = {
+// Should be `IWebpackStatsModuleBase`, but want subset to merge and override.
+interface IPatchedMods { [id: string]: any; }
+const PATCHED_MODS: IPatchedMods = {
   "moment/locale /es/": PATCHED_MOMENT_LOCALE_ES,
   "moment/locale sync /es/": PATCHED_MOMENT_LOCALE_ES,
   "webpack/buildin/global.js": {
@@ -45,25 +53,35 @@ const PATCHED_ASSETS_ALL = {
   // Emitted was added in late webpack4.
   // (_Note_: Really bool, typically `false` in our fixtures)
   emitted: "REMOVED",
+  info: {},
 };
 
 // Normalize actions across different versions of webpack.
 // Mutates.
-const patchAction = (name) => (instance) => {
+const patchAction = (name: string) => (instance: IAction) => {
   // Patch internal data based on baseName keys.
   // **Note**: Patch modules **first** since memoized, then used by assets.
-  instance._modules = instance.modules
+  (instance as any)._modules = instance.modules
     .map((mod) => {
-      const patched = PATCHED_MODS[mod.baseName];
+      // - `circular-deps`: Using `global` in v1 didn't include an extra file,
+      //   but v2 includes `webpack/buildin/global.js` so, manually remove.
+      if (name.startsWith("circular-deps") &&
+        mod.baseName === "webpack/buildin/global.js") {
+        return null;
+      }
+
+      // Apply general mutation mappings.
+      const patched = mod.baseName && PATCHED_MODS[mod.baseName];
       return patched ? { ...mod, ...patched } : mod;
     })
+    .filter(Boolean)
     .map(patchAllMods(name));
 
   // Patch assets scenarios manually.
   // - `multiple-chunks`: just use the normal bundle, not the split stuff.
   //   The splits are too varying to try and manually track.
   if (name.startsWith("multiple-chunks")) {
-    instance._assets = {
+    (instance as any)._assets = {
       "bundle-multiple.js": instance.assets["bundle-multiple.js"],
       "bundle.js": instance.assets["bundle.js"],
     };
@@ -72,9 +90,9 @@ const patchAction = (name) => (instance) => {
   // Iterate assets.
   Object.keys(instance.assets).forEach((assetName) => {
     // Patch all.
-    instance._assets[assetName].asset = {
+    (instance as any)._assets[assetName].asset = {
       ...instance.assets[assetName].asset,
-      ...instance._assets[assetName].asset,
+      ...(instance as any)._assets[assetName].asset,
       ...PATCHED_ASSETS_ALL,
     };
   });
@@ -84,7 +102,7 @@ const patchAction = (name) => (instance) => {
 
 // Normalize getData calls.
 // Mutates.
-const patchData = () => (data) => {
+const patchData = (data: ISizesData) => {
   const assets = Object.keys(data.assets)
     .reduce((memo, asset) => ({
       ...memo,
@@ -107,14 +125,14 @@ const patchData = () => (data) => {
 
 // Normalize modules for comparison.
 // - `chunks` are emptied because different by webpack version.
-const normalizeModules = (modules) => modules.map((mod) => ({ ...mod, chunks: [] }));
+const normalizeModules = (modules: IModule[]) => modules.map((mod) => ({ ...mod, chunks: [] }));
 
 // Normalize assets for comparison.
 // - `size` is hard-coded because different by webpack version's boilerplate / generated
 //   code.
 // - `chunks` can be different
 // - `mods.chunks` can be different
-const normalizeAssets = (modulesByAsset) => Object.keys(modulesByAsset)
+const normalizeAssets = (modulesByAsset: IModulesByAsset) => Object.keys(modulesByAsset)
   .reduce((memo, name) => ({
     ...memo,
     [name]: {
@@ -131,9 +149,9 @@ const normalizeAssets = (modulesByAsset) => Object.keys(modulesByAsset)
 // We add the base class tests here that need a concrete implementation.
 describe("lib/actions/base", () => {
   describe("modules, assets", () => {
-    let fixtures;
+    let fixtures: IFixtures;
 
-    const getInstance = (name) => Promise.resolve()
+    const getInstance = (name: string): Promise<IAction> => Promise.resolve()
       .then(() => create({ stats: fixtures[toPosixPath(name)] }))
       .then(patchAction(name));
 
@@ -144,7 +162,7 @@ describe("lib/actions/base", () => {
     describe("all versions", () => {
       FIXTURES.map((scenario) => {
         const lastIdx = VERSIONS.length - 1;
-        let instances;
+        let instances: IAction[];
 
         before(() => {
           return Promise.all(
@@ -210,22 +228,18 @@ describe("lib/actions/base", () => {
 });
 
 describe("lib/actions/sizes", () => {
-  let fixtures;
-  let simpleInstance;
-  let dupsCjsInstance;
-  let scopedInstance;
+  let fixtures: IFixtures;
+  let scopedInstance: IAction;
 
-  const getData = (name) => Promise.resolve()
+  const getData = (name: string): Promise<ISizesData> => Promise.resolve()
     .then(() => create({ stats: fixtures[toPosixPath(name)] }).validate())
     .then(patchAction(name))
-    .then((instance) => instance.getData())
-    .then(patchData(name));
+    .then((instance) => instance.getData() as Promise<ISizesData>)
+    .then(patchData);
 
   before(() => loadFixtures().then((f) => { fixtures = f; }));
 
   beforeEach(() => Promise.all([
-    "simple",
-    "duplicates-cjs",
     "scoped",
   ].map((name) =>
     create({
@@ -236,8 +250,6 @@ describe("lib/actions/sizes", () => {
   ))
     .then((instances) => {
       [
-        simpleInstance,
-        dupsCjsInstance,
         scopedInstance,
       ] = instances;
     }),
@@ -247,13 +259,13 @@ describe("lib/actions/sizes", () => {
     describe("all versions", () => {
       FIXTURES.map((scenario) => {
         const lastIdx = VERSIONS.length - 1;
-        let datas;
+        let datas: ISizesData[];
 
         before(() => {
           return Promise.all(
             VERSIONS.map((vers) => getData(join(scenario, `dist-development-${vers}`))),
           )
-            .then((d) => { datas = d; });
+            .then((d) => { datas = d as ISizesData[]; });
         });
 
         VERSIONS.map((vers, i) => {
@@ -435,14 +447,13 @@ describe("lib/actions/sizes", () => {
       // Mutate stats data to replicate null chunk scenario.
 
       // Add null asset chunk.
-      scopedInstance.stats.assets[0].chunks = [null].concat(
+      scopedInstance.stats.assets[0].chunks = ([null] as IWebpackStatsChunk[]).concat(
         scopedInstance.stats.assets[0].chunks,
       );
-
       // Add null module chunks.
       scopedInstance.stats.modules.forEach((mod) => {
         if (mod.chunks) {
-          mod.chunks = [null, null, null].concat(mod.chunks);
+          mod.chunks = ([null, null, null] as IWebpackStatsChunk[]).concat(mod.chunks);
         }
       });
 
@@ -457,16 +468,16 @@ describe("lib/actions/sizes", () => {
   });
 
   describe("text", () => {
-    let origChalkEnabled;
+    let origChalkLevel: chalk.Level;
 
     beforeEach(() => {
       // Stash and disable chalk for tests.
-      origChalkEnabled = chalk.enabled;
-      chalk.enabled = false;
+      origChalkLevel = chalk.level;
+      (chalk as any).level = chalk.Level.None;
     });
 
     afterEach(() => {
-      chalk.enabled = origChalkEnabled;
+      (chalk as any).level = origChalkLevel;
     });
 
     it("displays sizes correctly for scoped packages", () => {
@@ -519,7 +530,7 @@ inspectpack --action=sizes
 
   describe("tsv", () => {
     it("displays sizes correctly for scoped packages", () => {
-      return scopedInstance.template.render("tsv")
+      return scopedInstance.template.render(TemplateFormat.tsv)
         .then((tsvStr) => {
           /*tslint:disable max-line-length*/
           expect(normalizeOutput(TSV_PATH_RE, tsvStr)).to.eql(`

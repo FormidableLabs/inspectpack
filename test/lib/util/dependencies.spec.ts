@@ -1,29 +1,42 @@
 import { join, resolve, sep } from "path";
+
+import { expect } from "chai";
+import * as mock from "mock-fs";
+import * as sinon from "sinon";
+
 import {
   _files,
   _findPackage,
   _resolvePackageMap,
   dependencies,
+  INpmPackage,
+  INpmPackageMap,
   readPackage,
   readPackages,
 } from "../../../src/lib/util/dependencies";
-
-import * as mock from "mock-fs";
-import * as sinon from "sinon";
 import { toPosixPath } from "../../../src/lib/util/files";
 
-const posixifyKeys = (obj) => Object.keys(obj)
+const posixifyKeys = (obj: INpmPackageMap): INpmPackageMap => Object.keys(obj)
   .reduce((memo, key) => ({ ...memo, [toPosixPath(key)]: obj[key] }), {});
 
-const toNativePath = (filePath) => filePath.split("/").join(sep);
-const nativifyKeys = (obj) => Object.keys(obj)
+const toNativePath = (filePath: string) => filePath.split("/").join(sep);
+const nativifyKeys = (obj: INpmPackageMap): INpmPackageMap => Object.keys(obj)
   .reduce((memo, key) => ({ ...memo, [toNativePath(key)]: obj[key] }), {});
 
+const fillNpmPkg = (obj: object): INpmPackage => ({
+  dependencies: {},
+  devDependencies: {},
+  name: "",
+  range: "",
+  version: "",
+  ...obj,
+});
+
 describe("lib/util/dependencies", () => {
-  let sandbox;
+  let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {
@@ -295,13 +308,13 @@ describe("lib/util/dependencies", () => {
     const _emptyResp = { isFlattened: false, pkgObj: null, pkgPath: null };
 
     it("handles empty cases", () => {
-      const base = {
+      const base = fillNpmPkg({
         dependencies: {
           foo: "^3.0.0",
         },
         name: "base",
         version: "1.0.2",
-      };
+      });
 
       expect(_findPackage(_baseArgs)).to.eql(_emptyResp);
 
@@ -309,27 +322,27 @@ describe("lib/util/dependencies", () => {
         ..._baseArgs,
         name: "bar",
         pkgMap: nativifyKeys({
-          "base/node_modules/foo/package.json": {
+          "base/node_modules/foo/package.json": fillNpmPkg({
             name: "foo",
             version: "1.0.0",
-          },
+          }),
           "base/package.json": base,
         }),
       })).to.eql(_emptyResp);
     });
 
     it("finds unflattened packages", () => {
-      const base = {
+      const base = fillNpmPkg({
         dependencies: {
           foo: "^3.0.0",
         },
         name: "base",
         version: "1.0.2",
-      };
-      const foo = {
+      });
+      const foo = fillNpmPkg({
         name: "foo",
         version: "3.0.0",
-      };
+      });
 
       expect(_findPackage({
         ..._baseArgs,
@@ -345,22 +358,22 @@ describe("lib/util/dependencies", () => {
     });
 
     it("finds hidden roots packages outside of file path", () => {
-      const myPkg = {
+      const myPkg = fillNpmPkg({
         dependencies: {
           foo: "^3.0.0",
         },
         name: "my-pkg",
         version: "1.0.2",
-      };
-      const foo = {
+      });
+      const foo = fillNpmPkg({
         name: "foo",
         version: "3.0.0",
-      };
+      });
       // Note: Base _doesn't_ have `foo` dependency.
-      const base = {
+      const base = fillNpmPkg({
         name: "base",
         version: "1.0.0",
-      };
+      });
 
       expect(_findPackage({
         ..._baseArgs,

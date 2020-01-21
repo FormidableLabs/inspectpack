@@ -6,6 +6,17 @@ History
 * Fix issue with duplicates but no version skews.
   [#125](https://github.com/FormidableLabs/inspectpack/issues/125)
 
+## 4.3.1
+
+* BUG: Handle circular dependencies recursion issue in `versions`.
+  [#128](https://github.com/FormidableLabs/inspectpack/issues/128)
+
+## 4.3.0
+
+* Use `source` string length over `size` reported from Webpack stats for assessing real size of source.
+* Remove `*.map` files from published npm package.
+* Upgrade prod and dev dependencies, including TypeScript (to `3.7.4`).
+
 ## 4.2.2
 
 * Update `yargs` for security.

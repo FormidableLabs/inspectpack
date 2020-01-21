@@ -3,6 +3,7 @@ import { create as sizes } from "./actions/sizes";
 import { create as versions } from "./actions/versions";
 
 import { IAction, IActionConstructor, TemplateFormat } from "./actions/base";
+import { IWebpackStats } from "./interfaces/webpack-stats";
 
 interface IActions {
   [key: string]: (opts: IActionConstructor) => IAction;
@@ -17,6 +18,7 @@ export const ACTIONS: IActions = {
 export interface IRenderOptions extends IActionConstructor {
   action: "duplicates" | "sizes" | "versions";
   format: TemplateFormat;
+  stats: IWebpackStats;
 }
 
 /**

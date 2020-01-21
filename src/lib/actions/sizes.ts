@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import * as chalk from "chalk";
 
 import { IActionModule } from "../interfaces/modules";
 import { numF, sort } from "../util/strings";
@@ -10,7 +10,7 @@ import {
   Template,
 } from "./base";
 
-interface ISizesData {
+export interface ISizesData {
   meta: {
     full: number;
   };
