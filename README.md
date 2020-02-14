@@ -47,6 +47,8 @@ module.exports = {
       // Handle all messages with handler function (`(report: string)`)
       // Overrides `emitErrors` output.
       emitHandler: undefined,
+      // List of packages that can be ignored. (Default: `[]`)
+      ignoredPackages: undefined,
       // Display full duplicates information? (Default: `false`)
       verbose: false
     })
@@ -488,7 +490,7 @@ Other tools that inspect Webpack bundles:
 
 ## Maintenance Status
 
-**Active:** Formidable is actively working on this project, and we expect to continue for work for the foreseeable future. Bug reports, feature requests and pull requests are welcome. 
+**Active:** Formidable is actively working on this project, and we expect to continue for work for the foreseeable future. Bug reports, feature requests and pull requests are welcome.
 
 [npm_img]: https://badge.fury.io/js/inspectpack.svg
 [npm_site]: http://badge.fury.io/js/inspectpack

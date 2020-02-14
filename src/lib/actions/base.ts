@@ -22,6 +22,7 @@ import { sort } from "../util/strings";
 
 export interface IActionConstructor {
   stats: IWebpackStats;
+  ignoredPackages?: string[];
 }
 
 export interface IModulesByAsset {
@@ -141,9 +142,11 @@ export abstract class Action {
   private _modules?: IModule[];
   private _assets?: IModulesByAsset;
   private _template?: ITemplate;
+  private _ignoredPackages: string[];
 
-  constructor({ stats }: IActionConstructor) {
+  constructor({ stats, ignoredPackages }: IActionConstructor) {
     this.stats = stats;
+    this._ignoredPackages = Array.isArray(ignoredPackages) ? ignoredPackages.map((pkg) => `${pkg}/`) : [];
   }
 
   public validate(): Promise<IAction> {
@@ -229,6 +232,10 @@ export abstract class Action {
           const normalizedId = _normalizeWebpackPath(identifier, normalizedName);
           const isNodeModules = _isNodeModules(normalizedId);
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
+
+          if (baseName && this._ignoredPackages.some((pkgName) => baseName.startsWith(pkgName))) {
+            return list;
+          }
 
           return list.concat([{
             baseName,
