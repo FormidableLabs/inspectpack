@@ -48,6 +48,11 @@ module.exports = {
       // Overrides `emitErrors` output.
       emitHandler: undefined,
       // List of packages that can be ignored. (Default: `[]`)
+      // - If a string, then a prefix match of `{$name}/` for each module.
+      // - If a regex, then `.test(pattern)` which means you should add slashes
+      //   where appropriate.
+      //
+      // **Note**: Uses posix paths for all matching (e.g., on windows `/` not `\`).
       ignoredPackages: undefined,
       // Display full duplicates information? (Default: `false`)
       verbose: false
@@ -280,13 +285,16 @@ From there, you can run the `inspectpack` command line tool from anywhere!
 Usage: inspectpack -s <file> -a <action> [options]
 
 Options:
-  --action, -a   Actions to take
+  --action, -a            Actions to take
                 [string] [required] [choices: "duplicates", "sizes", "versions"]
-  --stats, -s    Path to webpack-created stats JSON object   [string] [required]
-  --format, -f   Display output format
+  --stats, -s             Path to webpack-created stats JSON object
+                                                             [string] [required]
+  --format, -f            Display output format
                      [string] [choices: "json", "text", "tsv"] [default: "text"]
-  --help, -h     Show help                                             [boolean]
-  --version, -v  Show version number                                   [boolean]
+  --ignored-packages, -i  List of package names (space separated) to ignore
+                                                           [array] [default: []]
+  --help, -h              Show help                                    [boolean]
+  --version, -v           Show version number                          [boolean]
 
 Examples:
   inspectpack -s stats.json -a duplicates  Show duplicates files

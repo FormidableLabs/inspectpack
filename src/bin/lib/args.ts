@@ -68,7 +68,7 @@ const args = () => yargs
   .option("ignored-packages", {
     alias: "i",
     default: [],
-    describe: "List of space separated packages to ignore",
+    describe: "List of package names (space separated) to ignore",
     type: "array",
   })
 

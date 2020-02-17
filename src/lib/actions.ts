@@ -19,7 +19,7 @@ export interface IRenderOptions extends IActionConstructor {
   action: "duplicates" | "sizes" | "versions";
   format: TemplateFormat;
   stats: IWebpackStats;
-  ignoredPackages: string[];
+  ignoredPackages: Array<string | RegExp>;
 }
 
 /**

@@ -40,7 +40,7 @@ interface IDuplicatesPluginConstructor {
   verbose?: boolean;
   emitErrors?: boolean;
   emitHandler?: (report: string) => {};
-  ignoredPackages?: string[];
+  ignoredPackages?: Array<string | RegExp>;
 }
 
 interface IPackageNames {
