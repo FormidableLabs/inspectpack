@@ -76,6 +76,10 @@ const webpack4 = {
     DuplicatesPlugin ? new DuplicatesPlugin({
       verbose: true,
       emitErrors: false
+      // TODO: REMOVE
+      // ignoredPackages: [
+      //   "@scope/foo"
+      // ]
     }) : null
   ].filter(Boolean)
 };

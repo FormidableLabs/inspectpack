@@ -241,7 +241,7 @@ export class DuplicatesPlugin {
 
     return Promise.all([
       actions("duplicates", { stats, ignoredPackages }).then((a) => a.getData() as Promise<IDuplicatesData>),
-      actions("versions", { stats }).then((a) => a.getData() as Promise<IVersionsData>),
+      actions("versions", { stats, ignoredPackages }).then((a) => a.getData() as Promise<IVersionsData>),
     ])
       .then((datas) => {
         const [dupData, pkgDataOrig] = datas;

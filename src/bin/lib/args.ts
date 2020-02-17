@@ -7,12 +7,10 @@ import {
   TemplateFormat,
 } from "../../lib";
 
-const ACTION_KEYS = Object.keys(ACTIONS);
-
 // Validate and normalize.
 const validate = (parser: yargs.Argv): Promise<IRenderOptions> => {
   const { argv } = parser;
-  const { action, format } = argv;
+  const { action, format, ignoredPackages } = argv;
 
   // Defaults
   const statsFile = argv.stats as string;
@@ -20,6 +18,7 @@ const validate = (parser: yargs.Argv): Promise<IRenderOptions> => {
   return readJson(statsFile).then((stats) => ({
     action,
     format,
+    ignoredPackages,
     stats,
   }) as IRenderOptions);
 };
@@ -30,7 +29,7 @@ const args = () => yargs
   // Actions
   .option("action", {
     alias: "a",
-    choices: ACTION_KEYS,
+    choices: Object.keys(ACTIONS),
     describe: "Actions to take",
     required: true,
     type: "string",
@@ -63,6 +62,14 @@ const args = () => yargs
     default: TemplateFormat.text,
     describe: "Display output format",
     type: "string",
+  })
+
+  // Ignores
+  .option("ignored-packages", {
+    alias: "i",
+    default: [],
+    describe: "List of space separated packages to ignore",
+    type: "array",
   })
 
   // Logistical

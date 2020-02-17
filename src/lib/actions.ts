@@ -19,6 +19,7 @@ export interface IRenderOptions extends IActionConstructor {
   action: "duplicates" | "sizes" | "versions";
   format: TemplateFormat;
   stats: IWebpackStats;
+  ignoredPackages: string[];
 }
 
 /**
@@ -54,7 +55,7 @@ export const actions = (
  * @returns {Promise<string>} Rendered result
  */
 export const render = (
-  { action, format, stats }: IRenderOptions,
+  { action, format, stats, ignoredPackages }: IRenderOptions,
 ): Promise<string> => Promise.resolve()
-  .then(() => actions(action, { stats }))
+  .then(() => actions(action, { stats, ignoredPackages }))
   .then((instance: IAction) => instance.template.render(format));
