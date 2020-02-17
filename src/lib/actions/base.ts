@@ -179,9 +179,10 @@ export abstract class Action {
   }
 
   protected ignorePackage(baseName: string): boolean {
+    const base = toPosixPath(baseName.trim());
     return this._ignoredPackages.some((pattern) => typeof pattern === "string" ?
-      baseName.startsWith(pattern) :
-      (pattern as RegExp).test(baseName),
+      base.startsWith(pattern) :
+      (pattern as RegExp).test(base),
     );
   }
 
