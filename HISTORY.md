@@ -1,10 +1,10 @@
 History
 =======
 
-## UNRELEASED
+## 4.4.0
 
 * Add `ignoredPackages` plugin option (string or regex) and `--ignored-packages|-i` CLI option (string) to ignore packages in respective outputs.
-  [#118](https://github.com/FormidableLabs/inspectpack/issues/118) (*[@tido64][]*)
+  [#132](https://github.com/FormidableLabs/inspectpack/issues/132) (*[@tido64][]*)
 
 ## 4.3.1
 
