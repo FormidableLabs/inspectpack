@@ -22,6 +22,7 @@ import { sort } from "../util/strings";
 
 export interface IActionConstructor {
   stats: IWebpackStats;
+  ignoredPackages?: Array<string | RegExp>;
 }
 
 export interface IModulesByAsset {
@@ -141,9 +142,12 @@ export abstract class Action {
   private _modules?: IModule[];
   private _assets?: IModulesByAsset;
   private _template?: ITemplate;
+  private _ignoredPackages: Array<string | RegExp>;
 
-  constructor({ stats }: IActionConstructor) {
+  constructor({ stats, ignoredPackages }: IActionConstructor) {
     this.stats = stats;
+    this._ignoredPackages = (ignoredPackages || [])
+      .map((pattern) => typeof pattern === "string" ? `${pattern}/` : pattern);
   }
 
   public validate(): Promise<IAction> {
@@ -172,6 +176,14 @@ export abstract class Action {
   // Flat array of webpack source modules only. (Memoized)
   public get modules(): IModule[] {
     return this._modules = this._modules || this.getSourceMods(this.stats.modules);
+  }
+
+  protected ignorePackage(baseName: string): boolean {
+    const base = toPosixPath(baseName.trim());
+    return this._ignoredPackages.some((pattern) => typeof pattern === "string" ?
+      base.startsWith(pattern) :
+      (pattern as RegExp).test(base),
+    );
   }
 
   protected getSourceMods(
@@ -229,6 +241,10 @@ export abstract class Action {
           const normalizedId = _normalizeWebpackPath(identifier, normalizedName);
           const isNodeModules = _isNodeModules(normalizedId);
           const baseName = isNodeModules ? _getBaseName(normalizedId) : null;
+
+          if (baseName && this.ignorePackage(baseName)) {
+            return list;
+          }
 
           return list.concat([{
             baseName,

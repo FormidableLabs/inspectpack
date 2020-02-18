@@ -40,6 +40,7 @@ interface IDuplicatesPluginConstructor {
   verbose?: boolean;
   emitErrors?: boolean;
   emitHandler?: (report: string) => {};
+  ignoredPackages?: Array<string | RegExp>;
 }
 
 interface IPackageNames {
@@ -208,13 +209,13 @@ export const _getDuplicatesVersionsData = (
 export class DuplicatesPlugin {
   private opts: IDuplicatesPluginConstructor;
 
-  constructor(opts: IDuplicatesPluginConstructor | null) {
-    opts = opts || {};
-
-    this.opts = {};
-    this.opts.verbose = opts.verbose === true; // default `false`
-    this.opts.emitErrors = opts.emitErrors === true; // default `false`
-    this.opts.emitHandler = typeof opts.emitHandler === "function" ? opts.emitHandler : undefined;
+  constructor({verbose, emitErrors, emitHandler, ignoredPackages}: IDuplicatesPluginConstructor = {}) {
+    this.opts = {
+      emitErrors: emitErrors === true, // default `false`
+      emitHandler: typeof emitHandler === "function" ? emitHandler : undefined,
+      ignoredPackages: Array.isArray(ignoredPackages) ? ignoredPackages : undefined,
+      verbose: verbose === true, // default `false`
+    };
   }
 
   public apply(compiler: ICompiler) {
@@ -231,7 +232,7 @@ export class DuplicatesPlugin {
     const { errors, warnings } = compilation;
     const stats = compilation.getStats().toJson();
 
-    const { emitErrors, emitHandler, verbose } = this.opts;
+    const { emitErrors, emitHandler, ignoredPackages, verbose } = this.opts;
 
     // Stash messages for output to console (success) or compilation warnings
     // or errors arrays on duplicates found.
@@ -239,8 +240,8 @@ export class DuplicatesPlugin {
     const addMsg = (msg: string) => msgs.push(msg);
 
     return Promise.all([
-      actions("duplicates", { stats }).then((a) => a.getData() as Promise<IDuplicatesData>),
-      actions("versions", { stats }).then((a) => a.getData() as Promise<IVersionsData>),
+      actions("duplicates", { stats, ignoredPackages }).then((a) => a.getData() as Promise<IDuplicatesData>),
+      actions("versions", { stats, ignoredPackages }).then((a) => a.getData() as Promise<IVersionsData>),
     ])
       .then((datas) => {
         const [dupData, pkgDataOrig] = datas;

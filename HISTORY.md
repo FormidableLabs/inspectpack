@@ -1,6 +1,11 @@
 History
 =======
 
+## UNRELEASED
+
+* Add `ignoredPackages` plugin option (string or regex) and `--ignored-packages|-i` CLI option (string) to ignore packages in respective outputs.
+  [#118](https://github.com/FormidableLabs/inspectpack/issues/118) (*[@tido64][]*)
+
 ## 4.3.1
 
 * BUG: Handle circular dependencies recursion issue in `versions`.
@@ -242,4 +247,5 @@ History
 [@rgerstenberger]: https://github.com/rgerstenberger
 [@ryan-codingintrigue]: https://github.com/ryan-codingintrigue
 [@ryan-roemer]: https://github.com/ryan-roemer
+[@tido64]: https://github.com/tido64
 [@tptee]: https://github.com/tptee

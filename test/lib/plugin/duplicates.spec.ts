@@ -302,8 +302,31 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
               expect(actualReport).to.eql(verboseReport);
             });
           });
-        });
 
+          it(`ignores specified packages with strings`, () => {
+            const plugin = new DuplicatesPlugin({
+              emitErrors: true,
+              ignoredPackages: ["foo"],
+            });
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.warnings).to.eql([]);
+              expect(compilation.errors).to.eql([]);
+            });
+          });
+
+          it(`ignores specified packages with regexes`, () => {
+            const plugin = new DuplicatesPlugin({
+              emitErrors: true,
+              ignoredPackages: [/^f[o]{2}\//],
+            });
+
+            return plugin.analyze(compilation).then(() => {
+              expect(compilation.warnings).to.eql([]);
+              expect(compilation.errors).to.eql([]);
+            });
+          });
+        });
       });
     });
   });
