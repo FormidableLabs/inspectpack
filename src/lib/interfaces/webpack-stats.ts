@@ -123,7 +123,7 @@ export type IWebpackStatsModuleSynthetic = t.TypeOf<typeof RWebpackStatsModuleSy
 // Module: More **modules**
 // ----------------------------------------------------------------------------
 export interface IWebpackStatsModuleModules extends IWebpackStatsModuleBase {
-  modules: Array<IWebpackStatsModuleSource | IWebpackStatsModuleModules>;
+  modules: (IWebpackStatsModuleSource | IWebpackStatsModuleModules)[];
 }
 
 export const RWebpackStatsModuleModules = t.recursion<IWebpackStatsModuleModules>(

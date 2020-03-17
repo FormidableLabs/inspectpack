@@ -1,6 +1,10 @@
 History
 =======
 
+## UNRELEASED
+
+* Various dependency updates.
+
 ## 4.4.0
 
 * Add `ignoredPackages` plugin option (string or regex) and `--ignored-packages|-i` CLI option (string) to ignore packages in respective outputs.
