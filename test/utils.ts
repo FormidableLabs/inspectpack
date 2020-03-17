@@ -151,7 +151,7 @@ const _traverseFixtureDir = (dirPath: string): Promise<any> => Promise.resolve()
         }, {} as any)); // TODO(ts): Better typing
 
     // TODO(ts): Better typing
-    return Promise.all(([] as Array<Promise<any>>).concat(pkgProm, nmProm, extraProm));
+    return Promise.all(([] as Promise<any>[]).concat(pkgProm, nmProm, extraProm));
   })
   // merge together.
   .then((results) => results.reduce((memo, result) => ({ ...memo, ...result }), {}));

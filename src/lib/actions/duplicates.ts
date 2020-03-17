@@ -58,7 +58,7 @@ interface IModulesByBaseNameBySource {
 /**
  * Create map of `basename` -> `source` -> `IModule`.
  *
- * @param mods {Array<IModule>} array of module objects.
+ * @param mods {IModule[]} array of module objects.
  * @returns {IModulesByBaseNameBySource} map
  */
 const modulesByBaseNameBySource = (mods: IModule[]): IModulesByBaseNameBySource => {

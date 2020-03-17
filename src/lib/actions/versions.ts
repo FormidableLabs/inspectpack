@@ -179,7 +179,7 @@ interface IModulesByPackageNameByPackagePath {
 /**
  * Create map of `basename` -> `IModule`.
  *
- * @param mods {Array<IModule>} array of module objects.
+ * @param mods {IModule[]} array of module objects.
  * @returns {IModulesByBaseName} map
  */
 const modulesByPackageNameByPackagePath = (
@@ -333,7 +333,7 @@ const commonPath = (val1: string, val2: string) => {
 
 const getAssetData = (
   commonRoot: string,
-  allDeps: Array<IDependencies | null>,
+  allDeps: (IDependencies | null)[],
   mods: IModule[],
 ): IVersionsAsset => {
   // Start assembling and merging in deps for each package root.
@@ -422,7 +422,7 @@ class Versions extends Action {
       // However, since package roots rely on a properly seeded cache from earlier
       // runs with a higher-up, valid traversal path, we start bottom up in serial
       // rather than executing different roots in parallel.
-      let allDeps: Array<IDependencies | null>;
+      let allDeps: (IDependencies | null)[];
       return serial(
         pkgRoots.map((pkgRoot) => () => dependencies(pkgRoot, pkgsFilter, pkgMap)),
       )

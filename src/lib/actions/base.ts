@@ -22,7 +22,7 @@ import { sort } from "../util/strings";
 
 export interface IActionConstructor {
   stats: IWebpackStats;
-  ignoredPackages?: Array<string | RegExp>;
+  ignoredPackages?: (string | RegExp)[];
 }
 
 export interface IModulesByAsset {
@@ -142,7 +142,7 @@ export abstract class Action {
   private _modules?: IModule[];
   private _assets?: IModulesByAsset;
   private _template?: ITemplate;
-  private _ignoredPackages: Array<string | RegExp>;
+  private _ignoredPackages: (string | RegExp)[];
 
   constructor({ stats, ignoredPackages }: IActionConstructor) {
     this.stats = stats;
