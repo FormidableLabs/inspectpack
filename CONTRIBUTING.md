@@ -14,6 +14,7 @@ $ yarn install
 `tl:dr` - You can run everything with:
 
 ```sh
+$ yarn run build
 $ yarn run build-test
 $ yarn run check
 ```
@@ -78,6 +79,7 @@ $ ts-unused-exports tsconfig.lint.json $(find {src,test} -name "*.ts")
 Before you go ahead and submit a PR, make sure that you have done the following:
 
 ```sh
+$ yarn run build
 $ yarn run build-test
 $ yarn run check
 ```
