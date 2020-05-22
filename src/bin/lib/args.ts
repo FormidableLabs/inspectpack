@@ -7,10 +7,14 @@ import {
   TemplateFormat,
 } from "../../lib";
 
+export interface ICliOptions extends IRenderOptions {
+  bail: boolean
+}
+
 // Validate and normalize.
-const validate = (parser: yargs.Argv): Promise<IRenderOptions> => {
+const validate = (parser: yargs.Argv): Promise<ICliOptions> => {
   const { argv } = parser;
-  const { action, format, ignoredPackages } = argv;
+  const { action, format, ignoredPackages, bail } = argv;
 
   // Defaults
   const statsFile = argv.stats as string;
@@ -20,7 +24,8 @@ const validate = (parser: yargs.Argv): Promise<IRenderOptions> => {
     format,
     ignoredPackages,
     stats,
-  }) as IRenderOptions);
+    bail,
+  }) as ICliOptions);
 };
 
 const args = () => yargs
@@ -72,9 +77,18 @@ const args = () => yargs
     type: "array",
   })
 
+  // Ignores
+  .option("bail", {
+    alias: "b",
+    default: false,
+    describe: "Exit non-zero if duplicates/versions results found",
+    type: "boolean",
+  })
+
+
   // Logistical
   .help().alias("help", "h")
   .version().alias("version", "v")
   .strict();
 
-export const parse = (): Promise<IRenderOptions> => validate(args());
+export const parse = (): Promise<ICliOptions> => validate(args());
