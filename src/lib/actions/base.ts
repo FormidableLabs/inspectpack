@@ -178,6 +178,11 @@ export abstract class Action {
     return this._modules = this._modules || this.getSourceMods(this.stats.modules);
   }
 
+  // Whether or not we consider the data to indicate we should bail with error.
+  public shouldBail(): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
   protected ignorePackage(baseName: string): boolean {
     const base = toPosixPath(baseName.trim());
     return this._ignoredPackages.some((pattern) => typeof pattern === "string" ?

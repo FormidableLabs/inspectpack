@@ -1,4 +1,4 @@
-export { TemplateFormat } from "./actions/base";
+export { IAction, TemplateFormat } from "./actions/base";
 export {
   ACTIONS,
   actions, // Public API (used in `webpack-dashboard`).

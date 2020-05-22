@@ -3,7 +3,7 @@ language: node_js
 node_js:
   - "10"
   - "12"
-  - "13"
+  - "14"
 
 branches:
   only:
@@ -18,7 +18,7 @@ script:
   - yarn --version
   - yarn run clean
   - yarn run build-lib --sourcemap
-  - yarn run test-cli
+  - yarn run test-usage
   - yarn run build-test
   - yarn run check-ci
   - codecov

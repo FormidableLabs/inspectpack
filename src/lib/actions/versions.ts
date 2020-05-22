@@ -395,6 +395,12 @@ const getAssetData = (
 };
 
 class Versions extends Action {
+  public shouldBail(): Promise<boolean> {
+    return this._getData().then((data: IVersionsData) =>
+      data.meta.packages.num !== 0
+    );
+  }
+
   protected _getData(): Promise<IVersionsData> {
     const mods = this.modules;
 

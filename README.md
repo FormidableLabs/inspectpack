@@ -293,6 +293,8 @@ Options:
                      [string] [choices: "json", "text", "tsv"] [default: "text"]
   --ignored-packages, -i  List of package names (space separated) to ignore
                                                            [array] [default: []]
+  --bail, -b              Exit non-zero if duplicates/versions results found
+                                                      [boolean] [default: false]
   --help, -h              Show help                                    [boolean]
   --version, -v           Show version number                          [boolean]
 
