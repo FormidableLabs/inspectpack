@@ -5,6 +5,8 @@ History
 
 * Feature: Add `--bail` option for `--action duplicates|versions`.
   [#138](https://github.com/FormidableLabs/inspectpack/issues/138) (*[alexander-schranz][]*)
+* Test: Refactor internal test script commands.
+* Test: Add actual process execs for `bin` tests.
 * Various dependency updates.
 
 ## 4.4.0
