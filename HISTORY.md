@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.5.0
 
 * Feature: Add `--bail` option for `--action duplicates|versions`.
   [#138](https://github.com/FormidableLabs/inspectpack/issues/138) (*[alexander-schranz][]*)
