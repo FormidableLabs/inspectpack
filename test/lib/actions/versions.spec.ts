@@ -827,7 +827,7 @@ describe("lib/actions/versions", () => {
     beforeEach(() => {
       // Stash and disable chalk for tests.
       origChalkLevel = chalk.level;
-      (chalk as any).level = chalk.Level.None;
+      (chalk as any).level = 0;
     });
 
     afterEach(() => {

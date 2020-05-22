@@ -202,7 +202,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
           beforeEach(() => {
             // Stash and disable chalk for tests.
             origChalkLevel = chalk.level;
-            (chalk as any).level = chalk.Level.None;
+            (chalk as any).level = 0;
           });
 
           afterEach(() => {
