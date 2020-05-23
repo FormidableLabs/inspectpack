@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.5.2
 
 * Internal: Optimize `shouldBail` to used cached `getData()`.
 
