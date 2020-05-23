@@ -396,8 +396,8 @@ const getAssetData = (
 
 class Versions extends Action {
   public shouldBail(): Promise<boolean> {
-    return this._getData().then((data: IVersionsData) =>
-      data.meta.packages.num !== 0
+    return this.getData().then((data: object) =>
+      (data as IVersionsData).meta.packages.num !== 0
     );
   }
 

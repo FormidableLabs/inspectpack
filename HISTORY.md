@@ -1,6 +1,10 @@
 History
 =======
 
+## UNRELEASED
+
+* Internal: Optimize `shouldBail` to used cached `getData()`.
+
 ## 4.5.1
 
 * Feature: Add `--bail` option for `--action duplicates|versions`.
