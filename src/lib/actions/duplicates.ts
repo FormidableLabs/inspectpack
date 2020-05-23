@@ -108,8 +108,8 @@ const createEmptySummary = (): IDuplicatesSummary => ({
 
 class Duplicates extends Action {
   public shouldBail(): Promise<boolean> {
-    return this._getData().then((data: IDuplicatesData) =>
-      data.meta.extraFiles.num !== 0
+    return this.getData().then((data: object) =>
+      (data as IDuplicatesData).meta.extraFiles.num !== 0
     );
   }
 
