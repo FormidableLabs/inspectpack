@@ -11,6 +11,7 @@ install:
 
 # Post-install test scripts.
 test_script:
+  # TODO: REMOVE DEBUG
   - node --version
   - yarn --version
   - yarn run build
