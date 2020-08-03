@@ -32,14 +32,14 @@
     "clean-lib": "rimraf bin lib plugin",
     "clean-test": "rimraf \"test/fixtures/*/dist-*\"",
     "clean": "builder concurrent --buffer clean-lib clean-test",
-    "preversion": "npm run clean && npm run build && npm run build-test && npm run check",
+    "preversion": "yarn run clean && yarn run build && yarn run build-test && yarn run check",
     "build-lib": "tsc",
     "build-test-wp": "node test/fixtures/packages/webpack.js --config ../../test/fixtures/config/webpack.config.js && node test/fixtures/packages/check-bundle.js",
     "build-test-scenarios": "builder envs --envs-path=test/fixtures/config/scenarios.json build-test-wp --buffer --queue=1",
     "build-test-modes": "builder envs build-test-scenarios \"[{\\\"WEBPACK_MODE\\\":\\\"development\\\"},{\\\"WEBPACK_MODE\\\":\\\"production\\\"}]\" --queue=2",
     "build-test-versions": "builder envs build-test-modes \"[{\\\"WEBPACK_VERSION\\\":\\\"1\\\"},{\\\"WEBPACK_VERSION\\\":\\\"2\\\"},{\\\"WEBPACK_VERSION\\\":\\\"3\\\"},{\\\"WEBPACK_VERSION\\\":\\\"4\\\"}]\" --queue=4",
     "build-test": "builder run build-test-versions",
-    "build": "npm run clean-lib && npm run build-lib",
+    "build": "yarn run clean-lib && yarn run build-lib",
     "watch": "tsc -w",
     "eslint": "eslint test/fixtures",
     "tslint": "tslint --project tsconfig.lint.json -t stylish",
@@ -50,8 +50,8 @@
     "test-lib": "mocha \"test/lib/**/*.spec.ts\"",
     "test-lib-cov": "nyc mocha \"test/**/*.spec.ts\"",
     "test-usage": "node bin/inspectpack.js -h",
-    "check": "npm run lint && npm run test",
-    "check-ci": "npm run lint && npm run test-cov"
+    "check": "yarn run lint && yarn run test",
+    "check-ci": "yarn run lint && yarn run test-cov"
   },
   "dependencies": {
     "chalk": "^4.0.0",
