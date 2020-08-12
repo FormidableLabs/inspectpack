@@ -4,6 +4,7 @@
   { "WEBPACK_CWD": "../../test/fixtures/simple" },
   { "WEBPACK_CWD": "../../test/fixtures/loaders" },
   { "WEBPACK_CWD": "../../test/fixtures/moment-app" },
+  { "WEBPACK_CWD": "../../test/fixtures/node-libs" },
   { "WEBPACK_CWD": "../../test/fixtures/multiple-roots" },
   { "WEBPACK_CWD": "../../test/fixtures/multiple-chunks" },
   { "WEBPACK_CWD": "../../test/fixtures/scoped" },
