@@ -50,8 +50,6 @@ interface IPackageNames {
 // ----------------------------------------------------------------------------
 // Helpers
 // ----------------------------------------------------------------------------
-const { log } = console;
-
 const identical = (val: string) => chalk`{bold.magenta ${val}}`;
 const similar = (val: string) => chalk`{bold.blue ${val}}`;
 const warning = (val: string) => chalk`{bold.yellow ${val}}`;
@@ -249,7 +247,8 @@ export class DuplicatesPlugin {
 
         // No duplicates.
         if (dupData.meta.extraFiles.num === 0) {
-          log(chalk`\n${header} - {green No duplicates found. 🚀}\n`);
+          // tslint:disable no-console
+          console.log(chalk`\n${header} - {green No duplicates found. 🚀}\n`);
           return;
         }
 

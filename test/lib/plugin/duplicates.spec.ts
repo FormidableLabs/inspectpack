@@ -130,6 +130,10 @@ describe("plugin/duplicates", () => {
   });
 
   describe("DuplicatesPlugin", () => {
+    beforeEach(() => {
+      sandbox.stub(console, "log");
+    });
+
     // Manually apply the analysis function with mocks.
     describe(`analyzes ${MULTI_SCENARIO}`, () => {
       VERSIONS.forEach((vers) => {
