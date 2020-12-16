@@ -1,8 +1,7 @@
 inspectpack
 ===========
 [![npm version][npm_img]][npm_site]
-[![Travis Status][trav_img]][trav_site]
-[![AppVeyor Status][appveyor_img]][appveyor_site]
+[![Actions Status][actions_img]][actions_site]
 [![Coverage Status][cov_img]][cov_site]
 [![Maintenance Status][maintenance-image]](#maintenance-status)
 
@@ -504,10 +503,8 @@ Other tools that inspect Webpack bundles:
 
 [npm_img]: https://badge.fury.io/js/inspectpack.svg
 [npm_site]: http://badge.fury.io/js/inspectpack
-[trav_img]: https://api.travis-ci.com/FormidableLabs/inspectpack.svg
-[trav_site]: https://travis-ci.com/FormidableLabs/inspectpack
-[appveyor_img]: https://ci.appveyor.com/api/projects/status/github/formidablelabs/inspectpack?branch=master&svg=true
-[appveyor_site]: https://ci.appveyor.com/project/FormidableLabs/inspectpack
+[actions_img]: https://github.com/FormidableLabs/inspectpack/workflows/CI/badge.svg
+[actions_site]: https://github.com/FormidableLabs/inspectpack/actions
 [cov]: https://codecov.io
 [cov_img]: https://codecov.io/gh/FormidableLabs/inspectpack/branch/master/graph/badge.svg
 [cov_site]: https://codecov.io/gh/FormidableLabs/inspectpack

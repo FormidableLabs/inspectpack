@@ -1,0 +1,45 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [10.x, 12.x, 14.x, 15.x]
+
+    steps:
+    # Setup
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    # Installation
+    - run: yarn --version
+    - run: yarn install --frozen-lockfile
+      env:
+        CI: true
+
+    # Basic script runs
+    - run: node bin/trace-pkg.js -v
+    - run: node bin/trace-pkg.js -h
+
+    # Build lib
+    -run: clean
+    -run: build-lib --sourcemap
+
+    # Basic CLI test
+    -run: test-usage
+
+    # Full tests
+    -run: build-test
+    -run: check-ci
+    - run: yarn codecov
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
