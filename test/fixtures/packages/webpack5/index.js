@@ -5,5 +5,6 @@ if (process.env.DEBUG) {
   console.log(`webpack version: ${require("webpack/package.json").version}`);
 }
 
+// Note: Different than previous versions of webpack-cli.
 // eslint-disable-next-line import/no-unresolved
-module.exports = require("webpack-cli");
+module.exports = require("webpack-cli/bin/cli.js");
