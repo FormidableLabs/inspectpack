@@ -1,7 +1,9 @@
+import { readFile } from "fs";
 import { join } from "path";
 
 import { expect } from "chai";
 import * as mock from "mock-fs";
+import * as pify from "pify";
 import * as sinon from "sinon";
 
 import * as actionsDups from "../../../src/lib/actions/duplicates";
@@ -18,6 +20,8 @@ import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import { IFixtures, loadFixtures, VERSIONS } from "../../utils";
 import { EMPTY_VERSIONS_DATA, EMPTY_VERSIONS_META } from "../actions/versions.spec";
+
+const readFileP = pify(readFile);
 
 const MULTI_SCENARIO = "multiple-resolved-no-duplicates";
 
@@ -142,11 +146,22 @@ describe("plugin/duplicates", () => {
         let toJson: () => IWebpackStats;
 
         // Report outputs
-        // tslint:disable max-line-length
-        const defaultReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
+        let defaultReport: string;
+        let verboseReport: string;
+
+        before(async () => {
+          // Get actual file sizes as these differ on windows and linux on GH actions.
+          const FIXTURE_DIR = join(__dirname, "../../fixtures/multiple-resolved-no-duplicates");
+          const getSize = (file: string) => readFileP(join(FIXTURE_DIR, file)).then((buf) => buf.length);
+          const ROOT_SIZE = await getSize("node_modules/foo/index.js");
+          const NESTED_SIZE = await getSize("node_modules/uses-foo/node_modules/foo/index.js");
+          const COMBINED_SIZE = ROOT_SIZE + NESTED_SIZE;
+
+          // tslint:disable max-line-length
+          defaultReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
 
 * Duplicates: Found 1 similar files across 2 code sources (both identical + similar)
-  accounting for 108 bundled bytes.
+  accounting for ${COMBINED_SIZE} bundled bytes.
 * Packages: Found 1 packages with 1 resolved, 2 installed, and 2 depended versions.
 
 ## bundle.js
@@ -162,10 +177,10 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
   https://github.com/FormidableLabs/inspectpack/#fixing-bundle-duplicates
 `;
 
-        const verboseReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
+          verboseReport = `Duplicate Sources / Packages - Duplicates found! ⚠️
 
 * Duplicates: Found 1 similar files across 2 code sources (both identical + similar)
-  accounting for 108 bundled bytes.
+  accounting for ${COMBINED_SIZE} bundled bytes.
 * Packages: Found 1 packages with 1 resolved, 2 installed, and 2 depended versions.
 
 ## bundle.js
@@ -175,20 +190,21 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
       * Dependency graph
         multiple-resolved-no-duplicates@1.2.3 -> foo@^1.0.0
       * Duplicated files in bundle.js
-        foo/index.js (I, 54)
+        foo/index.js (I, ${ROOT_SIZE})
 
     ~/uses-foo/~/foo
       * Dependency graph
         multiple-resolved-no-duplicates@1.2.3 -> uses-foo@^1.0.9 -> foo@^1.0.1
       * Duplicated files in bundle.js
-        foo/index.js (I, 54)
+        foo/index.js (I, ${NESTED_SIZE})
 
 * Understanding the report: Need help with the details? See:
   https://github.com/FormidableLabs/inspectpack/#diagnosing-duplicates
 * Fixing bundle duplicates: An introductory guide:
   https://github.com/FormidableLabs/inspectpack/#fixing-bundle-duplicates
 `;
-        // tslint:enable max-line-length
+          // tslint:enable max-line-length
+        });
 
         beforeEach(() => {
           const stats = fixtures[toPosixPath(join(MULTI_SCENARIO, `dist-development-${vers}`))];
