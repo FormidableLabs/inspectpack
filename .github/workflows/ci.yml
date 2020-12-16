@@ -26,10 +26,6 @@ jobs:
       env:
         CI: true
 
-    # Basic script runs
-    - run: node bin/trace-pkg.js -v
-    - run: node bin/trace-pkg.js -h
-
     # Build lib
     - run: clean
     - run: build-lib --sourcemap
