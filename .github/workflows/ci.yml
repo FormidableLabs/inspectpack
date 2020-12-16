@@ -31,15 +31,15 @@ jobs:
     - run: node bin/trace-pkg.js -h
 
     # Build lib
-    -run: clean
-    -run: build-lib --sourcemap
+    - run: clean
+    - run: build-lib --sourcemap
 
     # Basic CLI test
-    -run: test-usage
+    - run: test-usage
 
     # Full tests
-    -run: build-test
-    -run: check-ci
+    - run: build-test
+    - run: check-ci
     - run: yarn codecov
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
