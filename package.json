@@ -56,8 +56,8 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "fp-ts": "^2.6.1",
-    "io-ts": "^2.2.3",
-    "io-ts-reporters": "^1.0.0",
+    "io-ts": "^2.2.13",
+    "io-ts-reporters": "^1.2.2",
     "pify": "^5.0.0",
     "semver-compare": "^1.0.0",
     "yargs": "^16.2.0"
@@ -93,7 +93,7 @@
     "sinon": "^9.0.2",
     "sinon-chai": "^3.5.0",
     "source-map-support": "^0.5.19",
-    "ts-node": "^8.10.1",
+    "ts-node": "^9.1.1",
     "tslint": "^6.1.2",
     "typescript": "^3.9.3",
     "webpack": "^4.43.0",
