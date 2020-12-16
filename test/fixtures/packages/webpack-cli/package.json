@@ -1,0 +1,6 @@
+{
+  "name": "webpack-cli",
+  "version": "0.0.0",
+  "description": "Empty package to prevent flattening of real package",
+  "license": "MIT"
+}
