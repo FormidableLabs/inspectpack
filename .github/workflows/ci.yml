@@ -27,15 +27,15 @@ jobs:
         CI: true
 
     # Build lib
-    - run: clean
-    - run: build-lib --sourcemap
+    - run: yarn clean
+    - run: yarn build-lib --sourcemap
 
     # Basic CLI test
-    - run: test-usage
+    - run: yarn test-usage
 
     # Full tests
-    - run: build-test
-    - run: check-ci
+    - run: yarn build-test
+    - run: yarn check-ci
     - run: yarn codecov
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
