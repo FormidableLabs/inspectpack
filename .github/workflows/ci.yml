@@ -35,7 +35,7 @@ jobs:
 
     # Full tests
     - run: yarn build-test
-    - run: yarn check # TODO: UNWIND
+    - run: yarn check-ci
     - run: yarn codecov
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
