@@ -99,9 +99,12 @@
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-stats-plugin": "^0.3.1",
+    "webpack": "file:test/fixtures/packages/webpack",
+    "webpack-cli": "file:test/fixtures/packages/webpack-cli",
     "webpack1": "file:test/fixtures/packages/webpack1",
     "webpack2": "file:test/fixtures/packages/webpack2",
     "webpack3": "file:test/fixtures/packages/webpack3",
-    "webpack4": "file:test/fixtures/packages/webpack4"
+    "webpack4": "file:test/fixtures/packages/webpack4",
+    "webpack5": "file:test/fixtures/packages/webpack5"
   }
 }
