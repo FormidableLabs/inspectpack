@@ -45,6 +45,7 @@ if (!cwd) {
   throw new Error("WEBPACK_CWD is required");
 }
 
+const outputPath = resolve(cwd, `dist-${mode}-${vers}`);
 const webpack4 = {
   mode,
   devtool: false,
@@ -53,7 +54,7 @@ const webpack4 = {
     bundle: "./src/index.js"
   },
   output: {
-    path: resolve(cwd, `dist-${mode}-${vers}`),
+    path: outputPath,
     pathinfo: mode !== "production",
     filename: "[name].js"
   },
