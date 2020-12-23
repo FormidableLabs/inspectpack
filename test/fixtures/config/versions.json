@@ -2,5 +2,6 @@
   { "WEBPACK_VERSION": "1" },
   { "WEBPACK_VERSION": "2" },
   { "WEBPACK_VERSION": "3" },
-  { "WEBPACK_VERSION": "4" }
+  { "WEBPACK_VERSION": "4" },
+  { "WEBPACK_VERSION": "5" }
 ]

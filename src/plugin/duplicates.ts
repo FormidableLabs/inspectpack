@@ -22,7 +22,7 @@ export interface ICompilation {
   errors: Error[];
   warnings: Error[];
   getStats: () => {
-    toJson: () => IWebpackStats;
+    toJson: (opts: object) => IWebpackStats;
   };
 }
 
@@ -228,7 +228,11 @@ export class DuplicatesPlugin {
 
   public analyze(compilation: ICompilation, callback?: () => void) {
     const { errors, warnings } = compilation;
-    const stats = compilation.getStats().toJson();
+    const stats = compilation
+      .getStats()
+      .toJson({
+        source: true
+      });
 
     const { emitErrors, emitHandler, ignoredPackages, verbose } = this.opts;
 
