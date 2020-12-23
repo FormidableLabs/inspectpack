@@ -231,7 +231,7 @@ export class DuplicatesPlugin {
     const stats = compilation
       .getStats()
       .toJson({
-        source: true
+        source: true // Needed for webpack5+
       });
 
     const { emitErrors, emitHandler, ignoredPackages, verbose } = this.opts;

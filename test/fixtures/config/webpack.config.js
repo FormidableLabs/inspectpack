@@ -77,7 +77,7 @@ const webpackNew = {
     new StatsWriterPlugin({
       fields: ["assets", "modules"],
       stats: {
-        source: true
+        source: true // Needed for webpack5+
       }
     }),
     DuplicatesPlugin ? new DuplicatesPlugin({
