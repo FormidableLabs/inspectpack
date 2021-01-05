@@ -48,11 +48,10 @@ export type IWebpackStatsAssets = t.TypeOf<typeof RWebpackStatsAssets>;
 const RWebpackStatsModuleBase = t.type({
   // Chunk identifiers.
   chunks: t.array(RWebpackStatsChunk),
-  // Full path to file on disk (with extra hash stuff if `modules` module).
-   // Full path to file on disk (with extra hash stuff if `modules` module and
+  // Full path to file on disk (with extra hash stuff if `modules` module and
   // loader prefixes, etc.).
   identifier: t.string,
-   // Estimated byte size of module.
+  // Estimated byte size of module.
   size: t.number,
 });
 
@@ -82,6 +81,21 @@ export const RWebpackStatsModuleSource = t.intersection([
 ]);
 
 export type IWebpackStatsModuleSource = t.TypeOf<typeof RWebpackStatsModuleSource>;
+
+// ----------------------------------------------------------------------------
+// Module: Orphaned code **source**
+//
+// Introduced in webpack5 as a stat field, ignore these as not in any chunk.
+// See: https://webpack.js.org/configuration/stats/#statsorphanmodules
+// ----------------------------------------------------------------------------
+export const RWebpackStatsModuleOrphan = t.intersection([
+  RWebpackStatsModuleSource,
+  t.type({
+    orphan: t.boolean,
+  }),
+]);
+
+export type IWebpackStatsModuleOrphan = t.TypeOf<typeof RWebpackStatsModuleOrphan>;
 
 // ----------------------------------------------------------------------------
 // Module: Single "synthetic" module
@@ -117,6 +131,7 @@ export const RWebpackStatsModuleSynthetic = t.intersection([
   RWebpackStatsModuleBase,
   RWebpackStatsModuleWithName,
 ]);
+
 export type IWebpackStatsModuleSynthetic = t.TypeOf<typeof RWebpackStatsModuleSynthetic>;
 
 // ----------------------------------------------------------------------------

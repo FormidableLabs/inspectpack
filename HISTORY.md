@@ -1,6 +1,10 @@
 History
 =======
 
+## UNRELEASED
+
+* Feature: Add webpack5+ support.
+
 ## 4.5.2
 
 * Internal: Optimize `shouldBail` to used cached `getData()`.
