@@ -70,6 +70,22 @@ const patchAction = (name: string) => (instance: IAction) => {
         return null;
       }
 
+      // Ignore webpack5+ runtime helpers
+      if (mod.isSynthetic && mod.identifier.startsWith("webpack/runtime/")) {
+        return null;
+      }
+
+      // Don't add polyfills as of webpack5+
+      if (
+        [
+          "process/browser.js",
+          "setimmediate/setImmediate.js",
+          "timers-browserify/main.js"
+        ].includes(mod.baseName || "")
+      ) {
+        return null;
+      }
+
       // Apply general mutation mappings.
       const patched = mod.baseName && PATCHED_MODS[mod.baseName];
       return patched ? { ...mod, ...patched } : mod;

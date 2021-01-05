@@ -172,6 +172,17 @@ export const loadFixtureDirs = (): Promise<object> => {
   return _fixtureDirsProm;
 };
 
+// Normalize name fields.
+const patchModName = (name: string | null) => {
+  if (name === null) {
+    return null;
+  }
+
+  return name
+    // webpack5+ does some unicode normalizations that we unwind.
+    .replace("\u0000#", "#");
+};
+
 // General action patching
 export const patchAllMods = (name: string) => (mod: IModule) => {
   // Looks like tree-shaking **does** work in updated webpack4.
@@ -184,6 +195,10 @@ export const patchAllMods = (name: string) => (mod: IModule) => {
     mod.baseName === "foo/green.js") {
     mod.chunks = [];
   }
+
+  // Name field normalization.
+  mod.baseName = patchModName(mod.baseName);
+  mod.identifier = patchModName(mod.identifier) || "";
 
   return mod;
 };
