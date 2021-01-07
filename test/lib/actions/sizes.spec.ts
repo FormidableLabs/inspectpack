@@ -141,6 +141,28 @@ const patchData = (data: ISizesData) => {
 // - `chunks` are emptied because different by webpack version.
 const normalizeModules = (modules: IModule[]) => modules.map((mod) => ({ ...mod, chunks: [] }));
 
+const normalizeAsset = (asset: object) => {
+  const normAsset = JSON.parse(JSON.stringify(asset));
+
+  // Remove new fields not needed for tests.
+  [
+    "auxiliaryChunkIdHints",
+    "auxiliaryChunkNames",
+    "auxiliaryChunks",
+    "cached",
+    "chunkIdHints",
+    "comparedForEmit",
+    "filteredRelated",
+    "isOverSizeLimit",
+    "related",
+    "type"
+  ].forEach((field) => {
+    delete normAsset[field];
+  });
+
+  return normAsset;
+}
+
 // Normalize assets for comparison.
 // - `size` is hard-coded because different by webpack version's boilerplate / generated
 //   code.
@@ -152,7 +174,7 @@ const normalizeAssets = (modulesByAsset: IModulesByAsset) => Object.keys(modules
     [name]: {
       ...modulesByAsset[name],
       asset: {
-        ...modulesByAsset[name].asset,
+        ...normalizeAsset(modulesByAsset[name].asset),
         chunks: [],
         size: 600,
       },
