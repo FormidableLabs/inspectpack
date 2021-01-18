@@ -23,7 +23,7 @@ import {
   loadFixtureDirs,
   loadFixtures,
   patchAllMods,
-  skipTreeShaking,
+  treeShakingWorks,
   VERSIONS,
   VERSIONS_LATEST,
   VERSIONS_LATEST_IDX,
@@ -186,7 +186,7 @@ describe("lib/actions/versions", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
-          if (skipTreeShaking({ scenario, vers })) {
+          if (treeShakingWorks({ scenario, vers })) {
             it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
             return;
           }

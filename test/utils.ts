@@ -39,7 +39,7 @@ export const TREE_SHAKING_FIXTURES = [
 // Tree-shaking starts working here.
 export const TREE_SHAKING_VERSION_MIN = 4;
 
-export const skipTreeShaking = ({ scenario, vers }: { scenario: string, vers: string }) => {
+export const treeShakingWorks = ({ scenario, vers }: { scenario: string, vers: string }) => {
   const versNum = parseInt(vers, 10);
   return versNum >= TREE_SHAKING_VERSION_MIN && TREE_SHAKING_FIXTURES.includes(scenario);
 };

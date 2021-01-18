@@ -15,7 +15,7 @@ import {
   loadFixtures,
   normalizeOutput,
   patchAllMods,
-  skipTreeShaking,
+  treeShakingWorks,
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
@@ -242,7 +242,7 @@ describe("lib/actions/base", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
-          if (skipTreeShaking({ scenario, vers })) {
+          if (treeShakingWorks({ scenario, vers })) {
             it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
             return;
           }
@@ -336,7 +336,7 @@ describe("lib/actions/sizes", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
-          if (skipTreeShaking({ scenario, vers })) {
+          if (treeShakingWorks({ scenario, vers })) {
             it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
             return;
           }
