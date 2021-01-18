@@ -13,6 +13,7 @@ import {
   loadFixtures,
   normalizeOutput,
   patchAllMods,
+  skipTreeShaking,
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
@@ -108,6 +109,11 @@ describe("lib/actions/duplicates", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario: string) => {
         VERSIONS.map((vers: string) => {
+          if (skipTreeShaking({ scenario, vers })) {
+            it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
+            return;
+          }
+
           it(`v${vers} scenario '${scenario}' should match`, () => {
             return Promise.all([
               getData(join(scenario, `dist-development-${vers}`)),

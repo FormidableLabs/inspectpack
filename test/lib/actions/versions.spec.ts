@@ -23,6 +23,7 @@ import {
   loadFixtureDirs,
   loadFixtures,
   patchAllMods,
+  skipTreeShaking,
   VERSIONS,
   VERSIONS_LATEST,
   VERSIONS_LATEST_IDX,
@@ -185,6 +186,11 @@ describe("lib/actions/versions", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
+          if (skipTreeShaking({ scenario, vers })) {
+            it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
+            return;
+          }
+
           it(`v${vers} scenario '${scenario}' should match`, () => {
             return Promise.all([
               getData(join(scenario, `dist-development-${vers}`)),

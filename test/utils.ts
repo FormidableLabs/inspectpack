@@ -32,9 +32,17 @@ export const FIXTURES_WEBPACK1_BLACKLIST = [
 // production.
 //
 // Identify scenarios that are affect by tree-shaking.
-export const FIXTURES_TREE_SHAKING = [
+export const TREE_SHAKING_FIXTURES = [
   "tree-shaking",
 ];
+
+// Tree-shaking starts working here.
+export const TREE_SHAKING_VERSION_MIN = 4;
+
+export const skipTreeShaking = ({ scenario, vers }: { scenario: string, vers: string }) => {
+  const versNum = parseInt(vers, 10);
+  return versNum >= TREE_SHAKING_VERSION_MIN && TREE_SHAKING_FIXTURES.includes(scenario);
+};
 
 export const VERSIONS = versions.map((v) => v.WEBPACK_VERSION);
 
