@@ -8,7 +8,6 @@ import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
   FIXTURES_WEBPACK1_BLACKLIST,
-  FIXTURES_WEBPACK4_BLACKLIST,
   IFixtures,
   JSON_PATH_RE,
   loadFixtures,
@@ -66,7 +65,7 @@ describe("lib/actions/duplicates", () => {
   beforeEach(() => Promise.all([
     "scoped",
   ].map((name) => create({
-      stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
+      stats: fixtures[toPosixPath(join(name, `dist-development-${VERSIONS[VERSIONS.length - 1]}`))],
     }).validate()))
     .then((instances) => {
       [
@@ -76,7 +75,7 @@ describe("lib/actions/duplicates", () => {
   );
 
   describe("getData", () => {
-    describe("all versions", () => {
+    describe("all development versions", () => {
       FIXTURES.map((scenario: string) => {
         const lastIdx = VERSIONS.length - 1;
         let datas: IDuplicatesData[];
@@ -94,12 +93,6 @@ describe("lib/actions/duplicates", () => {
           // Blacklist `import` + webpack@1 and skip test.
           if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
             it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
-            return;
-          }
-
-          // Blacklist `import` + webpack@4 and skip test.
-          if (lastIdx + 1 === 4 && FIXTURES_WEBPACK4_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v4)`);
             return;
           }
 
