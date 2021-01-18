@@ -26,7 +26,21 @@ export const FIXTURES_WEBPACK1_BLACKLIST = [
   "tree-shaking",
 ];
 
+// Tree-shaking has only been working since webpack4+ (the webpack4 version we
+// test against at least). With working tree-shaking, the production and
+// development stats legitimately differ with removed/orphaned modules in
+// production.
+//
+// Identify scenarios that are affect by tree-shaking.
+export const FIXTURES_TREE_SHAKING = [
+  "tree-shaking",
+];
+
 export const VERSIONS = versions.map((v) => v.WEBPACK_VERSION);
+
+export const VERSIONS_LATEST_IDX = VERSIONS.length - 1;
+
+export const VERSIONS_LATEST = VERSIONS[VERSIONS_LATEST_IDX];
 
 const FIXTURES_DIRS = FIXTURES
   .map((f) => VERSIONS.reduce((m: string[], v) => m.concat([

@@ -18,6 +18,8 @@ import {
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
+  VERSIONS_LATEST,
+  VERSIONS_LATEST_IDX,
 } from "../../utils";
 
 const PATCHED_MOMENT_LOCALE_ES = {
@@ -196,7 +198,6 @@ describe("lib/actions/base", () => {
 
     describe("all development versions", () => {
       FIXTURES.map((scenario) => {
-        const lastIdx = VERSIONS.length - 1;
         let instances: IAction[];
 
         before(() => {
@@ -207,31 +208,31 @@ describe("lib/actions/base", () => {
         });
 
         VERSIONS.map((vers, i) => {
-          if (i === lastIdx) { return; } // Skip last index, version "current".
+          if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
 
           // TODO(MOMENT): REMOVE
           // Temporarily skip moment + v5
-          if (lastIdx + 1 === 5 && scenario === "moment-app") {
-            it(`should match modules/assets v${vers}-v${lastIdx + 1} for ${scenario} (TEMP_SKIP v5)`);
+          if (VERSIONS_LATEST === "5" && scenario === "moment-app") {
+            it(`should match modules/assets v${vers}-v${VERSIONS_LATEST} for ${scenario} (TEMP_SKIP v5)`);
             return;
           }
 
           // Blacklist `import` + webpack@1 and skip test.
           if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match modules/assets v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+            it(`should match modules/assets v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
 
-          it(`should match modules v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
+          it(`should match modules v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
             expect(normalizeModules(instances[i].modules),
-              `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(normalizeModules(instances[lastIdx].modules));
+              `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(normalizeModules(instances[VERSIONS_LATEST_IDX].modules));
           });
 
-          it(`should match assets v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
+          it(`should match assets v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
             expect(normalizeAssets(instances[i].assets),
-              `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(normalizeAssets(instances[lastIdx].assets));
+              `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(normalizeAssets(instances[VERSIONS_LATEST_IDX].assets));
           });
         });
       });
@@ -240,8 +241,13 @@ describe("lib/actions/base", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
-          it(`v${vers} scenario '${scenario}' should match`, () => {
+          // TODO: HERE
+          // if (i === 0 && FIXTURES_TREE_SHAKING.indexOf(scenario) > -1) {
+          //   it(`v${vers} scenario '${scenario}' should match (SKIP TREESHAKING)`);
+          //   return;
+          // }
 
+          it(`v${vers} scenario '${scenario}' should match`, () => {
             return Promise.all([
               getInstance(join(scenario, `dist-development-${vers}`)),
               getInstance(join(scenario, `dist-production-${vers}`)),
@@ -294,7 +300,6 @@ describe("lib/actions/sizes", () => {
   describe("getData", () => {
     describe("all development versions", () => {
       FIXTURES.map((scenario) => {
-        const lastIdx = VERSIONS.length - 1;
         let datas: ISizesData[];
 
         before(() => {
@@ -305,24 +310,24 @@ describe("lib/actions/sizes", () => {
         });
 
         VERSIONS.map((vers, i) => {
-          if (i === lastIdx) { return; } // Skip last index, version "current".
+          if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
 
           // TODO(MOMENT): REMOVE
           // Temporarily skip moment + v5
-          if (lastIdx + 1 === 5 && scenario === "moment-app") {
-            it(`should match modules/assets v${vers}-v${lastIdx + 1} for ${scenario} (TEMP_SKIP v5)`);
+          if (VERSIONS_LATEST === "5" && scenario === "moment-app") {
+            it(`should match modules/assets v${vers}-v${VERSIONS_LATEST} for ${scenario} (TEMP_SKIP v5)`);
             return;
           }
 
           // Blacklist `import` + webpack@1 and skip test.
           if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+            it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
 
-          it(`should match v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
-            expect(datas[i], `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(datas[lastIdx]);
+          it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            expect(datas[i], `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(datas[VERSIONS_LATEST_IDX]);
           });
         });
       });

@@ -16,6 +16,8 @@ import {
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
+  VERSIONS_LATEST,
+  VERSIONS_LATEST_IDX,
 } from "../../utils";
 
 // Keyed off `scenario`. Remap chunk names.
@@ -77,7 +79,6 @@ describe("lib/actions/duplicates", () => {
   describe("getData", () => {
     describe("all development versions", () => {
       FIXTURES.map((scenario: string) => {
-        const lastIdx = VERSIONS.length - 1;
         let datas: IDuplicatesData[];
 
         before(() => {
@@ -88,17 +89,17 @@ describe("lib/actions/duplicates", () => {
         });
 
         VERSIONS.map((vers: string, i: number) => {
-          if (i === lastIdx) { return; } // Skip last index, version "current".
+          if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
 
           // Blacklist `import` + webpack@1 and skip test.
           if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+            it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
 
-          it(`should match v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
-            expect(datas[i], `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(datas[lastIdx]);
+          it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            expect(datas[i], `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(datas[VERSIONS_LATEST_IDX]);
           });
         });
       });
