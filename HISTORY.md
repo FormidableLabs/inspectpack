@@ -1,6 +1,10 @@
 History
 =======
 
+## UNRELEASED
+
+* Internal: Refactor object merging to avoid unnecessary destructuring.
+
 ## 4.6.0
 
 * Feature: Add webpack5 support.

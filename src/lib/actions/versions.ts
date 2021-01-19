@@ -272,10 +272,12 @@ interface IVersionsAsset {
   packages: IVersionsPackages;
 }
 
+interface IVersionsDataAssets {
+  [asset: string]: IVersionsAsset;
+}
+
 export interface IVersionsData {
-  assets: {
-    [asset: string]: IVersionsAsset;
-  };
+  assets: IVersionsDataAssets;
   meta: IVersionsSummary;
 }
 
@@ -304,11 +306,10 @@ const createEmptyAsset = (): IVersionsAsset => ({
 
 const createEmptyData = (): IVersionsData => ({
   assets: {},
-  meta: {
-    ...createEmptyMeta(),
+  meta: Object.assign(createEmptyMeta(), {
     commonRoot: null,
     packageRoots: [],
-  },
+  }),
 });
 
 // Find largest common match for `node_module` dependencies.
@@ -473,13 +474,13 @@ class Versions extends Action {
           const commonRoot = pkgRoots.reduce((memo, pkgRoot) => commonPath(memo, pkgRoot));
 
           // Create root data without meta summary.
-          const data: IVersionsData =  {
-            ...createEmptyData(),
-            assets: assetNames.reduce((memo, assetName) => ({
-              ...memo,
-              [assetName]: getAssetData(commonRoot, allDeps, assets[assetName].mods),
-            }), {}),
-          };
+          const assetsData: IVersionsDataAssets = {};
+          assetNames.forEach((assetName) => {
+            assetsData[assetName] = getAssetData(commonRoot, allDeps, assets[assetName].mods);
+          });
+          const data: IVersionsData =  Object.assign(createEmptyData(), {
+            assets: assetsData,
+          });
 
           // Attach root-level meta.
           data.meta.packageRoots = pkgRoots;
@@ -558,8 +559,7 @@ class VersionsTemplate extends Template {
                         * {green ${shortPath(filePath)}}
                           * Num deps: ${numF(skews.length)}, files: ${numF(modules.length)}
                           ${skews
-                            .map((pkgParts) => pkgParts.map((part, i) => ({
-                              ...part,
+                            .map((pkgParts) => pkgParts.map((part, i) => Object.assign({}, part, {
                               name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
                             })))
                             .map(pkgNamePath)

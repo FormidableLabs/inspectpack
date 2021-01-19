@@ -137,10 +137,16 @@ export const _resolvePackageMap = (
   // Resolve all paths to package objects.
   .all(Object.keys(pkgMap).map((path) => pkgMap[path]))
   // Add non-null package objects to final object.
-  .then((pkgs) => Object.keys(pkgMap).reduce((obj, path, i) =>
-    pkgs[i] === null ? obj : { ...obj, [path]: pkgs[i] },
-    {},
-  ));
+  .then((pkgs) => {
+    const map: INpmPackageMap = {};
+    Object.keys(pkgMap).forEach((path, i) => {
+      if (pkgs[i] !== null) {
+        map[path] = pkgs[i];
+      }
+    });
+
+    return map;
+  });
 
 export const _findPackage = ({
   filePath,
@@ -323,11 +329,13 @@ const _recurseDependencies = ({
     }) as IDependencies[];
 };
 
+interface ICircularRefsInternalRefs {
+  [depsIdx: number]: ICircularRefs;
+}
+
 interface ICircularRefs {
   isCircular: boolean;
-  refs: {
-    [depsIdx: number]: ICircularRefs;
-  };
+  refs: ICircularRefsInternalRefs;
 }
 
 const _identifyCircularRefs = (
@@ -347,11 +355,16 @@ const _identifyCircularRefs = (
 
   // Traverse further.
   const nextPath = _refPath.concat([pkg]);
+  const refs: ICircularRefsInternalRefs = {};
+  pkg.dependencies
+      .map((dep) => _identifyCircularRefs(dep, nextPath))
+      .forEach((obj, i) => {
+        refs[i] = obj;
+      });
+
   return {
     isCircular: false,
-    refs: pkg.dependencies
-      .map((dep) => _identifyCircularRefs(dep, nextPath))
-      .reduce((memo, obj, i) => ({ ...memo, [i]: obj }), {}),
+    refs,
   };
 };
 
@@ -425,8 +438,7 @@ const _resolveRangesOrNull = (
   }
 
   // Mutate the object.
-  const resolvedPkg: IDependencies = {
-    ...pkg,
+  const resolvedPkg: IDependencies = Object.assign({}, pkg, {
     // Recurse.
     dependencies: pkg.dependencies
       .map((dep) => _resolveRangesOrNull(
@@ -437,7 +449,7 @@ const _resolveRangesOrNull = (
       .filter(Boolean),
     // Patch ranges
     range: range || pkg.range,
-  } as IDependencies;
+  }) as IDependencies;
 
   return resolvedPkg;
 };
