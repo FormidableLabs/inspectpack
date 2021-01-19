@@ -266,6 +266,43 @@ describe("lib/actions/base", () => {
         });
       });
     });
+
+    describe("all production", () => {
+      FIXTURES.map((scenario: string) => {
+        let latestProdAssets: IModulesByAsset;
+
+        before(() => {
+          return getInstance(join(scenario, `dist-production-${VERSIONS_LATEST}`))
+            .then((instance) => {
+              latestProdAssets = normalizeAssets(instance.assets);
+            });
+        });
+
+        VERSIONS.map((vers: string, i) => {
+          // Skip latest version + limit to tree-shaking scenarios.
+          if (i === VERSIONS_LATEST_IDX || !treeShakingWorks({ scenario, vers })) {
+            return;
+          }
+
+          let curProdAssets: IModulesByAsset;
+
+          before(() => {
+            return getInstance(join(scenario, `dist-production-${vers}`))
+              .then((instance) => {
+                curProdAssets = normalizeAssets(instance.assets);
+              });
+          });
+
+          // Note: We _don't_ match modules like above because orphaned modules
+          // (e.g., `chunks = []` are treated differently in webpack4 vs 5).
+
+          it(`should match assets v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            expect(curProdAssets, `prod mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(latestProdAssets);
+          });
+        });
+      });
+    });
   });
 });
 
