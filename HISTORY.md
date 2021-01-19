@@ -5,6 +5,8 @@ History
 
 * Feature: Add webpack5 support.
   [#156](https://github.com/FormidableLabs/inspectpack/issues/156)
+* Test: Change handling of tree-shaking supported fixtures to compare production on v4+ and dev vs prod on v3-.
+* Test: Remove `expose-loader` from `loaders` test scenario as just wasn't working on windows + v5.
 
 ## 4.5.2
 
