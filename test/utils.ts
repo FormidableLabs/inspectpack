@@ -19,7 +19,7 @@ export const FIXTURES = scenarios.map((s) => s.WEBPACK_CWD.replace("../../test/f
 //
 // Rather than deal with all these complexities, we just skip the subset of
 // tests for webpack@1 that involve `import` or loaders.
-export const FIXTURES_WEBPACK1_BLACKLIST = [
+export const FIXTURES_WEBPACK1_SKIPLIST = [
   "duplicates-esm",
   "loaders",
   "multiple-chunks",

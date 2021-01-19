@@ -9,7 +9,7 @@ import { IWebpackStatsChunk } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
-  FIXTURES_WEBPACK1_BLACKLIST,
+  FIXTURES_WEBPACK1_SKIPLIST,
   IFixtures,
   JSON_PATH_RE,
   loadFixtures,
@@ -218,8 +218,8 @@ describe("lib/actions/base", () => {
             return;
           }
 
-          // Blacklist `import` + webpack@1 and skip test.
-          if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
+          // Skip `import` + webpack@1.
+          if (i === 0 && FIXTURES_WEBPACK1_SKIPLIST.indexOf(scenario) > -1) {
             it(`should match modules/assets v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
@@ -356,8 +356,8 @@ describe("lib/actions/sizes", () => {
             return;
           }
 
-          // Blacklist `import` + webpack@1 and skip test.
-          if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
+          // Skip `import` + webpack@1.
+          if (i === 0 && FIXTURES_WEBPACK1_SKIPLIST.indexOf(scenario) > -1) {
             it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
