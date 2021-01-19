@@ -10,18 +10,20 @@ import {
   Template,
 } from "./base";
 
+interface ISizesAssets {
+  [asset: string]: {
+    meta: {
+      full: number;
+    };
+    files: IActionModule[];
+  };
+}
+
 export interface ISizesData {
   meta: {
     full: number;
   };
-  assets: {
-    [asset: string]: {
-      meta: {
-        full: number;
-      };
-      files: IActionModule[];
-    };
-  };
+  assets: ISizesAssets;
 }
 
 class Sizes extends Action {
@@ -32,9 +34,8 @@ class Sizes extends Action {
         const assetNames = Object.keys(assets).sort(sort);
 
         // Iterate assets.
-        const assetSizes = assetNames.reduce((memo, name) => ({
-          ...memo,
-          [name]: {
+        const assetSizes = assetNames.reduce((memo: ISizesAssets, name) => {
+          memo[name] = {
             files: assets[name].mods.map((mod) => ({
               baseName: mod.baseName,
               fileName: mod.identifier,
@@ -45,8 +46,10 @@ class Sizes extends Action {
             meta: {
               full: assets[name].asset.size,
             },
-          },
-        }), {});
+          };
+
+          return memo;
+        }, {});
 
         return {
           assets: assetSizes,

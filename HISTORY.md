@@ -1,6 +1,10 @@
 History
 =======
 
+## UNRELEASED
+
+* Internal: Refactor object merging to use `Object.assign` over destructuring.
+
 ## 4.6.0
 
 * Feature: Add webpack5 support.
