@@ -3,8 +3,8 @@ import execa = require("execa");
 
 // Have to use transpiled bin to exec in Node.js
 const IP_PATH = require.resolve("../../bin/inspectpack.js");
-const SIMPLE_STATS = require.resolve("../fixtures/simple/dist-development-4/stats.json");
-const DUP_ESM_STATS = require.resolve("../fixtures/duplicates-esm/dist-development-4/stats.json");
+const SIMPLE_STATS = require.resolve("../fixtures/simple/dist-development-5/stats.json");
+const DUP_ESM_STATS = require.resolve("../fixtures/duplicates-esm/dist-development-5/stats.json");
 
 const exec = (args: string[]) => execa("node", [IP_PATH].concat(args), {
   env: { ...process.env, FORCE_COLOR: "0" }

@@ -18,13 +18,15 @@ import { IModule } from "../../../src/lib/interfaces/modules";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
-  FIXTURES_WEBPACK1_BLACKLIST,
-  FIXTURES_WEBPACK4_BLACKLIST,
+  FIXTURES_WEBPACK1_SKIPLIST,
   IFixtures,
   loadFixtureDirs,
   loadFixtures,
   patchAllMods,
+  treeShakingWorks,
   VERSIONS,
+  VERSIONS_LATEST,
+  VERSIONS_LATEST_IDX,
 } from "../../utils";
 
 export const EMPTY_VERSIONS_META: IVersionsMeta = {
@@ -82,7 +84,7 @@ const PATCHED_ASSETS: IPatchedAsset = {
 // Mutates.
 const patchAction = (name: string) => (instance: IAction) => {
   // Patch all modules.
-  (instance as any)._modules = instance.modules.map(patchAllMods(name));
+  (instance as any)._modules = instance.modules.map(patchAllMods);
 
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
@@ -127,7 +129,7 @@ describe("lib/actions/versions", () => {
     "hidden-app-roots",
     "circular-deps",
   ].map((name) => create({
-      stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
+      stats: fixtures[toPosixPath(join(name, `dist-development-${VERSIONS[VERSIONS.length - 1]}`))],
     }).validate()))
     .then((instances) => {
       [
@@ -153,9 +155,8 @@ describe("lib/actions/versions", () => {
   });
 
   describe("getData", () => {
-    describe("all versions", () => {
+    describe("all development versions", () => {
       FIXTURES.map((scenario) => {
-        const lastIdx = VERSIONS.length - 1;
         let datas: IVersionsData[];
 
         before(() => {
@@ -166,23 +167,17 @@ describe("lib/actions/versions", () => {
         });
 
         VERSIONS.map((vers, i) => {
-          if (i === lastIdx) { return; } // Skip last index, version "current".
+          if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
 
-          // Blacklist `import` + webpack@1 and skip test.
-          if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+          // Skip `import` + webpack@1.
+          if (i === 0 && FIXTURES_WEBPACK1_SKIPLIST.indexOf(scenario) > -1) {
+            it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
 
-          // Blacklist `import` + webpack@4 and skip test.
-          if (lastIdx + 1 === 4 && FIXTURES_WEBPACK4_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v4)`);
-            return;
-          }
-
-          it(`should match v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
-            expect(datas[i], `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(datas[lastIdx]);
+          it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            expect(datas[i], `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(datas[VERSIONS_LATEST_IDX]);
           });
         });
       });
@@ -191,6 +186,11 @@ describe("lib/actions/versions", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
+          if (treeShakingWorks({ scenario, vers })) {
+            it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
+            return;
+          }
+
           it(`v${vers} scenario '${scenario}' should match`, () => {
             return Promise.all([
               getData(join(scenario, `dist-development-${vers}`)),
@@ -205,6 +205,38 @@ describe("lib/actions/versions", () => {
                   .to.not.eql([]).and
                   .to.not.eql({});
                 expect(dev, `dev vs prod mismatch for v${vers} ${scenario}`).to.eql(prod);
+              });
+          });
+        });
+      });
+    });
+
+    describe("all production", () => {
+      FIXTURES.map((scenario: string) => {
+        VERSIONS.map((vers: string, i) => {
+          // Skip latest version + limit to tree-shaking scenarios.
+          if (i === VERSIONS_LATEST_IDX || !treeShakingWorks({ scenario, vers })) {
+            return;
+          }
+
+          let latestProd: IVersionsData;
+
+          before(() => {
+            return getData(join(scenario, `dist-production-${VERSIONS_LATEST}`))
+              .then((data) => { latestProd = data; })
+          });
+
+          it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            return getData(join(scenario, `dist-production-${vers}`))
+              .then((curProd) => {
+                expect(curProd, `prod is empty for v${vers} ${scenario}`)
+                  .to.not.equal(null).and
+                  .to.not.equal(undefined).and
+                  .to.not.eql([]).and
+                  .to.not.eql({});
+
+                expect(curProd, `prod mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+                  .to.eql(latestProd);
               });
           });
         });

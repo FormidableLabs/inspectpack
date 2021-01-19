@@ -9,21 +9,23 @@ import { IWebpackStatsChunk } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import {
   FIXTURES,
-  FIXTURES_WEBPACK1_BLACKLIST,
-  FIXTURES_WEBPACK4_BLACKLIST,
+  FIXTURES_WEBPACK1_SKIPLIST,
   IFixtures,
   JSON_PATH_RE,
   loadFixtures,
   normalizeOutput,
   patchAllMods,
+  treeShakingWorks,
   TEXT_PATH_RE,
   TSV_PATH_RE,
   VERSIONS,
+  VERSIONS_LATEST,
+  VERSIONS_LATEST_IDX,
 } from "../../utils";
 
 const PATCHED_MOMENT_LOCALE_ES = {
-  baseName: "moment/locale sync /es/",
-  identifier: resolve(__dirname, "../../../node_modules/moment/locale sync /es/"),
+  baseName: "moment/locale|sync|/es/",
+  identifier: resolve(__dirname, "../../../node_modules/moment/locale|sync|/es/"),
   size: 100,
   source: "REMOVED",
 };
@@ -32,20 +34,11 @@ const PATCHED_MOMENT_LOCALE_ES = {
 // Should be `IWebpackStatsModuleBase`, but want subset to merge and override.
 interface IPatchedMods { [id: string]: any; }
 const PATCHED_MODS: IPatchedMods = {
+  // Normalize legacy/modern moment synthetic module names.
   "moment/locale /es/": PATCHED_MOMENT_LOCALE_ES,
+  "moment/locale|/es/": PATCHED_MOMENT_LOCALE_ES,
   "moment/locale sync /es/": PATCHED_MOMENT_LOCALE_ES,
-  "webpack/buildin/global.js": {
-    baseName: "webpack/buildin/global.js",
-    identifier: resolve(__dirname, "../../../node_modules/webpack/buildin/global.js"),
-    size: 300,
-    source: "REMOVED",
-  },
-  "webpack/buildin/module.js": {
-    baseName: "webpack/buildin/module.js",
-    identifier: resolve(__dirname, "../../../node_modules/webpack/buildin/module.js"),
-    size: 200,
-    source: "REMOVED",
-  },
+  "moment/locale|sync|/es/": PATCHED_MOMENT_LOCALE_ES,
 };
 
 // Patch in _all_ assets.
@@ -63,10 +56,24 @@ const patchAction = (name: string) => (instance: IAction) => {
   // **Note**: Patch modules **first** since memoized, then used by assets.
   (instance as any)._modules = instance.modules
     .map((mod) => {
-      // - `circular-deps`: Using `global` in v1 didn't include an extra file,
-      //   but v2 includes `webpack/buildin/global.js` so, manually remove.
-      if (name.startsWith("circular-deps") &&
-        mod.baseName === "webpack/buildin/global.js") {
+      // Ignore webpack5+ runtime helpers
+      if (mod.isSynthetic && mod.identifier.startsWith("webpack/runtime/")) {
+        return null;
+      }
+
+      // Normalize / remove internal additions.
+      if (
+        [
+          // webpack5+ doesn't add polyfills.
+          "process/browser.js",
+          "setimmediate/setImmediate.js",
+          "timers-browserify/main.js",
+
+          // webpack5+ doesn't always add these built-ins.
+          "webpack/buildin/global.js",
+          "webpack/buildin/module.js",
+        ].includes(mod.baseName || "")
+      ) {
         return null;
       }
 
@@ -75,7 +82,9 @@ const patchAction = (name: string) => (instance: IAction) => {
       return patched ? { ...mod, ...patched } : mod;
     })
     .filter(Boolean)
-    .map(patchAllMods(name));
+    .map(patchAllMods)
+    // Re-sort as `identifier` string may have been changed.
+    .sort((a, b) => a.identifier.localeCompare(b.identifier));
 
   // Patch assets scenarios manually.
   // - `multiple-chunks`: just use the normal bundle, not the split stuff.
@@ -127,6 +136,28 @@ const patchData = (data: ISizesData) => {
 // - `chunks` are emptied because different by webpack version.
 const normalizeModules = (modules: IModule[]) => modules.map((mod) => ({ ...mod, chunks: [] }));
 
+const normalizeAsset = (asset: object) => {
+  const normAsset = JSON.parse(JSON.stringify(asset));
+
+  // Remove new fields not needed for tests.
+  [
+    "auxiliaryChunkIdHints",
+    "auxiliaryChunkNames",
+    "auxiliaryChunks",
+    "cached",
+    "chunkIdHints",
+    "comparedForEmit",
+    "filteredRelated",
+    "isOverSizeLimit",
+    "related",
+    "type"
+  ].forEach((field) => {
+    delete normAsset[field];
+  });
+
+  return normAsset;
+}
+
 // Normalize assets for comparison.
 // - `size` is hard-coded because different by webpack version's boilerplate / generated
 //   code.
@@ -138,7 +169,7 @@ const normalizeAssets = (modulesByAsset: IModulesByAsset) => Object.keys(modules
     [name]: {
       ...modulesByAsset[name],
       asset: {
-        ...modulesByAsset[name].asset,
+        ...normalizeAsset(modulesByAsset[name].asset),
         chunks: [],
         size: 600,
       },
@@ -159,9 +190,8 @@ describe("lib/actions/base", () => {
       return loadFixtures().then((f) => { fixtures = f; });
     });
 
-    describe("all versions", () => {
+    describe("all development versions", () => {
       FIXTURES.map((scenario) => {
-        const lastIdx = VERSIONS.length - 1;
         let instances: IAction[];
 
         before(() => {
@@ -172,30 +202,24 @@ describe("lib/actions/base", () => {
         });
 
         VERSIONS.map((vers, i) => {
-          if (i === lastIdx) { return; } // Skip last index, version "current".
+          if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
 
-          // Blacklist `import` + webpack@1 and skip test.
-          if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match modules/assets v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+          // Skip `import` + webpack@1.
+          if (i === 0 && FIXTURES_WEBPACK1_SKIPLIST.indexOf(scenario) > -1) {
+            it(`should match modules/assets v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
 
-          // Blacklist `import` + webpack@4 and skip test.
-          if (lastIdx + 1 === 4 && FIXTURES_WEBPACK4_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match modules/assets  v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v4)`);
-            return;
-          }
-
-          it(`should match modules v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
+          it(`should match modules v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
             expect(normalizeModules(instances[i].modules),
-              `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(normalizeModules(instances[lastIdx].modules));
+              `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(normalizeModules(instances[VERSIONS_LATEST_IDX].modules));
           });
 
-          it(`should match assets v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
+          it(`should match assets v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
             expect(normalizeAssets(instances[i].assets),
-              `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(normalizeAssets(instances[lastIdx].assets));
+              `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(normalizeAssets(instances[VERSIONS_LATEST_IDX].assets));
           });
         });
       });
@@ -204,8 +228,12 @@ describe("lib/actions/base", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
-          it(`v${vers} scenario '${scenario}' should match`, () => {
+          if (treeShakingWorks({ scenario, vers })) {
+            it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
+            return;
+          }
 
+          it(`v${vers} scenario '${scenario}' should match`, () => {
             return Promise.all([
               getInstance(join(scenario, `dist-development-${vers}`)),
               getInstance(join(scenario, `dist-production-${vers}`)),
@@ -220,6 +248,43 @@ describe("lib/actions/base", () => {
                   .to.not.eql({});
                 expect(dev, `dev vs prod mismatch for v${vers} ${scenario}`).to.eql(prod);
               });
+          });
+        });
+      });
+    });
+
+    describe("all production", () => {
+      FIXTURES.map((scenario: string) => {
+        let latestProdAssets: IModulesByAsset;
+
+        before(() => {
+          return getInstance(join(scenario, `dist-production-${VERSIONS_LATEST}`))
+            .then((instance) => {
+              latestProdAssets = normalizeAssets(instance.assets);
+            });
+        });
+
+        VERSIONS.map((vers: string, i) => {
+          // Skip latest version + limit to tree-shaking scenarios.
+          if (i === VERSIONS_LATEST_IDX || !treeShakingWorks({ scenario, vers })) {
+            return;
+          }
+
+          let curProdAssets: IModulesByAsset;
+
+          before(() => {
+            return getInstance(join(scenario, `dist-production-${vers}`))
+              .then((instance) => {
+                curProdAssets = normalizeAssets(instance.assets);
+              });
+          });
+
+          // Note: We _don't_ match modules like above because orphaned modules
+          // (e.g., `chunks = []` are treated differently in webpack4 vs 5).
+
+          it(`should match assets v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            expect(curProdAssets, `prod mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(latestProdAssets);
           });
         });
       });
@@ -243,7 +308,7 @@ describe("lib/actions/sizes", () => {
     "scoped",
   ].map((name) =>
     create({
-      stats: fixtures[toPosixPath(join(name, "dist-development-4"))],
+      stats: fixtures[toPosixPath(join(name, `dist-development-${VERSIONS[VERSIONS.length - 1]}`))],
     })
     .validate()
     .then(patchAction(name)),
@@ -256,9 +321,8 @@ describe("lib/actions/sizes", () => {
   );
 
   describe("getData", () => {
-    describe("all versions", () => {
+    describe("all development versions", () => {
       FIXTURES.map((scenario) => {
-        const lastIdx = VERSIONS.length - 1;
         let datas: ISizesData[];
 
         before(() => {
@@ -269,23 +333,17 @@ describe("lib/actions/sizes", () => {
         });
 
         VERSIONS.map((vers, i) => {
-          if (i === lastIdx) { return; } // Skip last index, version "current".
+          if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
 
-          // Blacklist `import` + webpack@1 and skip test.
-          if (i === 0 && FIXTURES_WEBPACK1_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v1)`);
+          // Skip `import` + webpack@1.
+          if (i === 0 && FIXTURES_WEBPACK1_SKIPLIST.indexOf(scenario) > -1) {
+            it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario} (SKIP v1)`);
             return;
           }
 
-          // Blacklist `import` + webpack@4 and skip test.
-          if (lastIdx + 1 === 4 && FIXTURES_WEBPACK4_BLACKLIST.indexOf(scenario) > -1) {
-            it(`should match v${vers}-v${lastIdx + 1} for ${scenario} (SKIP v4)`);
-            return;
-          }
-
-          it(`should match v${vers}-v${lastIdx + 1} for ${scenario}`, () => {
-            expect(datas[i], `version mismatch for v${vers}-v${lastIdx + 1} ${scenario}`)
-              .to.eql(datas[lastIdx]);
+          it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            expect(datas[i], `version mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+              .to.eql(datas[VERSIONS_LATEST_IDX]);
           });
         });
       });
@@ -294,6 +352,11 @@ describe("lib/actions/sizes", () => {
     describe("development vs production", () => {
       FIXTURES.map((scenario) => {
         VERSIONS.map((vers) => {
+          if (treeShakingWorks({ scenario, vers })) {
+            it(`v${vers} scenario '${scenario}' should match (SKIP TREE-SHAKING)`);
+            return;
+          }
+
           it(`v${vers} scenario '${scenario}' should match`, () => {
             return Promise.all([
               getData(join(scenario, `dist-development-${vers}`)),
@@ -308,6 +371,38 @@ describe("lib/actions/sizes", () => {
                   .to.not.eql([]).and
                   .to.not.eql({});
                 expect(dev, `dev vs prod mismatch for v${vers} ${scenario}`).to.eql(prod);
+              });
+          });
+        });
+      });
+    });
+
+    describe("all production", () => {
+      FIXTURES.map((scenario: string) => {
+        VERSIONS.map((vers: string, i) => {
+          // Skip latest version + limit to tree-shaking scenarios.
+          if (i === VERSIONS_LATEST_IDX || !treeShakingWorks({ scenario, vers })) {
+            return;
+          }
+
+          let latestProd: ISizesData;
+
+          before(() => {
+            return getData(join(scenario, `dist-production-${VERSIONS_LATEST}`))
+              .then((data) => { latestProd = data; })
+          });
+
+          it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            return getData(join(scenario, `dist-production-${vers}`))
+              .then((curProd) => {
+                expect(curProd, `prod is empty for v${vers} ${scenario}`)
+                  .to.not.equal(null).and
+                  .to.not.equal(undefined).and
+                  .to.not.eql([]).and
+                  .to.not.eql({});
+
+                expect(curProd, `prod mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+                  .to.eql(latestProd);
               });
           });
         });

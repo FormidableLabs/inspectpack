@@ -19,22 +19,37 @@ export const FIXTURES = scenarios.map((s) => s.WEBPACK_CWD.replace("../../test/f
 //
 // Rather than deal with all these complexities, we just skip the subset of
 // tests for webpack@1 that involve `import` or loaders.
-export const FIXTURES_WEBPACK1_BLACKLIST = [
+export const FIXTURES_WEBPACK1_SKIPLIST = [
   "duplicates-esm",
   "loaders",
   "multiple-chunks",
   "tree-shaking",
 ];
 
-// Skip testing webpack4 vs. webpack1-3 because tree shaking appears to work
-// in this scenario now-ish...
+// Tree-shaking has only been working since webpack4+ (the webpack4 version we
+// test against at least). With working tree-shaking, the production and
+// development stats legitimately differ with removed/orphaned modules in
+// production.
 //
-// See: https://github.com/FormidableLabs/inspectpack/issues/77
-export const FIXTURES_WEBPACK4_BLACKLIST = [
+// Identify scenarios that are affect by tree-shaking.
+export const TREE_SHAKING_FIXTURES = [
   "tree-shaking",
 ];
 
+// Tree-shaking starts working here.
+export const TREE_SHAKING_VERSION_MIN = 4;
+
+// Returns true if scenario results change if tree-shaking actually works.
+export const treeShakingWorks = ({ scenario, vers }: { scenario: string, vers: string }) => {
+  const versNum = parseInt(vers, 10);
+  return versNum >= TREE_SHAKING_VERSION_MIN && TREE_SHAKING_FIXTURES.includes(scenario);
+};
+
 export const VERSIONS = versions.map((v) => v.WEBPACK_VERSION);
+
+export const VERSIONS_LATEST_IDX = VERSIONS.length - 1;
+
+export const VERSIONS_LATEST = VERSIONS[VERSIONS_LATEST_IDX];
 
 const FIXTURES_DIRS = FIXTURES
   .map((f) => VERSIONS.reduce((m: string[], v) => m.concat([
@@ -172,18 +187,22 @@ export const loadFixtureDirs = (): Promise<object> => {
   return _fixtureDirsProm;
 };
 
-// General action patching
-export const patchAllMods = (name: string) => (mod: IModule) => {
-  // Looks like tree-shaking **does** work in updated webpack4.
-  // Manually adjust just `foo/green.js` which is DCE'd to normalize dev vs prod
-  //
-  // **Side Effect**: Relies on populated `_assets` from above.
-  //
-  // See: https://github.com/FormidableLabs/inspectpack/issues/77
-  if (name === join("tree-shaking", "dist-development-4") &&
-    mod.baseName === "foo/green.js") {
-    mod.chunks = [];
+// Normalize name fields.
+const patchModName = (name: string | null) => {
+  if (name === null) {
+    return null;
   }
+
+  return name
+    // webpack5+ does some unicode normalizations that we unwind.
+    .replace("\u0000#", "#");
+};
+
+// General action patching
+export const patchAllMods = (mod: IModule) => {
+  // Name field normalization.
+  mod.baseName = patchModName(mod.baseName);
+  mod.identifier = patchModName(mod.identifier) || "";
 
   return mod;
 };

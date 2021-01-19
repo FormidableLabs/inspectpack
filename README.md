@@ -314,13 +314,18 @@ module.exports = {
   // ...
   plugins: [
     new StatsWriterPlugin({
-      fields: ["assets", "modules"]
+      fields: ["assets", "modules"],
+      stats: {
+        source: true // Needed for webpack5+
+      }
     })
   ]
 };
 ```
 
 This uses the [`webpack-stats-plugin`](https://github.com/FormidableLabs/webpack-stats-plugin) to output at least the `assets` and `modules` fields of the stats object to a file named `stats.json` in the directory specified in `output.path`. There are lots of various [options](https://github.com/FormidableLabs/webpack-stats-plugin#statswriterpluginopts) for the `webpack-stats-plugin` that may suit your particular webpack config better than this example.
+
+> ℹ️ **Webpack 5+ Note**: If you are using webpack5+ you will need to enable the `{ source: true }` options for the `stats` field for the plugin to include sources in stats output. In webpack versions previous to 5, this was enabled by default. The field is needed for internal determination as to whether or not a module is a real source file or a "synthetic" webpack added entry.
 
 #### _Note_: Multiple entry points
 

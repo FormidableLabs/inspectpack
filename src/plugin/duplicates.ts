@@ -22,7 +22,7 @@ export interface ICompilation {
   errors: Error[];
   warnings: Error[];
   getStats: () => {
-    toJson: () => IWebpackStats;
+    toJson: (opts: object) => IWebpackStats;
   };
 }
 
@@ -218,7 +218,7 @@ export class DuplicatesPlugin {
 
   public apply(compiler: ICompiler) {
     if (compiler.hooks) {
-      // Webpack4 integration
+      // Webpack4+ integration
       compiler.hooks.emit.tapPromise("inspectpack-duplicates-plugin", this.analyze.bind(this));
     } else {
       // Webpack1-3 integration
@@ -228,7 +228,11 @@ export class DuplicatesPlugin {
 
   public analyze(compilation: ICompilation, callback?: () => void) {
     const { errors, warnings } = compilation;
-    const stats = compilation.getStats().toJson();
+    const stats = compilation
+      .getStats()
+      .toJson({
+        source: true // Needed for webpack5+
+      });
 
     const { emitErrors, emitHandler, ignoredPackages, verbose } = this.opts;
 

@@ -11,10 +11,12 @@ import {
   IWebpackStatsModuleModules,
   IWebpackStatsModules,
   IWebpackStatsModuleSource,
+  IWebpackStatsModuleOrphan,
   IWebpackStatsModuleSynthetic,
   RWebpackStats,
   RWebpackStatsModuleModules,
   RWebpackStatsModuleSource,
+  RWebpackStatsModuleOrphan,
   RWebpackStatsModuleSynthetic,
 } from "../interfaces/webpack-stats";
 import { toPosixPath } from "../util/files";
@@ -217,7 +219,15 @@ export abstract class Action {
             return list.concat(this.getSourceMods(modsMod.modules, chunks));
 
           } else if (isRight(RWebpackStatsModuleSource.decode(mod))) {
-            // Easy case -- a normal source code module.
+            // webpack5+: Check if an orphan and just skip entirely.
+            if (
+              isRight(RWebpackStatsModuleOrphan.decode(mod)) &&
+              (mod as IWebpackStatsModuleOrphan).orphan
+            ) {
+              return list;
+            }
+
+            // Base case -- a normal source code module that is **not** an orphan.
             const srcMod = mod as IWebpackStatsModuleSource;
             identifier = srcMod.identifier;
             name = srcMod.name;
