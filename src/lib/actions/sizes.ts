@@ -34,8 +34,9 @@ class Sizes extends Action {
         const assetNames = Object.keys(assets).sort(sort);
 
         // Iterate assets.
-        const assetSizes = assetNames.reduce((memo: ISizesAssets, name) => {
-          memo[name] = {
+        const assetSizes: ISizesAssets = {};
+        assetNames.forEach((name) => {
+          assetSizes[name] = {
             files: assets[name].mods.map((mod) => ({
               baseName: mod.baseName,
               fileName: mod.identifier,
@@ -47,9 +48,7 @@ class Sizes extends Action {
               full: assets[name].asset.size,
             },
           };
-
-          return memo;
-        }, {});
+        });
 
         return {
           assets: assetSizes,

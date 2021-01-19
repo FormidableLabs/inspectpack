@@ -122,35 +122,35 @@ class Duplicates extends Action {
         const assetNames = Object.keys(assets).sort(sort);
 
         // Get asset duplicates
-        const assetDups = assetNames.reduce((dups: IDuplicatesDataAssets, name) => {
+        const assetDups: IDuplicatesDataAssets = {};
+        assetNames.forEach((name) => {
           const modsMap = modulesByBaseNameBySource(assets[name].mods);
 
-          dups[name] = {
-            files: Object.keys(modsMap).reduce((files: IDuplicatesFiles, baseName) => {
-              files[baseName] = {
-                meta: createEmptySummary(),
-                sources: Object
-                  .keys(modsMap[baseName])
-                  .sort(sort)
-                  .map((source) => ({
-                    meta: createEmptySummary(),
-                    modules: modsMap[baseName][source].map((mod) => ({
-                      baseName: mod.baseName,
-                      fileName: mod.identifier,
-                      size: {
-                        full: mod.size,
-                      },
-                    })),
+          const files: IDuplicatesFiles = {};
+          Object.keys(modsMap).forEach((baseName) => {
+            files[baseName] = {
+              meta: createEmptySummary(),
+              sources: Object
+                .keys(modsMap[baseName])
+                .sort(sort)
+                .map((source) => ({
+                  meta: createEmptySummary(),
+                  modules: modsMap[baseName][source].map((mod) => ({
+                    baseName: mod.baseName,
+                    fileName: mod.identifier,
+                    size: {
+                      full: mod.size,
+                    },
                   })),
-              };
+                })),
+            };
+          });
 
-              return files;
-            }, {}),
+          assetDups[name] = {
+            files,
             meta: createEmptySummary(),
           };
-
-          return dups;
-        }, {});
+        });
 
         // Create real data object.
         // Start without any summaries. Just raw object structure.

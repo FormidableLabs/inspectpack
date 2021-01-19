@@ -355,14 +355,16 @@ const _identifyCircularRefs = (
 
   // Traverse further.
   const nextPath = _refPath.concat([pkg]);
+  const refs: ICircularRefsInternalRefs = {};
+  pkg.dependencies
+      .map((dep) => _identifyCircularRefs(dep, nextPath))
+      .forEach((obj, i) => {
+        refs[i] = obj;
+      });
+
   return {
     isCircular: false,
-    refs: pkg.dependencies
-      .map((dep) => _identifyCircularRefs(dep, nextPath))
-      .reduce((memo: ICircularRefsInternalRefs, obj, i) => {
-        memo[i] = obj;
-        return memo;
-      }, {}),
+    refs,
   };
 };
 
