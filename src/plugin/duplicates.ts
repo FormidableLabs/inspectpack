@@ -218,7 +218,7 @@ export class DuplicatesPlugin {
 
   public apply(compiler: ICompiler) {
     if (compiler.hooks) {
-      // Webpack4 integration
+      // Webpack4+ integration
       compiler.hooks.emit.tapPromise("inspectpack-duplicates-plugin", this.analyze.bind(this));
     } else {
       // Webpack1-3 integration
