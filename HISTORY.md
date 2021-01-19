@@ -3,7 +3,7 @@ History
 
 ## UNRELEASED
 
-* Internal: Refactor object merging to use `Object.assign` over destructuring.
+* Internal: Refactor object merging to avoid unnecessary destructuring.
 
 ## 4.6.0
 

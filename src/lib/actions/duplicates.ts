@@ -39,14 +39,16 @@ export interface IDuplicatesFiles {
   };
 }
 
+interface IDuplicatesDataAssets {
+  [asset: string]: {
+    meta: IDuplicatesSummary;
+    files: IDuplicatesFiles;
+  },
+}
+
 export interface IDuplicatesData {
   meta: IDuplicatesSummary;
-  assets: {
-    [asset: string]: {
-      meta: IDuplicatesSummary;
-      files: IDuplicatesFiles;
-    },
-  };
+  assets: IDuplicatesDataAssets;
 }
 
 interface IModulesByBaseNameBySource {
@@ -120,34 +122,34 @@ class Duplicates extends Action {
         const assetNames = Object.keys(assets).sort(sort);
 
         // Get asset duplicates
-        const assetDups = assetNames.reduce((dups, name) => {
+        const assetDups = assetNames.reduce((dups: IDuplicatesDataAssets, name) => {
           const modsMap = modulesByBaseNameBySource(assets[name].mods);
 
-          return {
-            ...dups,
-            [name]: {
-              files: Object.keys(modsMap).reduce((files: IDuplicatesFiles, baseName) => ({
-                ...files,
-                [baseName]: {
-                  meta: createEmptySummary(),
-                  sources: Object
-                    .keys(modsMap[baseName])
-                    .sort(sort)
-                    .map((source) => ({
-                      meta: createEmptySummary(),
-                      modules: modsMap[baseName][source].map((mod) => ({
-                        baseName: mod.baseName,
-                        fileName: mod.identifier,
-                        size: {
-                          full: mod.size,
-                        },
-                      })),
+          dups[name] = {
+            files: Object.keys(modsMap).reduce((files: IDuplicatesFiles, baseName) => {
+              files[baseName] = {
+                meta: createEmptySummary(),
+                sources: Object
+                  .keys(modsMap[baseName])
+                  .sort(sort)
+                  .map((source) => ({
+                    meta: createEmptySummary(),
+                    modules: modsMap[baseName][source].map((mod) => ({
+                      baseName: mod.baseName,
+                      fileName: mod.identifier,
+                      size: {
+                        full: mod.size,
+                      },
                     })),
-                },
-              }), {}),
-              meta: createEmptySummary(),
-            },
+                  })),
+              };
+
+              return files;
+            }, {}),
+            meta: createEmptySummary(),
           };
+
+          return dups;
         }, {});
 
         // Create real data object.
