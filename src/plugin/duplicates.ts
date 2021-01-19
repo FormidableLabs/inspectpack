@@ -178,14 +178,12 @@ export const _getDuplicatesVersionsData = (
       });
     });
   });
-  const foundDupFilesMap: IFilesMap = Object.keys(foundFilesMap)
-    .reduce((memo: IFilesMap, baseName) => {
-      if (foundFilesMap[baseName] >= 2) {
-        memo[baseName] = foundFilesMap[baseName];
-      }
-
-      return memo;
-    }, {});
+  const foundDupFilesMap: IFilesMap = {};
+  Object.keys(foundFilesMap).forEach((baseName) => {
+    if (foundFilesMap[baseName] >= 2) {
+      foundDupFilesMap[baseName] = foundFilesMap[baseName];
+    }
+  });
   const foundSources = Object.keys(foundDupFilesMap)
     .reduce((memo, baseName) => {
       return memo + foundDupFilesMap[baseName];
@@ -340,7 +338,7 @@ export class DuplicatesPlugin {
 
                 return installs;
               })
-              .reduce((m, a) => m.concat(a)); // flatten.
+              .reduce((m, a) => m.concat(a), []); // flatten.
 
             // tslint:disable-next-line max-line-length
             addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numPkgResolved)} {underline resolved}, ${numF(numPkgInstalled)} {underline installed}, ${numF(numPkgDepended)} {underline depended}. Latest {green ${latestVersion || "NONE"}}.)`);

@@ -474,11 +474,12 @@ class Versions extends Action {
           const commonRoot = pkgRoots.reduce((memo, pkgRoot) => commonPath(memo, pkgRoot));
 
           // Create root data without meta summary.
+          const assetsData: IVersionsDataAssets = {};
+          assetNames.forEach((assetName) => {
+            assetsData[assetName] = getAssetData(commonRoot, allDeps, assets[assetName].mods);
+          });
           const data: IVersionsData =  Object.assign(createEmptyData(), {
-            assets: assetNames.reduce((memo: IVersionsDataAssets, assetName) => {
-              memo[assetName] = getAssetData(commonRoot, allDeps, assets[assetName].mods);
-              return memo;
-            }, {}),
+            assets: assetsData,
           });
 
           // Attach root-level meta.

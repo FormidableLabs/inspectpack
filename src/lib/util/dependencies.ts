@@ -137,16 +137,16 @@ export const _resolvePackageMap = (
   // Resolve all paths to package objects.
   .all(Object.keys(pkgMap).map((path) => pkgMap[path]))
   // Add non-null package objects to final object.
-  .then((pkgs) => Object.keys(pkgMap).reduce(
-    (obj: INpmPackageMap, path, i) => {
+  .then((pkgs) => {
+    const map: INpmPackageMap = {};
+    Object.keys(pkgMap).forEach((path, i) => {
       if (pkgs[i] !== null) {
-        obj[path] = pkgs[i];
+        map[path] = pkgs[i];
       }
+    });
 
-      return obj;
-    },
-    {},
-  ));
+    return map;
+  });
 
 export const _findPackage = ({
   filePath,
