@@ -177,7 +177,7 @@ export abstract class Action {
 
   // Flat array of webpack source modules only. (Memoized)
   public get modules(): IModule[] {
-    return this._modules = this._modules || this.getSourceMods(this.stats.modules)
+    return this._modules = this._modules || this.getSourceMods(this.stats.modules);
   }
 
   // Whether or not we consider the data to indicate we should bail with error.

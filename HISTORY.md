@@ -3,7 +3,8 @@ History
 
 ## UNRELEASED
 
-* Feature: Add webpack5+ support.
+* Feature: Add webpack5 support.
+  [#156](https://github.com/FormidableLabs/inspectpack/issues/156)
 
 ## 4.5.2
 
