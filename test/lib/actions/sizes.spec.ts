@@ -24,8 +24,8 @@ import {
 } from "../../utils";
 
 const PATCHED_MOMENT_LOCALE_ES = {
-  baseName: "moment/locale sync /es/",
-  identifier: resolve(__dirname, "../../../node_modules/moment/locale sync /es/"),
+  baseName: "moment/locale|sync|/es/",
+  identifier: resolve(__dirname, "../../../node_modules/moment/locale|sync|/es/"),
   size: 100,
   source: "REMOVED",
 };
@@ -34,20 +34,11 @@ const PATCHED_MOMENT_LOCALE_ES = {
 // Should be `IWebpackStatsModuleBase`, but want subset to merge and override.
 interface IPatchedMods { [id: string]: any; }
 const PATCHED_MODS: IPatchedMods = {
+  // Normalize legacy/modern moment synthetic module names.
   "moment/locale /es/": PATCHED_MOMENT_LOCALE_ES,
+  "moment/locale|/es/": PATCHED_MOMENT_LOCALE_ES,
   "moment/locale sync /es/": PATCHED_MOMENT_LOCALE_ES,
-  "webpack/buildin/global.js": {
-    baseName: "webpack/buildin/global.js",
-    identifier: resolve(__dirname, "../../../node_modules/webpack/buildin/global.js"),
-    size: 300,
-    source: "REMOVED",
-  },
-  "webpack/buildin/module.js": {
-    baseName: "webpack/buildin/module.js",
-    identifier: resolve(__dirname, "../../../node_modules/webpack/buildin/module.js"),
-    size: 200,
-    source: "REMOVED",
-  },
+  "moment/locale|sync|/es/": PATCHED_MOMENT_LOCALE_ES,
 };
 
 // Patch in _all_ assets.
@@ -65,22 +56,22 @@ const patchAction = (name: string) => (instance: IAction) => {
   // **Note**: Patch modules **first** since memoized, then used by assets.
   (instance as any)._modules = instance.modules
     .map((mod) => {
-      // Ignore webpack runtime helpers
-      if (mod.baseName === "webpack/buildin/global.js") {
-        return null;
-      }
-
       // Ignore webpack5+ runtime helpers
       if (mod.isSynthetic && mod.identifier.startsWith("webpack/runtime/")) {
         return null;
       }
 
-      // Don't add polyfills as of webpack5+
+      // Normalize / remove internal additions.
       if (
         [
+          // webpack5+ doesn't add polyfills.
           "process/browser.js",
           "setimmediate/setImmediate.js",
-          "timers-browserify/main.js"
+          "timers-browserify/main.js",
+
+          // webpack5+ doesn't always add these built-ins.
+          "webpack/buildin/global.js",
+          "webpack/buildin/module.js",
         ].includes(mod.baseName || "")
       ) {
         return null;
@@ -210,13 +201,6 @@ describe("lib/actions/base", () => {
 
         VERSIONS.map((vers, i) => {
           if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
-
-          // TODO(MOMENT): REMOVE
-          // Temporarily skip moment + v5
-          if (VERSIONS_LATEST === "5" && scenario === "moment-app") {
-            it(`should match modules/assets v${vers}-v${VERSIONS_LATEST} for ${scenario} (TEMP_SKIP v5)`);
-            return;
-          }
 
           // Skip `import` + webpack@1.
           if (i === 0 && FIXTURES_WEBPACK1_SKIPLIST.indexOf(scenario) > -1) {
@@ -348,13 +332,6 @@ describe("lib/actions/sizes", () => {
 
         VERSIONS.map((vers, i) => {
           if (i === VERSIONS_LATEST_IDX) { return; } // Skip last index, version "current".
-
-          // TODO(MOMENT): REMOVE
-          // Temporarily skip moment + v5
-          if (VERSIONS_LATEST === "5" && scenario === "moment-app") {
-            it(`should match modules/assets v${vers}-v${VERSIONS_LATEST} for ${scenario} (TEMP_SKIP v5)`);
-            return;
-          }
 
           // Skip `import` + webpack@1.
           if (i === 0 && FIXTURES_WEBPACK1_SKIPLIST.indexOf(scenario) > -1) {
