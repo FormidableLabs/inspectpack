@@ -199,22 +199,7 @@ const patchModName = (name: string | null) => {
 };
 
 // General action patching
-export const patchAllMods = (name: string) => (mod: IModule) => {
-  // TODO(TREE SHAKING): REMOVE???
-  //
-  // Tree shaking only works in webpack4+. As a practical matter, we have
-  // a duplicate with base name `foo/green.js` which should be completely
-  // removed in production modules vs. development ones from webpack4 on.
-  //
-  // **Side Effect**: Relies on populated `_assets` from above.
-  //
-  // See: https://github.com/FormidableLabs/inspectpack/issues/77
-  if (name === join("tree-shaking", "dist-development-4") &&
-    mod.baseName === "foo/green.js") {
-    // TODO(TREE SHAKING): HERE -- refactor / remove retool.
-    // mod.chunks = ["bundle"];
-  }
-
+export const patchAllMods = (mod: IModule) => {
   // Name field normalization.
   mod.baseName = patchModName(mod.baseName);
   mod.identifier = patchModName(mod.identifier) || "";

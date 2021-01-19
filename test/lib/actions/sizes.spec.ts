@@ -91,7 +91,7 @@ const patchAction = (name: string) => (instance: IAction) => {
       return patched ? { ...mod, ...patched } : mod;
     })
     .filter(Boolean)
-    .map(patchAllMods(name));
+    .map(patchAllMods);
 
   // Patch assets scenarios manually.
   // - `multiple-chunks`: just use the normal bundle, not the split stuff.

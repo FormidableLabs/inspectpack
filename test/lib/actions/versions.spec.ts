@@ -84,7 +84,7 @@ const PATCHED_ASSETS: IPatchedAsset = {
 // Mutates.
 const patchAction = (name: string) => (instance: IAction) => {
   // Patch all modules.
-  (instance as any)._modules = instance.modules.map(patchAllMods(name));
+  (instance as any)._modules = instance.modules.map(patchAllMods);
 
   // Patch assets scenarios via a rename LUT.
   const patches = PATCHED_ASSETS[name.split(sep)[0]];
