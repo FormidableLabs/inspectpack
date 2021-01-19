@@ -82,7 +82,9 @@ const patchAction = (name: string) => (instance: IAction) => {
       return patched ? { ...mod, ...patched } : mod;
     })
     .filter(Boolean)
-    .map(patchAllMods);
+    .map(patchAllMods)
+    // Re-sort as `identifier` string may have been changed.
+    .sort((a, b) => a.identifier.localeCompare(b.identifier));
 
   // Patch assets scenarios manually.
   // - `multiple-chunks`: just use the normal bundle, not the split stuff.
