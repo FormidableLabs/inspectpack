@@ -305,8 +305,7 @@ export class DuplicatesPlugin {
 
                 let installs = Object.keys(packages[pkgName][version]).map((installed) => {
                   const skews = packages[pkgName][version][installed].skews
-                    .map((pkgParts) => pkgParts.map((part, i) => ({
-                      ...part,
+                    .map((pkgParts) => pkgParts.map((part, i) => Object.assign({}, part, {
                       name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
                     })))
                     .map(pkgNamePath)

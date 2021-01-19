@@ -329,11 +329,13 @@ const _recurseDependencies = ({
     }) as IDependencies[];
 };
 
+interface ICircularRefsInternalRefs {
+  [depsIdx: number]: ICircularRefs;
+}
+
 interface ICircularRefs {
   isCircular: boolean;
-  refs: {
-    [depsIdx: number]: ICircularRefs;
-  };
+  refs: ICircularRefsInternalRefs;
 }
 
 const _identifyCircularRefs = (
@@ -357,7 +359,10 @@ const _identifyCircularRefs = (
     isCircular: false,
     refs: pkg.dependencies
       .map((dep) => _identifyCircularRefs(dep, nextPath))
-      .reduce((memo, obj, i) => ({ ...memo, [i]: obj }), {}),
+      .reduce((memo: ICircularRefsInternalRefs, obj, i) => {
+        memo[i] = obj;
+        return memo;
+      }, {}),
   };
 };
 
@@ -431,8 +436,7 @@ const _resolveRangesOrNull = (
   }
 
   // Mutate the object.
-  const resolvedPkg: IDependencies = {
-    ...pkg,
+  const resolvedPkg: IDependencies = Object.assign({}, pkg, {
     // Recurse.
     dependencies: pkg.dependencies
       .map((dep) => _resolveRangesOrNull(
@@ -443,7 +447,7 @@ const _resolveRangesOrNull = (
       .filter(Boolean),
     // Patch ranges
     range: range || pkg.range,
-  } as IDependencies;
+  }) as IDependencies;
 
   return resolvedPkg;
 };
