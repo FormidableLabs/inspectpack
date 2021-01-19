@@ -49,7 +49,7 @@ if (!cwd) {
 const outputPath = resolve(cwd, `dist-${mode}-${vers}`);
 
 // Webpack 4+
-const webpackNew = {
+let configModern = {
   mode,
   devtool: false,
   context: resolve(cwd),
@@ -87,38 +87,39 @@ const webpackNew = {
   ].filter(Boolean)
 };
 
+// Dynamically try to import a custom override from `CWD/webpack.config.js`
+try {
+  const webpack = require(`webpack${vers}/lib`); // eslint-disable-line global-require
+  const override = require(resolve(cwd, "webpack.config.js")); // eslint-disable-line global-require
+  configModern = override(webpack, configModern, versNum);
+} catch (err) {
+  if (err.code !== "MODULE_NOT_FOUND") {
+    throw err;
+  }
+}
+
 const webpack1Module = {
-  loaders: webpackNew.module.rules.map((rule) => ({
+  loaders: configModern.module.rules.map((rule) => ({
     test: rule.test,
     loader: rule.use
   }))
 };
 
 // Webpack 2-3
-const webpackOld = {
-  devtool: webpackNew.devtool,
-  context: webpackNew.context,
-  entry: webpackNew.entry,
-  output: webpackNew.output,
+const configLegacy = {
+  devtool: configModern.devtool,
+  context: configModern.context,
+  entry: configModern.entry,
+  output: configModern.output,
   // TODO(66): Add minify thing here -- mode === "production",
   // https://github.com/FormidableLabs/inspectpack/issues/66
-  module: versNum === 1 ? webpack1Module : webpackNew.module,
-  plugins: webpackNew.plugins
+  module: versNum === 1 ? webpack1Module : configModern.module,
+  plugins: configModern.plugins,
+  resolve: configModern.resolve
 };
 
 // Choose appropriate version.
 // eslint-disable-next-line no-magic-numbers
-let config = versNum >= 4 ? webpackNew : webpackOld;
-
-// Dynamically try to import a custom override from `CWD/webpack.config.js`
-try {
-  const webpack = require(`webpack${vers}/lib`); // eslint-disable-line global-require
-  const override = require(resolve(cwd, "webpack.config.js")); // eslint-disable-line global-require
-  config = override(webpack, config);
-} catch (err) {
-  if (err.code !== "MODULE_NOT_FOUND") {
-    throw err;
-  }
-}
+const config = versNum >= 4 ? configModern : configLegacy;
 
 module.exports = config;

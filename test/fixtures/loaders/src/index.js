@@ -6,7 +6,7 @@ import text from "./hello.txt";
 import style from "./style.css";
 
 // Use expose loader to make global
-require("expose-loader?BunBun!./bunny"); // eslint-disable-line import/no-unresolved
+require("./bunny");
 
 const hello = () => "hello world";
 
