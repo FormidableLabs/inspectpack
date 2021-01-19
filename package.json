@@ -83,7 +83,6 @@
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-promise": "^4.2.1",
     "execa": "^5.0.0",
-    "expose-loader": "^0.7.5",
     "inspectpack-test-fixtures": "file:test/fixtures",
     "mocha": "^8.2.1",
     "mock-fs": "^4.12.0",
