@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.6.1
 
 * Internal: Refactor object merging to avoid unnecessary destructuring.
 
