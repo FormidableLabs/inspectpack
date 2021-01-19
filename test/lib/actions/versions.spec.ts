@@ -211,6 +211,38 @@ describe("lib/actions/versions", () => {
       });
     });
 
+    describe("all production", () => {
+      FIXTURES.map((scenario: string) => {
+        VERSIONS.map((vers: string, i) => {
+          // Skip latest version + limit to tree-shaking scenarios.
+          if (i === VERSIONS_LATEST_IDX || !treeShakingWorks({ scenario, vers })) {
+            return;
+          }
+
+          let latestProd: IVersionsData;
+
+          before(() => {
+            return getData(join(scenario, `dist-production-${VERSIONS_LATEST}`))
+              .then((data) => { latestProd = data; })
+          });
+
+          it(`should match v${vers}-v${VERSIONS_LATEST} for ${scenario}`, () => {
+            return getData(join(scenario, `dist-production-${vers}`))
+              .then((curProd) => {
+                expect(curProd, `prod is empty for v${vers} ${scenario}`)
+                  .to.not.equal(null).and
+                  .to.not.equal(undefined).and
+                  .to.not.eql([]).and
+                  .to.not.eql({});
+
+                expect(curProd, `prod mismatch for v${vers}-v${VERSIONS_LATEST} ${scenario}`)
+                  .to.eql(latestProd);
+              });
+          });
+        });
+      });
+    });
+
     describe("node_modules scenarios", () => {
       it("errors on malformed root package.json", () => {
         mock({
