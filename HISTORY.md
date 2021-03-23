@@ -1,6 +1,11 @@
 History
 =======
 
+## 4.7.0
+
+* Feature: Include TypeScript definitions. (*[jensbodal][]*)
+  [#76](https://github.com/FormidableLabs/inspectpack/issues/76)
+
 ## 4.6.1
 
 * Internal: Refactor object merging to avoid unnecessary destructuring.
@@ -267,6 +272,7 @@ History
 [@alexander-schranz]: https://github.com/alexander-schranz
 [@deadcoder0904]: https://github.com/deadcoder0904
 [@divmain]: https://github.com/divmain
+[@jensbodal]: https://github.com/jensbodal
 [@kkerr1]: https://github.com/kkerr1
 [@rgerstenberger]: https://github.com/rgerstenberger
 [@ryan-codingintrigue]: https://github.com/ryan-codingintrigue

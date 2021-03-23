@@ -3,6 +3,7 @@
   "version": "4.6.1",
   "description": "An inspection tool for Webpack frontend JavaScript bundles.",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "bin": {
     "inspectpack": "bin/inspectpack.js"
   },
