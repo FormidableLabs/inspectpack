@@ -1,7 +1,7 @@
 History
 =======
 
-## UNRELEASED
+## 4.7.1
 
 * Bug: Fix plugin types.
   [#161](https://github.com/FormidableLabs/inspectpack/issues/161)
