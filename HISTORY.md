@@ -1,6 +1,11 @@
 History
 =======
 
+## UNRELEASED
+
+* Bug: Fix plugin types.
+  [#161](https://github.com/FormidableLabs/inspectpack/issues/161)
+
 ## 4.7.0
 
 * Feature: Include TypeScript definitions. (*[jensbodal][]*)

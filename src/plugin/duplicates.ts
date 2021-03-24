@@ -13,9 +13,11 @@ import { numF, sort } from "../lib/util/strings";
 
 // Simple interfaces for webpack work.
 // See, e.g. https://github.com/TypeStrong/ts-loader/blob/master/src/interfaces.ts
+
+// Permissive compiler type that spans webpack v1 - current.
 interface ICompiler {
-  hooks: any;
-  plugin: (name: string, callback: () => void) => void;
+  hooks?: any;
+  plugin?: (name: string, callback: () => void) => void;
 }
 
 export interface ICompilation {
@@ -218,9 +220,11 @@ export class DuplicatesPlugin {
     if (compiler.hooks) {
       // Webpack4+ integration
       compiler.hooks.emit.tapPromise("inspectpack-duplicates-plugin", this.analyze.bind(this));
-    } else {
+    } else if (compiler.plugin) {
       // Webpack1-3 integration
       compiler.plugin("emit", this.analyze.bind(this) as any);
+    } else {
+      throw new Error("Unrecognized compiler format");
     }
   }
 
