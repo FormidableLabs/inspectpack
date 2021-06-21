@@ -52,10 +52,12 @@ export const actions = (
  * @param opts.action {String} name of action
  * @param opts.format {Object} output format
  * @param opts.stats {Object} webpack stats object
+ * @param opts.ignoredPackages {(string | RegExp)[]} packages to ignore
+ * @param opts.duplicatesOnly {boolean} only report on duplicate
  * @returns {Promise<string>} Rendered result
  */
 export const render = (
-  { action, format, stats, ignoredPackages }: IRenderOptions,
+  { action, format, stats, ignoredPackages, duplicatesOnly }: IRenderOptions,
 ): Promise<string> => Promise.resolve()
-  .then(() => actions(action, { stats, ignoredPackages }))
+  .then(() => actions(action, { stats, ignoredPackages, duplicatesOnly }))
   .then((instance: IAction) => instance.template.render(format));
