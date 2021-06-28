@@ -12,7 +12,8 @@ An inspection tool for Webpack frontend JavaScript bundles.
 
 It is also the engine for the handy [`webpack-dashboard`](https://github.com/FormidableLabs/webpack-dashboard) plugin.
 
-- [Plugin](#plugin)
+- [DuplicatePlugin](#duplicatesPlugin)
+- [VersionsPlugin](#versionsplugin)
 - [Command line tool](#command-line-tool)
   - [`duplicates`](#duplicates)
   - [`versions`](#versions)
@@ -20,10 +21,10 @@ It is also the engine for the handy [`webpack-dashboard`](https://github.com/For
 - [Notes, tips, tricks](#notes-tips-tricks)
 - [Other useful tools](#other-useful-tools)
 
-IMPORTANT NOTE: this scoped package of inspectpack adds versionPlugin that to be discussed in [issue 168](https://github.com/FormidableLabs/inspectpack/issues/168).
-The goal is to merge the functionality back into inspectpack.
+**IMPORTANT NOTE: this scoped package of inspectpack adds versionPlugin that to be discussed in [issue 168](https://github.com/FormidableLabs/inspectpack/issues/168).
+The goal is to merge the functionality back into inspectpack.**
 
-## Plugin
+## DuplicatesPlugin
 
 The `DuplicatesPlugin` identifies unnecessarily duplicated code in your webpack bundles with an actionable report to help you trim down wasted bytes.
 
@@ -272,6 +273,44 @@ In parallel to `webpack` collapsing package references in the _bundle_, if you u
 Specifying a [`resolutions`](https://yarnpkg.com/lang/en/docs/selective-version-resolutions/) field in your `package.json` allows fine-grain control over how packages with the same package dependency resolve to one or more actual version numbers.
 
 Similar to `resolve.alias`, because you can get outside the guarantees of semantic versioning with this tool, be sure to check that your overall application supports the finalized code in the bundle.
+
+## VersionsPlugin
+
+The `VersionsPlugin` reports on multiple versions of packages installed in your `node_modules` tree that have version skews and have 2+ files included in your bundle under inspection.
+
+To start using, add the plugin to your `webpack.config.js` file:
+
+```js
+const { VersionsPlugin } = require("inspectpack/plugin");
+
+module.exports = {
+  // ...
+  plugins: [
+    // ...
+    new VersionsPlugin({
+      // Emit compilation warning or error? (Default: `false`)
+      emitErrors: false,
+      // Handle all messages with handler function (`(report: string)`)
+      // Overrides `emitErrors` output.
+      emitHandler: undefined,
+      // List of packages that can be ignored. (Default: `[]`)
+      // - If a string, then a prefix match of `{$name}/` for each module.
+      // - If a regex, then `.test(pattern)` which means you should add slashes
+      //   where appropriate.
+      //
+      // **Note**: Uses posix paths for all matching (e.g., on windows `/` not `\`).
+      ignoredPackages: undefined,
+      // Display full duplicates information? (Default: `false`)
+      verbose: false,
+      // Report version information of duplicate packages only? (Default: `true`)
+      duplicatesOnly: true
+    })
+  ]
+};
+```
+
+With `duplicatesOnly` set to `false`, the plugin will report the version of each packages that gets bundled into each asset.
+This allows us to understand the version(s) of each package that is bundled in our assets.
 
 ## Command line tool
 
