@@ -1,5 +1,5 @@
 {
-  "name": "inspectpack",
+  "name": "@step2yeung/inspectpack",
   "version": "4.7.1",
   "description": "An inspection tool for Webpack frontend JavaScript bundles.",
   "main": "lib/index.js",
@@ -9,12 +9,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/FormidableLabs/inspectpack.git"
+    "url": "https://github.com/step2yeung/inspectpack.git"
   },
   "bugs": {
-    "url": "https://github.com/FormidableLabs/inspectpack/issues"
+    "url": "https://github.com/step2yeung/inspectpack/issues"
   },
-  "homepage": "https://github.com/FormidableLabs/inspectpack",
+  "homepage": "https://github.com/step2yeung/inspectpack",
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "license": "MIT",
   "keywords": [

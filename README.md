@@ -20,6 +20,9 @@ It is also the engine for the handy [`webpack-dashboard`](https://github.com/For
 - [Notes, tips, tricks](#notes-tips-tricks)
 - [Other useful tools](#other-useful-tools)
 
+IMPORTANT NOTE: this scoped package of inspectpack adds versionPlugin that to be discussed in [issue 168](https://github.com/FormidableLabs/inspectpack/issues/168).
+The goal is to merge the functionality back into inspectpack.
+
 ## Plugin
 
 The `DuplicatesPlugin` identifies unnecessarily duplicated code in your webpack bundles with an actionable report to help you trim down wasted bytes.
