@@ -341,6 +341,11 @@
   resolved "https://registry.yarnpkg.com/@types/semver-compare/-/semver-compare-1.0.1.tgz#17d1dc62c516c133ab01efb7803a537ee6eaf3d5"
   integrity sha512-wx2LQVvKlEkhXp/HoKIZ/aSL+TvfJdKco8i0xJS3aR877mg4qBHzNT6+B5a61vewZHo79EdZavskGnRXEC2H6A==
 
+"@types/semver@^7.3.8":
+  version "7.3.8"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.8.tgz#508a27995498d7586dcecd77c25e289bfaf90c59"
+  integrity sha512-D/2EJvAlCEtYFEYmmlGwbGXuK886HzyCc3nZX/tkFTQdEU8jZDAgiv08P162yB17y4ZXZoq7yFAnW4GDBb9Now==
+
 "@types/sinon-chai@^3.2.4":
   version "3.2.5"
   resolved "https://registry.yarnpkg.com/@types/sinon-chai/-/sinon-chai-3.2.5.tgz#df21ae57b10757da0b26f512145c065f2ad45c48"

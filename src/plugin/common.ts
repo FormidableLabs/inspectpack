@@ -26,3 +26,8 @@ export const pkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
   (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.range}`,
   "",
 );
+
+export const versionpkgNamePath = (pkgParts: INpmPackageBase[]) => pkgParts.reduce(
+  (m, part) => `${m}${m ? " -> " : ""}${part.name}@${part.version}`,
+  "",
+);

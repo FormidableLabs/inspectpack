@@ -249,7 +249,7 @@ interface IVersionsSummary extends IVersionsMeta {
   commonRoot: string | null;
 }
 
-interface IVersionsPackages extends IDependenciesByPackageName {
+export interface IVersionsPackages extends IDependenciesByPackageName {
   [packageName: string]: {
     [version: string]: {
       [filePath: string]: { // Note: **relative**, **Posix** path in final version
@@ -398,16 +398,17 @@ const getAssetData = (
   return data;
 };
 
-class Versions extends Action {
+export class Versions extends Action {
+  private _allDeps!: (IDependencies | null)[];
+  private _packageRoots!: string[];
+
   public shouldBail(): Promise<boolean> {
     return this.getData().then((data: object) =>
       (data as IVersionsData).meta.packages.num !== 0
     );
   }
 
-  protected _getData(): Promise<IVersionsData> {
-    const mods = this.modules;
-
+  protected _generateAllDeps(): Promise<(IDependencies | null)[]> {
     // Share a mutable package map cache across all dependency resolution.
     const pkgMap = {};
 
@@ -416,116 +417,151 @@ class Versions extends Action {
     // The package roots come back in an order such that we cache things early
     // that may be used later for nested directories that may need to search
     // up higher for "flattened" dependencies.
-    return _packageRoots(mods).then((pkgRoots) => {
+    return this.packageRoots.then((pkgRoots) => {
       // If we don't have a package root, then we have no dependencies in the
       // bundle and we can short circuit.
       if (!pkgRoots.length) {
-        return Promise.resolve(createEmptyData());
+        return Promise.resolve([]);
       }
 
       // We now have a guaranteed non-empty string. Get modules map and filter to
       // limit I/O to only potential packages.
-      const pkgsFilter = allPackages(mods);
+      const pkgsFilter = allPackages(this.modules);
 
       // Recursively read in dependencies.
       //
       // However, since package roots rely on a properly seeded cache from earlier
       // runs with a higher-up, valid traversal path, we start bottom up in serial
       // rather than executing different roots in parallel.
-      let allDeps: (IDependencies | null)[];
       return serial(
         pkgRoots.map((pkgRoot) => () => dependencies(pkgRoot, pkgsFilter, pkgMap)),
-      )
-        // Capture deps.
-        .then((all) => { allDeps = all; })
-        // Check dependencies and validate.
-        .then(() => Promise.all(allDeps.map((deps) => {
-          // We're going to _mostly_ permissively handle uninstalled trees, but
-          // we will error if no `node_modules` exist which means likely that
-          // an `npm install` is needed.
-          if (deps !== null && !deps.dependencies.length) {
-            return Promise.all(
-              pkgRoots.map((pkgRoot) => exists(join(pkgRoot, "node_modules"))),
-            )
-              .then((pkgRootsExist) => {
-                if (pkgRootsExist.indexOf(true) === -1) {
-                  throw new Error(
-                    `Found ${mods.length} bundled files in a project ` +
-                    `'node_modules' directory, but none found on disk. ` +
-                    `Do you need to run 'npm install'?`,
-                  );
-                }
-              });
-          }
+      ).then((all) => {
+        return all;
+      });
+    });
+  }
 
-          return Promise.resolve();
-        })))
-        // Assemble data.
-        .then(() => {
-          // Short-circuit if all null or empty array.
-          // Really a belt-and-suspenders check, since we've already validated
-          // that package.json exists.
-          if (!allDeps.length || allDeps.every((deps) => deps === null)) {
-            return createEmptyData();
-          }
+  protected _getData(): Promise<IVersionsData> {
+    const mods = this.modules;
+    let allDependencies: (IDependencies | null)[];
+    let pkgRoots: string[];
 
-          const { assets } = this;
-          const assetNames = Object.keys(assets).sort(sort);
+    return Promise.all([
+      this.allDeps,
+      this.packageRoots,
+    ])
+      .then((datas) => {
+        const [allDeps, packageRoots] = datas;
+        allDependencies = allDeps;
+        pkgRoots = packageRoots;
 
-          // Find largest-common-part of all roots for this version to do relative paths from.
-          // **Note**: No second memo argument. First `memo` is first array element.
-          const commonRoot = pkgRoots.reduce((memo, pkgRoot) => commonPath(memo, pkgRoot));
+        if (!pkgRoots.length) {
+          return Promise.resolve(createEmptyData());
+        }
+      })
+      .then(() => Promise.all(allDependencies.map((deps) => {
+        // We're going to _mostly_ permissively handle uninstalled trees, but
+        // we will error if no `node_modules` exist which means likely that
+        // an `npm install` is needed.
+        if (deps !== null && !deps.dependencies.length) {
+          return Promise.all(
+            pkgRoots.map((pkgRoot) => exists(join(pkgRoot, "node_modules"))),
+          )
+            .then((pkgRootsExist) => {
+              if (pkgRootsExist.indexOf(true) === -1) {
+                throw new Error(
+                  `Found ${mods.length} bundled files in a project ` +
+                  `'node_modules' directory, but none found on disk. ` +
+                  `Do you need to run 'npm install'?`,
+                );
+              }
+            });
+        }
 
-          // Create root data without meta summary.
-          const assetsData: IVersionsDataAssets = {};
-          assetNames.forEach((assetName) => {
-            assetsData[assetName] = getAssetData(commonRoot, allDeps, assets[assetName].mods, this.duplicatesOnly);
-          });
-          const data: IVersionsData =  Object.assign(createEmptyData(), {
-            assets: assetsData,
-          });
+        return Promise.resolve();
+      })))
+      // Assemble data.
+      .then(() => {
+        // Short-circuit if all null or empty array.
+        // Really a belt-and-suspenders check, since we've already validated
+        // that package.json exists.
+        if (!allDependencies.length || allDependencies.every((deps) => deps === null)) {
+          return createEmptyData();
+        }
 
-          // Attach root-level meta.
-          data.meta.packageRoots = pkgRoots;
-          data.meta.commonRoot = commonRoot;
+        const { assets } = this;
+        const assetNames = Object.keys(assets).sort(sort);
 
-          // Each asset.
-          assetNames.forEach((assetName) => {
-            const { packages, meta } = data.assets[assetName];
+        // Find largest-common-part of all roots for this version to do relative paths from.
+        // **Note**: No second memo argument. First `memo` is first array element.
+        const commonRoot = pkgRoots.reduce((memo, pkgRoot) => commonPath(memo, pkgRoot));
 
-            Object.keys(packages).forEach((pkgName) => {
-              const pkgVersions = Object.keys(packages[pkgName]);
+        // Create root data without meta summary.
+        const assetsData: IVersionsDataAssets = {};
+        assetNames.forEach((assetName) => {
+          assetsData[assetName] = getAssetData(commonRoot, allDependencies, assets[assetName].mods, this.duplicatesOnly);
+        });
+        const data: IVersionsData =  Object.assign(createEmptyData(), {
+          assets: assetsData,
+        });
 
-              meta.packages.num += 1;
-              meta.resolved.num += pkgVersions.length;
+        // Attach root-level meta.
+        data.meta.packageRoots = pkgRoots;
+        data.meta.commonRoot = commonRoot;
 
-              data.meta.packages.num += 1;
-              data.meta.resolved.num += pkgVersions.length;
+        // Each asset.
+        assetNames.forEach((assetName) => {
+          const { packages, meta } = data.assets[assetName];
 
-              pkgVersions.forEach((version) => {
-                const pkgVers = packages[pkgName][version];
-                Object.keys(pkgVers).forEach((filePath) => {
-                  meta.files.num += pkgVers[filePath].modules.length;
-                  meta.depended.num += pkgVers[filePath].skews.length;
-                  meta.installed.num += 1;
+          Object.keys(packages).forEach((pkgName) => {
+            const pkgVersions = Object.keys(packages[pkgName]);
 
-                  data.meta.files.num += pkgVers[filePath].modules.length;
-                  data.meta.depended.num += pkgVers[filePath].skews.length;
-                  data.meta.installed.num += 1;
-                });
+            meta.packages.num += 1;
+            meta.resolved.num += pkgVersions.length;
+
+            data.meta.packages.num += 1;
+            data.meta.resolved.num += pkgVersions.length;
+
+            pkgVersions.forEach((version) => {
+              const pkgVers = packages[pkgName][version];
+              Object.keys(pkgVers).forEach((filePath) => {
+                meta.files.num += pkgVers[filePath].modules.length;
+                meta.depended.num += pkgVers[filePath].skews.length;
+                meta.installed.num += 1;
+
+                data.meta.files.num += pkgVers[filePath].modules.length;
+                data.meta.depended.num += pkgVers[filePath].skews.length;
+                data.meta.installed.num += 1;
               });
             });
-
           });
 
-          return data;
         });
+
+        return data;
       });
   }
 
   protected _createTemplate(): ITemplate {
     return new VersionsTemplate({ action: this });
   }
+
+  public get allDeps(): Promise<(IDependencies | null)[]> {
+    return Promise.resolve()
+      .then(() => this._allDeps || this._generateAllDeps())
+      .then((allDeps) => this._allDeps = allDeps);
+  }
+
+  public get packageRoots(): Promise<string[]> {
+    return Promise.resolve()
+      .then(() => this._packageRoots || _packageRoots(this.modules))
+      .then((pkgroots) => this._packageRoots = pkgroots);
+  }
+}
+
+export interface IVersionAction extends Versions {
+  allDeps: Promise<(IDependencies | null)[]>,
+  packageRoots: Promise<string[]>
 }
 
 // `~/different-foo/~/foo`

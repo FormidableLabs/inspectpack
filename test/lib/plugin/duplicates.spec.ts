@@ -11,9 +11,9 @@ import * as actionsVersions from "../../../src/lib/actions/versions";
 
 import {
    _getDuplicatesVersionsData,
-   DuplicatesPlugin,
-   ICompilation,
+   DuplicatesPlugin
 } from "../../../src/plugin/duplicates";
+import { ICompilation } from "../../../src/plugin/common";
 
 import * as chalk from "chalk";
 import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";

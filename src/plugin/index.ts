@@ -1,2 +1,2 @@
 export { DuplicatesPlugin } from "./duplicates";
-export { VersionsPlugin } from "./versions";
+export { VersionCheckPlugin } from "./versions";
