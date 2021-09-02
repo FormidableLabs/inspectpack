@@ -107,7 +107,7 @@ function findDupsFromDependencyMap(dependencyMap: IDependencyMap): (string[]) {
 }
 
 // returns true if a package version does not match the allowedVersions specified, otherwise, return false
-const isAllowedVersionViolated = (allowedVersions:IAllowedVersions, pkgName: string, packages: IVersionsPackages): boolean => {
+export const isAllowedVersionViolated = (allowedVersions:IAllowedVersions, pkgName: string, packages: IVersionsPackages): boolean => {
   if (Object.keys(allowedVersions).includes(pkgName)) {
     const versions = Object.keys(packages[pkgName]);
     const specifier = allowedVersions[pkgName];
