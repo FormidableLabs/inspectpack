@@ -1,5 +1,5 @@
 const { dirname } = require("path");
-const chalk = require("chalk");
+const colors = require("picocolors");
 
 /**
  * Runtime switcher for all webpack versions.
@@ -12,7 +12,7 @@ if (!WEBPACK_VERSION) {
 }
 
 const fixture = `${WEBPACK_CWD}/dist-${WEBPACK_MODE}-${WEBPACK_VERSION}/bundle.js`;
-log(chalk `\n[{green.bold Building fixture}] ${fixture}\n`);
+log(`\n[${colors.green(colors.bold("Building fixture"))}] ${fixture}\n`);
 
 // Change process directory to the actual install, so that node_modules
 // resolution will use the nested stuff **first**.

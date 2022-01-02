@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import * as colors from "picocolors";
 import semverCompare = require("semver-compare");
 import { actions } from "../lib";
 import { IDuplicatesData, IDuplicatesFiles } from "../lib/actions/duplicates";
@@ -52,10 +52,10 @@ interface IPackageNames {
 // ----------------------------------------------------------------------------
 // Helpers
 // ----------------------------------------------------------------------------
-const identical = (val: string) => chalk`{bold.magenta ${val}}`;
-const similar = (val: string) => chalk`{bold.blue ${val}}`;
-const warning = (val: string) => chalk`{bold.yellow ${val}}`;
-const error = (val: string) => chalk`{bold.red ${val}}`;
+const identical = (val: string) => colors.magenta(val);
+const similar = (val: string) => colors.blue(val);
+const warning = (val: string) => colors.yellow(val);
+const error = (val: string) => colors.red(val);
 
 // `~/different-foo/~/foo` + highlight last component.
 const shortPath = (filePath: string, pkgName: string) => {
@@ -64,7 +64,7 @@ const shortPath = (filePath: string, pkgName: string) => {
   // Color last part of package name.
   const lastPkgIdx = short.lastIndexOf(pkgName);
   if (lastPkgIdx > -1) {
-    short = chalk`${short.substring(0, lastPkgIdx)}{cyan ${pkgName}}`;
+    short = `${short.substring(0, lastPkgIdx)}${colors.cyan(pkgName)}`;
   }
 
   return short;
@@ -194,7 +194,7 @@ export const _getDuplicatesVersionsData = (
   if (extraSources !== foundSources) {
     addWarning(error(
       `Missing sources: Expected ${numF(extraSources)}, found ${numF(foundSources)}.\n` +
-      chalk`{white Found map:} {gray ${JSON.stringify(foundDupFilesMap)}}\n`,
+      `${colors.white("Found map:")} ${colors.gray(JSON.stringify(foundDupFilesMap))}\n`,
     ));
   }
 
@@ -249,12 +249,12 @@ export class DuplicatesPlugin {
     ])
       .then((datas) => {
         const [dupData, pkgDataOrig] = datas;
-        const header = chalk`{bold.underline Duplicate Sources / Packages}`;
+        const header = colors.bold(colors.underline("Duplicate Sources / Packages"));
 
         // No duplicates.
         if (dupData.meta.extraFiles.num === 0) {
           // tslint:disable no-console
-          console.log(chalk`\n${header} - {green No duplicates found. 🚀}\n`);
+          console.log(`\n${header} - ${colors.green("No duplicates found. 🚀")}\n`);
           return;
         }
 
@@ -266,11 +266,11 @@ export class DuplicatesPlugin {
 
         // Have duplicates. Report summary.
         // tslint:disable max-line-length
-        addMsg(chalk`${header} - ${fmt("Duplicates found! ⚠️")}
+        addMsg(`${header} - ${fmt("Duplicates found! ⚠️")}
 
-* {yellow.bold.underline Duplicates}: Found ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similar)
+* ${colors.yellow(colors.bold(colors.underline("Duplicates")))}: Found ${numF(dupData.meta.extraFiles.num)} ${similar("similar")} files across ${numF(dupData.meta.extraSources.num)} code sources (both ${identical("identical")} + similar)
   accounting for ${numF(dupData.meta.extraSources.bytes)} bundled bytes.
-* {yellow.bold.underline Packages}: Found ${numF(pkgData.meta.packages.num)} packages with ${numF(pkgData.meta.resolved.num)} {underline resolved}, ${numF(pkgData.meta.installed.num)} {underline installed}, and ${numF(pkgData.meta.depended.num)} {underline depended} versions.
+* ${colors.yellow(colors.bold(colors.underline("Packages")))}: Found ${numF(pkgData.meta.packages.num)} packages with ${numF(pkgData.meta.resolved.num)} ${colors.underline("resolved")}, ${numF(pkgData.meta.installed.num)} ${colors.underline("installed")}, and ${numF(pkgData.meta.depended.num)} ${colors.underline("depended")} versions.
 `);
         // tslint:enable max-line-length
 
@@ -288,7 +288,7 @@ export class DuplicatesPlugin {
 
           // Only add asset name when duplicates.
           if (pkgNames.length) {
-            addMsg(chalk`{gray ## ${dupAssetName}}`);
+            addMsg(colors.gray(`## ${dupAssetName}`));
           }
 
           pkgNames.forEach((pkgName) => {
@@ -308,7 +308,7 @@ export class DuplicatesPlugin {
                 let installs = Object.keys(packages[pkgName][version]).map((installed) => {
                   const skews = packages[pkgName][version][installed].skews
                     .map((pkgParts) => pkgParts.map((part, i) => Object.assign({}, part, {
-                      name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
+                      name: colors[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
                     })))
                     .map(pkgNamePath)
                     .sort(sort);
@@ -316,7 +316,7 @@ export class DuplicatesPlugin {
                   numPkgDepended += skews.length;
 
                   if (!verbose) {
-                    return chalk`  {green ${version}} {gray ${shortPath(installed, pkgName)}}
+                    return `  ${colors.green(version)} ${colors.gray(shortPath(installed, pkgName))}
     ${skews.join("\n    ")}`;
                   }
 
@@ -325,19 +325,19 @@ export class DuplicatesPlugin {
                     .filter(Boolean)
                     .map((mod) => {
                       const note = mod.isIdentical ? identical("I") : similar("S");
-                      return chalk`{gray ${mod.baseName}} (${note}, ${numF(mod.bytes)})`;
+                      return `${colors.gray(mod.baseName)} (${note}, ${numF(mod.bytes)})`;
                     });
 
-                  return chalk`    {gray ${shortPath(installed, pkgName)}}
-      {white * Dependency graph}
+                  return `    ${colors.gray(shortPath(installed, pkgName))}
+      ${colors.white("* Dependency graph")}
         ${skews.join("\n        ")}
-      {white * Duplicated files in }{gray ${dupAssetName}}
+      ${colors.white("* Duplicated files in ")}${colors.gray(dupAssetName)}
         ${duplicates.join("\n        ")}
 `;
                 });
 
                 if (verbose) {
-                  installs = [chalk`  {green ${version}}`].concat(installs);
+                  installs = [`  ${colors.green(version)}`].concat(installs);
                 }
 
                 return installs;
@@ -345,7 +345,7 @@ export class DuplicatesPlugin {
               .reduce((m, a) => m.concat(a), []); // flatten.
 
             // tslint:disable-next-line max-line-length
-            addMsg(chalk`{cyan ${pkgName}} (Found ${numF(numPkgResolved)} {underline resolved}, ${numF(numPkgInstalled)} {underline installed}, ${numF(numPkgDepended)} {underline depended}. Latest {green ${latestVersion || "NONE"}}.)`);
+            addMsg(`${colors.cyan(pkgName)} (Found ${numF(numPkgResolved)} ${colors.underline("resolved")}, ${numF(numPkgInstalled)} ${colors.underline("installed")}, ${numF(numPkgDepended)} ${colors.underline("depended")}. Latest ${colors.green(latestVersion || "NONE")}.)`);
             versions.forEach(addMsg);
 
             if (!verbose) {
@@ -354,10 +354,10 @@ export class DuplicatesPlugin {
           });
         });
         // tslint:disable max-line-length
-        addMsg(chalk`
-* {gray.bold.underline Understanding the report}: Need help with the details? See:
+        addMsg(`
+* ${colors.gray(colors.bold(colors.underline("Understanding the report")))}: Need help with the details? See:
   https://github.com/FormidableLabs/inspectpack/#diagnosing-duplicates
-* {gray.bold.underline Fixing bundle duplicates}: An introductory guide:
+* ${colors.gray(colors.bold(colors.underline("Fixing bundle duplicates")))}: An introductory guide:
   https://github.com/FormidableLabs/inspectpack/#fixing-bundle-duplicates
 `.trimLeft());
         // tslint:enable max-line-length
