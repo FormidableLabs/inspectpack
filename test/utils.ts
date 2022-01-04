@@ -1,5 +1,5 @@
 import { basename, join, relative, sep } from "path";
-import stripAnsi from "strip-ansi";
+import stripAnsi = require("strip-ansi");
 
 import { IModule } from "../src/lib/interfaces/modules";
 import { IWebpackStats } from "../src/lib/interfaces/webpack-stats";

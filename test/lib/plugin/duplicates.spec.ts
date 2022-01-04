@@ -257,7 +257,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
                 .to.have.lengthOf(1).and
                 .to.have.property("0").that
                 .is.an("Error");
-              expect(stripAnsi(compilation.warnings[0].message)).to.eql(defaultReport);
+              expect(stripAnsi(compilation.errors[0].message)).to.eql(defaultReport);
             });
           });
 
@@ -273,7 +273,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
                 .to.have.lengthOf(1).and
                 .to.have.property("0").that
                 .is.an("Error");
-              expect(stripAnsi(compilation.warnings[0].message)).to.eql(verboseReport);
+              expect(stripAnsi(compilation.errors[0].message)).to.eql(verboseReport);
             });
           });
 
