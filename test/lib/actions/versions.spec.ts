@@ -1,7 +1,7 @@
 import { join, resolve, sep } from "path";
 
 import { expect } from "chai";
-import stripAnsi from "strip-ansi";
+import stripAnsi = require("strip-ansi");
 import * as merge from "deepmerge";
 import * as mock from "mock-fs";
 

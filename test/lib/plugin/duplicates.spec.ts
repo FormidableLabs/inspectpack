@@ -15,7 +15,7 @@ import {
    ICompilation,
 } from "../../../src/plugin/duplicates";
 
-import stripAnsi from "strip-ansi";
+import stripAnsi = require("strip-ansi");
 import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import { IFixtures, loadFixtures, VERSIONS } from "../../utils";
