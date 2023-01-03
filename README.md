@@ -1,4 +1,4 @@
-[![Inspectpack — Formidable, We build the modern web](./inspectpack-Hero.png)](https://formidable.com/open-source/)
+[![Inspectpack — Formidable, We build the modern web](https://raw.githubusercontent.com/FormidableLabs/inspectpack/master/inspectpack-Hero.png)](https://formidable.com/open-source/)
 
 [![npm version][npm_img]][npm_site]
 [![Actions Status][actions_img]][actions_site]
