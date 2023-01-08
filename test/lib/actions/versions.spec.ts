@@ -1,7 +1,7 @@
 import { join, resolve, sep } from "path";
 
 import { expect } from "chai";
-import * as chalk from "chalk";
+import stripAnsi = require("strip-ansi");
 import * as merge from "deepmerge";
 import * as mock from "mock-fs";
 
@@ -854,18 +854,6 @@ describe("lib/actions/versions", () => {
   });
 
   describe("text", () => {
-    let origChalkLevel: chalk.Level;
-
-    beforeEach(() => {
-      // Stash and disable chalk for tests.
-      origChalkLevel = chalk.level;
-      (chalk as any).level = 0;
-    });
-
-    afterEach(() => {
-      (chalk as any).level = origChalkLevel;
-    });
-
     it("displays versions skews correctly for scoped packages", () => {
       mock({
         "test/fixtures/scoped": fixtureDirs["test/fixtures/scoped"],
@@ -873,7 +861,7 @@ describe("lib/actions/versions", () => {
 
       return scopedInstance.template.text()
         .then((textStr) => {
-          expect(textStr).to.eql(`
+          expect(stripAnsi(textStr)).to.eql(`
 inspectpack --action=versions
 =============================
 
@@ -915,7 +903,7 @@ inspectpack --action=versions
 
       return multipleRootsInstance.template.text()
         .then((textStr) => {
-          expect(textStr).to.eql(`
+          expect(stripAnsi(textStr)).to.eql(`
 inspectpack --action=versions
 =============================
 
@@ -951,7 +939,7 @@ inspectpack --action=versions
 
       return hiddenAppRootsInstance.template.text()
         .then((textStr) => {
-          expect(textStr).to.eql(`
+          expect(stripAnsi(textStr)).to.eql(`
 inspectpack --action=versions
 =============================
 
@@ -986,7 +974,7 @@ inspectpack --action=versions
       return scopedInstance.template.tsv()
         .then((tsvStr) => {
           /*tslint:disable max-line-length*/
-          expect(tsvStr).to.eql(`
+          expect(stripAnsi(tsvStr)).to.eql(`
 Asset	Package	Version	Installed Path	Dependency Path
 bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> @scope/foo@^1.0.9
 bundle.js	@scope/foo	1.1.1	~/@scope/foo	scoped@1.2.3 -> flattened-foo@^1.1.0 -> @scope/foo@^1.1.1
@@ -1007,7 +995,7 @@ bundle.js	foo	4.3.3	~/unscoped-foo/~/deeper-unscoped/~/foo	scoped@1.2.3 -> unsco
       return hiddenAppRootsInstance.template.tsv()
         .then((tsvStr) => {
           /*tslint:disable max-line-length*/
-          expect(tsvStr).to.eql(`
+          expect(stripAnsi(tsvStr)).to.eql(`
 Asset	Package	Version	Installed Path	Dependency Path
 bundle.js	foo	1.1.1	~/foo	package1@1.1.1 -> foo@^1.0.0
 bundle.js	foo	3.3.3	~/different-foo/~/foo	package1@1.1.1 -> different-foo@^1.0.1 -> foo@^3.0.1

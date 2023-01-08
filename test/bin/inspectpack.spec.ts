@@ -7,7 +7,7 @@ const SIMPLE_STATS = require.resolve("../fixtures/simple/dist-development-5/stat
 const DUP_ESM_STATS = require.resolve("../fixtures/duplicates-esm/dist-development-5/stats.json");
 
 const exec = (args: string[]) => execa("node", [IP_PATH].concat(args), {
-  env: { ...process.env, FORCE_COLOR: "0" }
+  env: { ...process.env, NO_COLOR: "true" }
 });
 
 describe("bin/inspectpack", () => {

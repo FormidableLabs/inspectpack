@@ -3,7 +3,7 @@
 const { stat } = require("fs");
 const { resolve, join } = require("path");
 
-const chalk = require("chalk");
+const colors = require("picocolors");
 const pify = require("pify");
 
 /**
@@ -26,7 +26,7 @@ if (!WEBPACK_VERSION) {
 
 const main = () => {
   const fixture = `${WEBPACK_CWD}/dist-${WEBPACK_MODE}-${WEBPACK_VERSION}/bundle.js`;
-  log(chalk `\n[{yellow.bold Checking fixture}] ${fixture}\n`);
+  log(`\n[${colors.yellow(colors.bold("Checking fixture"))}] ${fixture}\n`);
 
   const fixturePath = resolve(join(__dirname, ".."), fixture);
   return exists(fixturePath)
@@ -39,6 +39,6 @@ const main = () => {
 
 main()
   .catch((err) => {
-    log(chalk `\n[{red.bold Missing fixture}] ${err.message}\n`);
+    log(`\n[${colors.red(colors.bold("Missing fixture"))}] ${err.message}\n`);
     process.exit(1);
   });

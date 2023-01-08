@@ -15,7 +15,7 @@ import {
    ICompilation,
 } from "../../../src/plugin/duplicates";
 
-import * as chalk from "chalk";
+import stripAnsi = require("strip-ansi");
 import { IWebpackStats } from "../../../src/lib/interfaces/webpack-stats";
 import { toPosixPath } from "../../../src/lib/util/files";
 import { IFixtures, loadFixtures, VERSIONS } from "../../utils";
@@ -217,17 +217,6 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
         });
 
         describe(`v${vers}`, () => {
-          let origChalkLevel: chalk.Level;
-
-          beforeEach(() => {
-            // Stash and disable chalk for tests.
-            origChalkLevel = chalk.level;
-            (chalk as any).level = 0;
-          });
-
-          afterEach(() => {
-            (chalk as any).level = origChalkLevel;
-          });
 
           it(`produces a default report`, () => {
             const plugin = new DuplicatesPlugin({});
@@ -237,8 +226,8 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
               expect(compilation.warnings)
                 .to.have.lengthOf(1).and
                 .to.have.property("0").that
-                  .is.an("Error").and
-                  .has.property("message", defaultReport);
+                  .is.an("Error");
+              expect(stripAnsi(compilation.warnings[0].message)).to.eql(defaultReport);
             });
           });
 
@@ -252,8 +241,8 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
               expect(compilation.warnings)
                 .to.have.lengthOf(1).and
                 .to.have.property("0").that
-                  .is.an("Error").and
-                  .has.property("message", verboseReport);
+                  .is.an("Error");
+              expect(stripAnsi(compilation.warnings[0].message)).to.eql(verboseReport);
             });
           });
 
@@ -267,8 +256,8 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
               expect(compilation.errors)
                 .to.have.lengthOf(1).and
                 .to.have.property("0").that
-                  .is.an("Error").and
-                  .has.property("message", defaultReport);
+                .is.an("Error");
+              expect(stripAnsi(compilation.errors[0].message)).to.eql(defaultReport);
             });
           });
 
@@ -283,8 +272,8 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
               expect(compilation.errors)
                 .to.have.lengthOf(1).and
                 .to.have.property("0").that
-                  .is.an("Error").and
-                  .has.property("message", verboseReport);
+                .is.an("Error");
+              expect(stripAnsi(compilation.errors[0].message)).to.eql(verboseReport);
             });
           });
 
@@ -301,7 +290,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
 
               // First call, first argument is the report
               const actualReport = emitHandler.args[0][0];
-              expect(actualReport).to.eql(defaultReport);
+              expect(stripAnsi(actualReport)).to.eql(defaultReport);
             });
           });
 
@@ -319,7 +308,7 @@ foo (Found 1 resolved, 2 installed, 2 depended. Latest 1.1.1.)
 
               // First call, first argument is the report
               const actualReport = emitHandler.args[0][0];
-              expect(actualReport).to.eql(verboseReport);
+              expect(stripAnsi(actualReport)).to.eql(verboseReport);
             });
           });
 

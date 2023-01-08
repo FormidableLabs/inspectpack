@@ -1,4 +1,5 @@
 import { basename, join, relative, sep } from "path";
+import stripAnsi = require("strip-ansi");
 
 import { IModule } from "../src/lib/interfaces/modules";
 import { IWebpackStats } from "../src/lib/interfaces/webpack-stats";
@@ -223,7 +224,7 @@ const REMAINDER_IDX = 7; // Everything after.
 // - shorten, make relative, and posixify test paths
 // - replace numbers of byte sizes with `"NUM"` since Windows has different
 //   byte counts.
-export const normalizeOutput = (re: RegExp, str: string) => str
+export const normalizeOutput = (re: RegExp, str: string) => stripAnsi(str)
   // Normalize any string paths.
   .replace(re, function() { // tslint:disable-line only-arrow-functions
     return [

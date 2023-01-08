@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import * as colors from "picocolors";
 import { dirname, join, relative, sep } from "path";
 import semverCompare = require("semver-compare");
 
@@ -538,15 +538,15 @@ class VersionsTemplate extends Template {
     return Promise.resolve()
       .then(() => this.action.getData() as Promise<IVersionsData>)
       .then(({ meta, assets }) => {
-        const versAsset = (name: string) => chalk`{gray ## \`${name}\`}`;
+        const versAsset = (name: string) => colors.gray(`## \`${name}\``);
         const versPkgs = (name: string) => Object.keys(assets[name].packages)
           .sort(sort)
-          .map((pkgName) => this.trim(chalk`
-            * {cyan ${pkgName}}
+          .map((pkgName) => this.trim(`
+            * ${colors.cyan(pkgName)}
               ${Object.keys(assets[name].packages[pkgName])
                 .sort(semverCompare)
-                .map((version) => this.trim(chalk`
-                  * {gray ${version}}
+                .map((version) => this.trim(`
+                  * ${colors.gray(version)}
                     ${Object.keys(assets[name].packages[pkgName][version])
                       .sort(sort)
                       .map((filePath) => {
@@ -555,12 +555,12 @@ class VersionsTemplate extends Template {
                           modules,
                         } = assets[name].packages[pkgName][version][filePath];
 
-                        return this.trim(chalk`
-                        * {green ${shortPath(filePath)}}
+                        return this.trim(`
+                        * ${colors.green(shortPath(filePath))}
                           * Num deps: ${numF(skews.length)}, files: ${numF(modules.length)}
                           ${skews
                             .map((pkgParts) => pkgParts.map((part, i) => Object.assign({}, part, {
-                              name: chalk[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
+                              name: colors[i < pkgParts.length - 1 ? "gray" : "cyan"](part.name),
                             })))
                             .map(pkgNamePath)
                             .sort(sort)
@@ -580,11 +580,11 @@ class VersionsTemplate extends Template {
           .join("\n");
         const versions = (name: string) => `${versAsset(name)}\n${versPkgs(name)}\n`;
 
-        const report = this.trim(chalk`
-          {cyan inspectpack --action=versions}
-          {gray =============================}
+        const report = this.trim(`
+          ${colors.cyan("inspectpack --action=versions")}
+          ${colors.gray("=============================")}
 
-          {gray ## Summary}
+          ${colors.gray("## Summary")}
           * Packages with skews:      ${numF(meta.packages.num)}
           * Total resolved versions:  ${numF(meta.resolved.num)}
           * Total installed packages: ${numF(meta.installed.num)}

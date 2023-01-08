@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import * as chalk from "chalk";
 import { join, resolve } from "path";
 
 import { IAction, IModulesByAsset, TemplateFormat } from "../../../src/lib/actions/base";
@@ -563,17 +562,6 @@ describe("lib/actions/sizes", () => {
   });
 
   describe("text", () => {
-    let origChalkLevel: chalk.Level;
-
-    beforeEach(() => {
-      // Stash and disable chalk for tests.
-      origChalkLevel = chalk.level;
-      (chalk as any).level = 0;
-    });
-
-    afterEach(() => {
-      (chalk as any).level = origChalkLevel;
-    });
 
     it("displays sizes correctly for scoped packages", () => {
       return scopedInstance.template.text()

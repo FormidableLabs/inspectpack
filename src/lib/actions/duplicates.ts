@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import * as colors from "picocolors";
 
 import { IActionModule, IModule, SYNTHETIC_SOURCE_TOKEN } from "../interfaces/modules";
 import { numF, sort } from "../util/strings";
@@ -208,7 +208,7 @@ class DuplicatesTemplate extends Template {
     return Promise.resolve()
       .then(() => this.action.getData() as Promise<IDuplicatesData>)
       .then(({ meta, assets }) => {
-        const dupAsset = (name: string) => chalk`{gray ## \`${name}\`}`;
+        const dupAsset = (name: string) => colors.gray(`## \`${name}\``);
         const dupFiles = (name: string) => Object.keys(assets[name].files)
           .map((baseName) => {
             const { files } = assets[name];
@@ -223,13 +223,13 @@ class DuplicatesTemplate extends Template {
               .map((sourceGroup, i) => this.trim(`
                 ${i}. (${inlineMeta(sourceGroup.meta)})
                   ${sourceGroup.modules
-                    .map((mod) => `(${mod.size.full}) ${chalk.gray(mod.fileName)}`)
+                    .map((mod) => `(${mod.size.full}) ${colors.gray(mod.fileName)}`)
                     .join("\n    ")}
               `, 14))
               .join("\n  ");
 
-            return this.trim(chalk`
-              * {green ${baseName}}
+            return this.trim(`
+              * ${colors.green(baseName)}
                 * Meta: ${inlineMeta(base.meta)}
                 ${sources}
             `, 14);
@@ -237,11 +237,11 @@ class DuplicatesTemplate extends Template {
           .join("\n");
         const duplicates = (name: string) => `${dupAsset(name)}\n${dupFiles(name)}\n`;
 
-        const report = this.trim(chalk`
-          {cyan inspectpack --action=duplicates}
-          {gray ===============================}
+        const report = this.trim(`
+          ${colors.cyan("inspectpack --action=duplicates")}
+          ${colors.gray("===============================")}
 
-          {gray ## Summary}
+          ${colors.gray("## Summary")}
           * Extra Files (unique):         ${numF(meta.extraFiles.num)}
           * Extra Sources (non-unique):   ${numF(meta.extraSources.num)}
           * Extra Bytes (non-unique):     ${numF(meta.extraSources.bytes)}

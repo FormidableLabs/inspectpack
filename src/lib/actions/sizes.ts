@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import * as colors from "picocolors";
 
 import { IActionModule } from "../interfaces/modules";
 import { numF, sort } from "../util/strings";
@@ -74,25 +74,25 @@ class SizesTemplate extends Template {
       .then(() => this.action.getData() as Promise<ISizesData>)
       .then(({ meta, assets }) => {
         const files = (mods: IActionModule[]) => mods
-          .map((obj) => this.trim(chalk`
-            * {gray ${obj.fileName}}
+          .map((obj) => this.trim(`
+            * ${colors.gray(obj.fileName)}
               * Size: ${numF(obj.size.full)}
           `, 12))
           .join("\n");
 
         const assetSizes = Object.keys(assets)
-          .map((name) => this.trim(chalk`
-            {gray ## \`${name}\`}
+          .map((name) => this.trim(`
+            ${colors.gray(`## \`${name}\``)}
             * Bytes: ${numF(assets[name].meta.full)}
             ${files(assets[name].files)}
           `, 12))
           .join("\n\n");
 
-        const report = this.trim(chalk`
-          {cyan inspectpack --action=sizes}
-          {gray ==========================}
+        const report = this.trim(`
+          ${colors.cyan("inspectpack --action=sizes")}
+          ${colors.gray("==========================")}
 
-          {gray ## Summary}
+          ${colors.gray("## Summary")}
           * Bytes: ${numF(meta.full)}
 
           ${assetSizes}
